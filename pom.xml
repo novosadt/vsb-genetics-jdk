@@ -16,12 +16,22 @@
 
     <dependencies>
 
-        <!-- HTSJdk -->
+        <!-- Apache Commons -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.9</version>
+        </dependency>
+
+        <!-- HTSJDK -->
         <dependency>
             <groupId>com.github.samtools</groupId>
             <artifactId>htsjdk</artifactId>
             <version>${htsjdk.version}</version>
         </dependency>
+
+
+
     </dependencies>
 
     <build>
