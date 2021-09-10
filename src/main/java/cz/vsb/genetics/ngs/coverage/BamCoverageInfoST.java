@@ -16,47 +16,47 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package cz.vsb.genetics.ngs;
+package cz.vsb.genetics.ngs.coverage;
 
 import cz.vsb.genetics.common.Chromosome;
-import htsjdk.samtools.*;
+import htsjdk.samtools.SamReader;
 
-import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
-public class BamCoverageInfo {
+public class BamCoverageInfoST implements BamCoverageInfo {
     private final SamReader samReader;
 
-    public BamCoverageInfo(String bamFile, String indexFile) throws Exception {
-        final SamReaderFactory factory =
-                SamReaderFactory.makeDefault().enable(SamReaderFactory.Option.VALIDATE_CRC_CHECKSUMS).validationStringency(ValidationStringency.LENIENT);
-
-        final SamInputResource resource = SamInputResource.of(new File(bamFile)).index(new File(indexFile));
-
-        samReader = factory.open(resource);
+    public BamCoverageInfoST(String bamFile, String indexFile) throws Exception {
+        samReader = BamCoverageInfoUtils.getSamReader(bamFile, indexFile);
     }
 
+    @Override
     public void close() throws Exception {
         samReader.close();
     }
 
+    @Override
     public long getCoverage(Chromosome chromosome, int position) {
-        SAMRecordIterator it = samReader.queryOverlapping(chromosome.toString(), position, position);
-
-        long count = it.hasNext() ? it.stream().count() : 0;
-
-        it.close();
-
-        return count;
+        return BamCoverageInfoUtils.getCoverage(chromosome, position, samReader);
     }
 
+    @Override
     public List<Long> getCoverage(Chromosome chromosome, int start, int end) {
-        List<Long> coverages = new ArrayList<>();
+        return BamCoverageInfoUtils.getCoverage(chromosome, start, end, samReader);
+    }
 
-        for (int pos = start; pos < end; pos++)
-            coverages.add(getCoverage(chromosome, pos));
+    @Override
+    public List<Long> getCoverage(Chromosome chromosome, int start, int end, int step) {
+        return BamCoverageInfoUtils.getCoverage(chromosome, start, end, step, samReader);
+    }
 
-        return coverages;
+    @Override
+    public double getMeanCoverage(Chromosome chromosome, int start, int end) {
+        return BamCoverageInfoUtils.getMeanCoverage(chromosome, start, end, samReader);
+    }
+
+    @Override
+    public double getMeanCoverage(Chromosome chromosome, int start, int end, int step) {
+        return BamCoverageInfoUtils.getMeanCoverage(chromosome, start, end, step, samReader);
     }
 }

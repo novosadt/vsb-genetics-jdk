@@ -17,15 +17,29 @@ package cz.bach.vsb.genetics.test.ngs;/*
  */
 
 import cz.vsb.genetics.common.Chromosome;
-import cz.vsb.genetics.ngs.BamCoverageInfo;
+import cz.vsb.genetics.ngs.coverage.BamCoverageInfo;
+import cz.vsb.genetics.ngs.coverage.BamCoverageInfoMT;
+import cz.vsb.genetics.ngs.coverage.BamCoverageInfoST;
+import org.apache.commons.lang3.time.StopWatch;
 
 import java.util.List;
 
 public class TestBamCoverage {
     public static void main(String[] args) {
         try {
-            //testBamCoverageAtPosition();
-            testBamCoverageAtInterval();
+            Chromosome chromosome = Chromosome.chr17;
+            int start = 7675023;
+            int end = 7675999;
+
+            StopWatch stopWatch = new StopWatch();
+            stopWatch.start();
+
+            //testBamCoverageAtPosition(chromosome, start);
+            //testBamCoverageAtIntervalST(chromosome, start, end);
+            testBamCoverageAtIntervalMT(chromosome, start, end, 6);
+
+            stopWatch.stop();
+            System.out.println("Time (mils): " + stopWatch.getTime());
         }
         catch (Exception e) {
             System.out.println(e.getMessage() + "\n");
@@ -33,14 +47,11 @@ public class TestBamCoverage {
         }
     }
 
-    public static void testBamCoverageAtPosition() throws Exception {
+    public static void testBamCoverageAtPosition(Chromosome chromosome, int position) throws Exception {
         String bamFile = "./data/ngs/bam/test.bam";
         String indexFile = "./data/ngs/bam/test.bai";
 
-        Chromosome chromosome = Chromosome.chr17;
-        int position = 7675949;
-
-        BamCoverageInfo bamCoverageInfo = new BamCoverageInfo(bamFile, indexFile);
+        BamCoverageInfoST bamCoverageInfo = new BamCoverageInfoST(bamFile, indexFile);
         long coverage = bamCoverageInfo.getCoverage(chromosome, position);
 
         String info = String.format("Coverage at position %s:%d - %d", chromosome.toString(), position, coverage);
@@ -50,15 +61,24 @@ public class TestBamCoverage {
         bamCoverageInfo.close();
     }
 
-    public static void testBamCoverageAtInterval() throws Exception {
+    public static void testBamCoverageAtIntervalST(Chromosome chromosome, int start, int end) throws Exception {
         String bamFile = "./data/ngs/bam/test.bam";
         String indexFile = "./data/ngs/bam/test.bai";
 
-        Chromosome chromosome = Chromosome.chr17;
-        int start = 7675923;
-        int end = 7675999;
+        BamCoverageInfo bamCoverageInfo = new BamCoverageInfoST(bamFile, indexFile);
+        List<Long> coverages = bamCoverageInfo.getCoverage(chromosome, start, end);
 
-        BamCoverageInfo bamCoverageInfo = new BamCoverageInfo(bamFile, indexFile);
+        for (Long coverage : coverages)
+            System.out.println(String.format("Coverage at position %s:%d - %d", chromosome.toString(), start++, coverage));
+
+        bamCoverageInfo.close();
+    }
+
+    public static void testBamCoverageAtIntervalMT(Chromosome chromosome, int start, int end, int threads) throws Exception {
+        String bamFile = "./data/ngs/bam/test.bam";
+        String indexFile = "./data/ngs/bam/test.bai";
+
+        BamCoverageInfo bamCoverageInfo = new BamCoverageInfoMT(bamFile, indexFile, threads);
         List<Long> coverages = bamCoverageInfo.getCoverage(chromosome, start, end);
 
         for (Long coverage : coverages)
