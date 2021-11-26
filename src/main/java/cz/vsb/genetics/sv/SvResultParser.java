@@ -16,22 +16,31 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package cz.vsb.genetics.ngs.coverage;
 
-import cz.vsb.genetics.common.Chromosome;
+package cz.vsb.genetics.sv;
+
+import cz.vsb.genetics.common.StructuralVariant;
 
 import java.util.List;
 
-public interface BamCoverageInfo {
-    void close() throws Exception;
+public interface SvResultParser {
+    void parseResultFile(String file, String delim) throws Exception;
 
-    long getCoverage(Chromosome chromosome, int position);
+    void printStructuralVariantStats();
 
-    List<Long> getCoverage(Chromosome chromosome, int start, int end) throws Exception;
+    void setRemoveDuplicateVariants(boolean value);
 
-    List<Long> getCoverage(Chromosome chromosome, int start, int end, int step) throws Exception;
+    List<StructuralVariant> getTranslocations();
 
-    double getMeanCoverage(Chromosome chromosome, int start, int end) throws Exception;
+    List<StructuralVariant> getDuplications();
 
-    double getMeanCoverage(Chromosome chromosome, int start, int end, int step) throws Exception;
+    List<StructuralVariant> getInversions();
+
+    List<StructuralVariant> getDeletions();
+
+    List<StructuralVariant> getInsertions();
+
+    List<StructuralVariant> getCopyNumberVariations();
+
+    List<StructuralVariant> getUnknown();
 }

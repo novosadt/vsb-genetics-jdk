@@ -17,9 +17,9 @@ package cz.bach.vsb.genetics.test.ngs;/*
  */
 
 import cz.vsb.genetics.common.Chromosome;
-import cz.vsb.genetics.ngs.coverage.BamCoverageInfo;
-import cz.vsb.genetics.ngs.coverage.BamCoverageInfoMT;
-import cz.vsb.genetics.ngs.coverage.BamCoverageInfoST;
+import cz.vsb.genetics.coverage.ngs.BamCoverageInfo;
+import cz.vsb.genetics.coverage.ngs.BamCoverageInfoMT;
+import cz.vsb.genetics.coverage.ngs.BamCoverageInfoST;
 import org.apache.commons.lang3.time.StopWatch;
 
 import java.util.List;

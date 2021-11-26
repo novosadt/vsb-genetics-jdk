@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package cz.vsb.genetics.ngs.coverage;
+package cz.vsb.genetics.coverage.ngs;
 
 import cz.vsb.genetics.common.Chromosome;
 import htsjdk.samtools.*;
