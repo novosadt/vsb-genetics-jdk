@@ -1,8 +1,5 @@
 package cz.vsb.genetics.om.bionano;
 
-import cz.vsb.genetics.om.bionano.CMap;
-import cz.vsb.genetics.om.bionano.CMapContainer;
-import cz.vsb.genetics.om.bionano.CMapEntry;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.BufferedReader;
@@ -52,23 +49,26 @@ public class CMapParser {
     private CMapEntry parseLine(String line) {
         String[] values = line.split("\t");
 
+        int l = values.length;
+        int i = 0;
+
         CMapEntry entry = new CMapEntry();
-        entry.setCmapId(new Integer(values[0]));
-        entry.setContigLength(new Float(values[1]));
-        entry.setNumSites(new Integer(values[2]));
-        entry.setSiteId(new Integer(values[3]));
-        entry.setLabelChannel(new Integer(values[4]));
-        entry.setPosition(new Float(values[5]));
-        entry.setStdDev(new Float(values[6]));
-        entry.setCoverage(new Float(values[7]));
-        entry.setOccurrence(new Float(values[8]));
-        entry.setChimQuality(new Float(values[9]));
-        entry.setSegDupL(new Float(values[10]));
-        entry.setSegDupR(new Float(values[11]));
-        entry.setFragileL(new Float(values[12]));
-        entry.setFragileR(new Float(values[13]));
-        entry.setOutlierFrac(new Float(values[14]));
-        entry.setChimNorm(new Float(values[15]));
+        entry.setCmapId(l < ++i ? null : new Integer(values[0]));
+        entry.setContigLength(l < ++i ? null : new Float(values[1]));
+        entry.setNumSites(l < ++i ? null : new Integer(values[2]));
+        entry.setSiteId(l < ++i ? null : new Integer(values[3]));
+        entry.setLabelChannel(l < ++i ? null : new Integer(values[4]));
+        entry.setPosition(l < ++i ? null : new Float(values[5]));
+        entry.setStdDev(l < ++i ? null : new Float(values[6]));
+        entry.setCoverage(l < ++i ? null : new Float(values[7]));
+        entry.setOccurrence(l < ++i ? null : new Float(values[8]));
+        entry.setChimQuality(l < ++i ? null : new Float(values[9]));
+        entry.setSegDupL(l < ++i ? null : new Float(values[10]));
+        entry.setSegDupR(l < ++i ? null : new Float(values[11]));
+        entry.setFragileL(l < ++i ? null : new Float(values[12]));
+        entry.setFragileR(l < ++i ? null : new Float(values[13]));
+        entry.setOutlierFrac(l < ++i ? null : new Float(values[14]));
+        entry.setChimNorm(l < ++i ? null : new Float(values[15]));
 
         return entry;
     }
