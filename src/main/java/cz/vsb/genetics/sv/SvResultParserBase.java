@@ -19,9 +19,6 @@
 
 package cz.vsb.genetics.sv;
 
-import cz.vsb.genetics.common.StructuralVariant;
-import cz.vsb.genetics.common.StructuralVariantType;
-
 import java.util.ArrayList;
 import java.util.List;
 

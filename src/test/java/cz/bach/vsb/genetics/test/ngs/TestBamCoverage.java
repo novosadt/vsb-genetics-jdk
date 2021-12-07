@@ -17,9 +17,9 @@ package cz.bach.vsb.genetics.test.ngs;/*
  */
 
 import cz.vsb.genetics.common.Chromosome;
-import cz.vsb.genetics.coverage.ngs.BamCoverageInfo;
-import cz.vsb.genetics.coverage.ngs.BamCoverageInfoMT;
-import cz.vsb.genetics.coverage.ngs.BamCoverageInfoST;
+import cz.vsb.genetics.ngs.coverage.BamCoverageInfo;
+import cz.vsb.genetics.ngs.coverage.BamCoverageInfoMT;
+import cz.vsb.genetics.ngs.coverage.BamCoverageInfoST;
 import org.apache.commons.lang3.time.StopWatch;
 
 import java.util.List;
@@ -69,7 +69,7 @@ public class TestBamCoverage {
         List<Long> coverages = bamCoverageInfo.getCoverage(chromosome, start, end);
 
         for (Long coverage : coverages)
-            System.out.println(String.format("Coverage at position %s:%d - %d", chromosome.toString(), start++, coverage));
+            System.out.printf("Coverage at position %s:%d - %d%n", chromosome.toString(), start++, coverage);
 
         bamCoverageInfo.close();
     }
@@ -82,7 +82,7 @@ public class TestBamCoverage {
         List<Long> coverages = bamCoverageInfo.getCoverage(chromosome, start, end);
 
         for (Long coverage : coverages)
-            System.out.println(String.format("Coverage at position %s:%d - %d", chromosome.toString(), start++, coverage));
+            System.out.printf("Coverage at position %s:%d - %d%n", chromosome.toString(), start++, coverage);
 
         bamCoverageInfo.close();
     }

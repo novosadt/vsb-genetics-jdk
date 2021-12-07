@@ -17,11 +17,11 @@
  */
 
 
-package cz.vsb.genetics.sv.ngs;
+package cz.vsb.genetics.ngs.sv;
 
 import cz.vsb.genetics.common.Chromosome;
-import cz.vsb.genetics.common.StructuralVariant;
-import cz.vsb.genetics.common.StructuralVariantType;
+import cz.vsb.genetics.sv.StructuralVariant;
+import cz.vsb.genetics.sv.StructuralVariantType;
 import cz.vsb.genetics.sv.SvResultParserBase;
 import org.apache.commons.lang3.StringUtils;
 

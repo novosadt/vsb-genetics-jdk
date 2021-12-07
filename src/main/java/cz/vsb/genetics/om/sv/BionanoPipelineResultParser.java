@@ -17,32 +17,25 @@
  */
 
 
-package cz.vsb.genetics.sv.om;
+package cz.vsb.genetics.om.sv;
 
 import cz.vsb.genetics.common.Chromosome;
-import cz.vsb.genetics.common.StructuralVariant;
-import cz.vsb.genetics.common.StructuralVariantType;
+import cz.vsb.genetics.om.bionano.SMap;
+import cz.vsb.genetics.om.bionano.SMapEntry;
+import cz.vsb.genetics.om.bionano.SMapParser;
+import cz.vsb.genetics.sv.StructuralVariant;
+import cz.vsb.genetics.sv.StructuralVariantType;
 import cz.vsb.genetics.sv.SvResultParserBase;
-import org.apache.commons.lang3.StringUtils;
-
-import java.io.BufferedReader;
-import java.io.FileReader;
 
 public class BionanoPipelineResultParser extends SvResultParserBase {
 
     @Override
     public void parseResultFile(String file, String delim) throws Exception {
-        BufferedReader reader = new BufferedReader(new FileReader(file));
+        SMapParser parser = new SMapParser();
+        SMap smap = parser.parse(file);
 
-        String line;
-        while((line = reader.readLine()) != null) {
-            if (line.startsWith("#") || StringUtils.isBlank(line))
-                continue;
-
-            parseLine(line, delim);
-        }
-
-        reader.close();
+        for (SMapEntry entry : smap.getEntries())
+            addStructuralVariant(entry);
     }
 
     @Override
@@ -50,20 +43,14 @@ public class BionanoPipelineResultParser extends SvResultParserBase {
         printStructuralVariantStats("Bionano Genomics");
     }
 
-    private void parseLine(String line, String delim) {
-        String[] values = line.split(delim);
-
-        addStructuralVariant(values);
-    }
-
-    private void addStructuralVariant(String[] values) {
-        String srcChromId = values[2];
-        String dstChromId = values[3];
-        Long srcLoc = new Double(values[6]).longValue();
-        Long dstLoc = new Double(values[7]).longValue();
-        String type = values[9].toLowerCase();
+    private void addStructuralVariant(SMapEntry entry) {
+        String srcChromId = entry.getRefcontigID1().toString();
+        String dstChromId = entry.getRefcontigID2().toString();
+        Long srcLoc = entry.getRefStartPos().longValue();
+        Long dstLoc = entry.getRefEndPos().longValue();
+        String type = entry.getType().toLowerCase();
         long size = dstLoc - srcLoc;
-        String gene = values.length < 35 ? "" : values[34];
+        String gene = entry.getOverlapGenes() == null ? "" : entry.getOverlapGenes();
 
         if (type.contains("translocation"))
             size = 0L;

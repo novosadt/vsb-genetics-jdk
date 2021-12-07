@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package cz.vsb.genetics.coverage.ngs;
+package cz.vsb.genetics.ngs.coverage;
 
 import cz.vsb.genetics.common.Chromosome;
 import htsjdk.samtools.SamReader;
@@ -44,7 +44,7 @@ public class BamCoverageInfoMT extends BamCoverageInfoUtils implements BamCovera
 
     @Override
     public long getCoverage(Chromosome chromosome, int position) {
-        return BamCoverageInfoUtils.getCoverage(chromosome, position, samReaders[0]);
+        return getCoverage(chromosome, position, samReaders[0]);
     }
 
     @Override
@@ -129,9 +129,9 @@ public class BamCoverageInfoMT extends BamCoverageInfoUtils implements BamCovera
         @Override
         public void run() {
             if (step == -1)
-                coverages = BamCoverageInfoUtils.getCoverage(chromosome, start, end, samReader);
+                coverages = getCoverage(chromosome, start, end, samReader);
             else
-                coverages = BamCoverageInfoUtils.getCoverage(chromosome, start, end, step, samReader);
+                coverages = getCoverage(chromosome, start, end, step, samReader);
         }
 
         public List<Long> getCoverages() {

@@ -19,8 +19,6 @@
 
 package cz.vsb.genetics.sv;
 
-import cz.vsb.genetics.common.StructuralVariant;
-
 import java.util.List;
 
 public interface SvResultParser {

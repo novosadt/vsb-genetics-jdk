@@ -17,7 +17,7 @@
  */
 
 
-package cz.vsb.genetics.common;
+package cz.vsb.genetics.sv;
 
 import java.util.HashSet;
 import java.util.Set;

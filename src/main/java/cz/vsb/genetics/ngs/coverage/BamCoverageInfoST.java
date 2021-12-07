@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package cz.vsb.genetics.coverage.ngs;
+package cz.vsb.genetics.ngs.coverage;
 
 import cz.vsb.genetics.common.Chromosome;
 import htsjdk.samtools.SamReader;
@@ -26,7 +26,7 @@ import java.util.List;
 public class BamCoverageInfoST implements BamCoverageInfo {
     private final SamReader samReader;
 
-    public BamCoverageInfoST(String bamFile, String indexFile) throws Exception {
+    public BamCoverageInfoST(String bamFile, String indexFile) {
         samReader = BamCoverageInfoUtils.getSamReader(bamFile, indexFile);
     }
 

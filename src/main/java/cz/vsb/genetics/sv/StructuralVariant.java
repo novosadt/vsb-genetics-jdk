@@ -17,7 +17,9 @@
  */
 
 
-package cz.vsb.genetics.common;
+package cz.vsb.genetics.sv;
+
+import cz.vsb.genetics.common.Chromosome;
 
 public class StructuralVariant {
     private final Chromosome srcChromosome;
