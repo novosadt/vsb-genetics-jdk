@@ -1,29 +1,32 @@
 package cz.vsb.genetics.om.bionano;
 
 public class CMapEntry {
-    Integer cmapId;
-    Float contigLength;
-    Integer numSites;
-    Integer siteId;
-    Integer labelChannel;
-    Float position;
-    Float stdDev;
-    Float coverage;
-    Float occurrence;
-    Float chimQuality;
-    Float segDupL;
-    Float segDupR;
-    Float fragileL;
-    Float fragileR;
-    Float outlierFrac;
-    Float chimNorm;
+    private final Integer cmapId;
+    private Float contigLength;
+    private Integer numSites;
+    private final Integer siteId;
+    private Integer labelChannel;
+    private Float position;
+    private Float stdDev;
+    private Float coverage;
+    private Float occurrence;
+    private Float chimQuality;
+    private Float segDupL;
+    private Float segDupR;
+    private Float fragileL;
+    private Float fragileR;
+    private Float outlierFrac;
+    private Float chimNorm;
+
+    public CMapEntry(Integer cmapId, Integer siteId) {
+        assert (cmapId !=null && siteId != null);
+
+        this.cmapId = cmapId;
+        this.siteId = siteId;
+    }
 
     public Integer getCmapId() {
         return cmapId;
-    }
-
-    public void setCmapId(Integer cmapId) {
-        this.cmapId = cmapId;
     }
 
     public Float getContigLength() {
@@ -44,10 +47,6 @@ public class CMapEntry {
 
     public Integer getSiteId() {
         return siteId;
-    }
-
-    public void setSiteId(Integer siteId) {
-        this.siteId = siteId;
     }
 
     public Integer getLabelChannel() {
@@ -144,5 +143,23 @@ public class CMapEntry {
 
     public void setChimNorm(Float chimNorm) {
         this.chimNorm = chimNorm;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof CMapEntry)) return false;
+
+        CMapEntry cMapEntry = (CMapEntry) o;
+
+        if (!getCmapId().equals(cMapEntry.getCmapId())) return false;
+        return getSiteId().equals(cMapEntry.getSiteId());
+    }
+
+    @Override
+    public int hashCode() {
+        int result = getCmapId().hashCode();
+        result = 31 * result + getSiteId().hashCode();
+        return result;
     }
 }
