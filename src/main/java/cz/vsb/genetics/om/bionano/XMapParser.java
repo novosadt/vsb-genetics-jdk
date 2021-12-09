@@ -4,6 +4,11 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.MatchResult;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class XMapParser {
     public XMap parse(String file) throws Exception{
@@ -28,24 +33,39 @@ public class XMapParser {
     private XMapEntry parseLine(String line) {
         String[] values = line.split("\t");
 
-        int l = values.length;
-        int i = 1;
-
         XMapEntry entry = new XMapEntry(new Integer(values[0]));
-        entry.setQryContigID(l < ++i ? null : new Integer(values[1]));
-        entry.setRefContigID(l < ++i ? null : new Integer(values[2]));
-        entry.setQryStartPos(l < ++i ? null : new Float(values[3]));
-        entry.setQryEndPos(l < ++i ? null : new Float(values[4]));
-        entry.setRefStartPos(l < ++i ? null : new Float(values[5]));
-        entry.setRefEndPos(l < ++i ? null : new Float(values[6]));
-        entry.setOrientation(l < ++i ? null : values[7]);
-        entry.setConfidence(l < ++i ? null : new Float(values[8]));
-        entry.setHitEnum(l < ++i ? null : values[9]);
-        entry.setQryLen(l < ++i ? null : new Float(values[10]));
-        entry.setRefLen(l < ++i ? null : new Float(values[11]));
-        entry.setLabelChannel(l < ++i ? null : new Integer(values[12]));
-        entry.setAlignment(l < ++i ? null : values[13]);
+        entry.setQryContigID(new Integer(values[1]));
+        entry.setRefContigID(new Integer(values[2]));
+        entry.setQryStartPos(new Float(values[3]));
+        entry.setQryEndPos(new Float(values[4]));
+        entry.setRefStartPos(new Float(values[5]));
+        entry.setRefEndPos(new Float(values[6]));
+        entry.setOrientation(values[7]);
+        entry.setConfidence(new Float(values[8]));
+        entry.setHitEnum(values[9]);
+        entry.setQryLen(new Float(values[10]));
+        entry.setRefLen(new Float(values[11]));
+        entry.setLabelChannel(new Integer(values[12]));
+        entry.setAlignment(values[13]);
+        entry.setAlignments(getAlignments(entry.getAlignment()));
 
         return entry;
+    }
+
+    private List<XMapEntry.XMapAlignmentEntry> getAlignments(String alignment) {
+        String regex = "\\((\\d+),(\\d+)\\)";
+
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(alignment);
+
+        List<XMapEntry.XMapAlignmentEntry> alignmentEntries = new ArrayList<>();
+
+        while(matcher.find()) {
+            alignmentEntries.add(
+                    new XMapEntry.XMapAlignmentEntry(new Integer(matcher.group(1)), new Integer(matcher.group(2))));
+
+        }
+
+        return alignmentEntries;
     }
 }

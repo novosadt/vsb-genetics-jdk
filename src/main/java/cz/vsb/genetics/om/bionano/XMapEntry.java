@@ -1,5 +1,7 @@
 package cz.vsb.genetics.om.bionano;
 
+import java.util.List;
+
 public class XMapEntry {
     private final Integer xmapEntryID;
     private Integer qryContigID;
@@ -15,6 +17,7 @@ public class XMapEntry {
     private Float refLen;
     private Integer labelChannel;
     private String alignment;
+    private List<XMapAlignmentEntry> alignments;
 
     public XMapEntry(Integer xmapEntryID) {
         assert xmapEntryID != null;
@@ -130,6 +133,14 @@ public class XMapEntry {
         this.alignment = alignment;
     }
 
+    public List<XMapAlignmentEntry> getAlignments() {
+        return alignments;
+    }
+
+    public void setAlignments(List<XMapAlignmentEntry> alignments) {
+        this.alignments = alignments;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -144,4 +155,23 @@ public class XMapEntry {
     public int hashCode() {
         return getXmapEntryID().hashCode();
     }
+
+    public static class XMapAlignmentEntry {
+        private final Integer refContigSiteId;
+        private final Integer qryContigSiteId;
+
+        public XMapAlignmentEntry(Integer refContigSiteId, Integer qryContigSiteId) {
+            this.refContigSiteId = refContigSiteId;
+            this.qryContigSiteId = qryContigSiteId;
+        }
+
+        public Integer getRefContigSiteId() {
+            return refContigSiteId;
+        }
+
+        public Integer getQryContigSiteId() {
+            return qryContigSiteId;
+        }
+    }
+
 }
