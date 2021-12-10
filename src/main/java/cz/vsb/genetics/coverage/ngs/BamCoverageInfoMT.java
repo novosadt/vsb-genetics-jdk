@@ -16,20 +16,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package cz.vsb.genetics.ngs.coverage;
+package cz.vsb.genetics.coverage.ngs;
 
 import cz.vsb.genetics.common.Chromosome;
+import cz.vsb.genetics.coverage.CoverageInfo;
 import htsjdk.samtools.SamReader;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class BamCoverageInfoMT extends BamCoverageInfoUtils implements BamCoverageInfo {
-    private final SamReader[] samReaders;
+public class BamCoverageInfoMT extends BamCoverageInfoUtils implements CoverageInfo {
+    private SamReader[] samReaders;
     private final int threads;
+    private final String bamFile;
+    private final String indexFile;
 
     public BamCoverageInfoMT(String bamFile, String indexFile, int threads) {
         this.threads = threads;
+        this.bamFile = bamFile;
+        this.indexFile = indexFile;
+    }
+
+    @Override
+    public void open() {
         samReaders = new SamReader[threads];
 
         for (int i = 0; i < threads; i++)

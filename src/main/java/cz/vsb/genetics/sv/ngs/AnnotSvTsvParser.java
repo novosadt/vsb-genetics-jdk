@@ -17,7 +17,7 @@
  */
 
 
-package cz.vsb.genetics.ngs.sv;
+package cz.vsb.genetics.sv.ngs;
 
 import cz.vsb.genetics.common.Chromosome;
 import cz.vsb.genetics.sv.StructuralVariant;

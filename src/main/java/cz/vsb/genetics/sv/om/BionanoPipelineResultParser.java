@@ -17,7 +17,7 @@
  */
 
 
-package cz.vsb.genetics.om.sv;
+package cz.vsb.genetics.sv.om;
 
 import cz.vsb.genetics.common.Chromosome;
 import cz.vsb.genetics.om.bionano.SMap;

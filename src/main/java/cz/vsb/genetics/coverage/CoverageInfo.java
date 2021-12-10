@@ -16,13 +16,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package cz.vsb.genetics.ngs.coverage;
+package cz.vsb.genetics.coverage;
 
 import cz.vsb.genetics.common.Chromosome;
 
 import java.util.List;
 
-public interface BamCoverageInfo {
+public interface CoverageInfo {
+    void open() throws Exception;
+
     void close() throws Exception;
 
     long getCoverage(Chromosome chromosome, int position);

@@ -14,8 +14,15 @@ public class XMap {
         return entries;
     }
 
-    public Map<Integer, Map<Integer, Integer>> getContigSiteAlignmentHits() {
-        return contigSiteAlignmentHits;
+    public Integer getSiteCoverage(Integer contigId, Integer siteId) {
+        Map<Integer, Integer> siteAlignmentHits = contigSiteAlignmentHits.get(contigId);
+
+        if (siteAlignmentHits == null)
+            return 0;
+
+        Integer alignmentHits = siteAlignmentHits.get(siteId);
+
+        return alignmentHits == null ? 0 : alignmentHits;
     }
 
     public void calculateContigSiteAlignmentHits() {

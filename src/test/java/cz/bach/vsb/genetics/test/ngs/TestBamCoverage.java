@@ -17,9 +17,9 @@ package cz.bach.vsb.genetics.test.ngs;/*
  */
 
 import cz.vsb.genetics.common.Chromosome;
-import cz.vsb.genetics.ngs.coverage.BamCoverageInfo;
-import cz.vsb.genetics.ngs.coverage.BamCoverageInfoMT;
-import cz.vsb.genetics.ngs.coverage.BamCoverageInfoST;
+import cz.vsb.genetics.coverage.CoverageInfo;
+import cz.vsb.genetics.coverage.ngs.BamCoverageInfoMT;
+import cz.vsb.genetics.coverage.ngs.BamCoverageInfoST;
 import org.apache.commons.lang3.time.StopWatch;
 
 import java.util.List;
@@ -65,7 +65,7 @@ public class TestBamCoverage {
         String bamFile = "./data/ngs/bam/test.bam";
         String indexFile = "./data/ngs/bam/test.bai";
 
-        BamCoverageInfo bamCoverageInfo = new BamCoverageInfoST(bamFile, indexFile);
+        CoverageInfo bamCoverageInfo = new BamCoverageInfoST(bamFile, indexFile);
         List<Long> coverages = bamCoverageInfo.getCoverage(chromosome, start, end);
 
         for (Long coverage : coverages)
@@ -78,7 +78,7 @@ public class TestBamCoverage {
         String bamFile = "./data/ngs/bam/test.bam";
         String indexFile = "./data/ngs/bam/test.bai";
 
-        BamCoverageInfo bamCoverageInfo = new BamCoverageInfoMT(bamFile, indexFile, threads);
+        CoverageInfo bamCoverageInfo = new BamCoverageInfoMT(bamFile, indexFile, threads);
         List<Long> coverages = bamCoverageInfo.getCoverage(chromosome, start, end);
 
         for (Long coverage : coverages)
