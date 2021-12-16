@@ -22,37 +22,44 @@ package cz.vsb.genetics.common;
 import org.apache.commons.lang3.StringUtils;
 
 public enum Chromosome {
-    chr1,
-    chr2,
-    chr3,
-    chr4,
-    chr5,
-    chr6,
-    chr7,
-    chr8,
-    chr9,
-    chr10,
-    chr11,
-    chr12,
-    chr13,
-    chr14,
-    chr15,
-    chr16,
-    chr17,
-    chr18,
-    chr19,
-    chr20,
-    chr21,
-    chr22,
-    chrX,
-    chrY,
-    chrM;
+    chr1(1),
+    chr2(2),
+    chr3(3),
+    chr4(4),
+    chr5(5),
+    chr6(6),
+    chr7(7),
+    chr8(8),
+    chr9(9),
+    chr10(10),
+    chr11(11),
+    chr12(12),
+    chr13(13),
+    chr14(14),
+    chr15(15),
+    chr16(16),
+    chr17(17),
+    chr18(18),
+    chr19(19),
+    chr20(20),
+    chr21(21),
+    chr22(22),
+    chrX(23),
+    chrY(24),
+    chrM(25);
 
+    public final int number;
+    
+    Chromosome(int number) {
+        this.number = number;
+    }
+    
     public static Chromosome getChromosome(String label) {
         if (StringUtils.isBlank(label))
             return null;
 
         label = label.toLowerCase();
+        label = label.replaceAll("chr", "");
 
         if (label.contains("mt") || label.contains("m"))
             return chrM;

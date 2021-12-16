@@ -10,5 +10,8 @@ public class CMapContainer {
         cmaps.put(cmap.getId(), cmap);
     }
 
+    public CMap get(Integer cmapId) {
+        return cmaps.get(cmapId);
+    }
 
 }

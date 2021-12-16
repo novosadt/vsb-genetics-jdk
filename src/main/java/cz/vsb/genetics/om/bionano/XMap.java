@@ -4,7 +4,7 @@ import java.util.*;
 
 public class XMap {
     private final List<XMapEntry> entries = new ArrayList<>();
-    private Map<Integer, Map<Integer, Integer>> contigSiteAlignmentHits = new HashMap<>();
+    private final Map<Integer, List<Integer>> refSiteToQuerySites = new HashMap<>();
 
     public void add(XMapEntry entry) {
         entries.add(entry);
@@ -15,35 +15,25 @@ public class XMap {
     }
 
     public Integer getSiteCoverage(Integer contigId, Integer siteId) {
-        Map<Integer, Integer> siteAlignmentHits = contigSiteAlignmentHits.get(contigId);
+        // TODO
+        // Na zaklade reference site id si vytahnout prislusne query site ids z refSiteToQuerySites (bude jich tolik,
+        // kolik ma coverage reference cmap site id. Nasledne si query cmap pro tyto query site ids vytahnout prislusne
+        // coverage a ty secist dohromady. Vysledek da pokryti na dane pozici (siteId) na prislusnem
+        // chromozomu (contigId).
 
-        if (siteAlignmentHits == null)
-            return 0;
-
-        Integer alignmentHits = siteAlignmentHits.get(siteId);
-
-        return alignmentHits == null ? 0 : alignmentHits;
+        return null;
     }
 
-    public void calculateContigSiteAlignmentHits() {
-        contigSiteAlignmentHits.clear();
-
+    public void findQuerySitesForReferenceSite() {
         for (XMapEntry entry : entries) {
-            Map<Integer, Integer> siteAlignmentHits = contigSiteAlignmentHits.get(entry.getRefContigID());
-            if (siteAlignmentHits == null) {
-                siteAlignmentHits = new HashMap<>();
-                contigSiteAlignmentHits.put(entry.getRefContigID(), siteAlignmentHits);
-            }
-
             for (XMapEntry.XMapAlignmentEntry alignmentEntry : entry.getAlignments()) {
-                Integer refSiteId = alignmentEntry.getRefContigSiteId();
-                Integer alignmentHits = siteAlignmentHits.get(refSiteId);
-                if (alignmentHits == null) {
-                    alignmentHits = 0;
-                    siteAlignmentHits.put(refSiteId, alignmentHits);
+                List<Integer> querySites = refSiteToQuerySites.get(alignmentEntry.getRefContigSiteId());
+                if (querySites == null) {
+                    querySites = new ArrayList<>();
+                    refSiteToQuerySites.put(alignmentEntry.getRefContigSiteId(), querySites);
                 }
 
-                siteAlignmentHits.put(refSiteId, ++alignmentHits);
+                querySites.add(alignmentEntry.getQryContigSiteId());
             }
         }
     }

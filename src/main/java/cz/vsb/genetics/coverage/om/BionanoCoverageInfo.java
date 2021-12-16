@@ -8,19 +8,24 @@ import java.util.List;
 
 public class BionanoCoverageInfo implements CoverageInfo {
     private final String cmapReferenceFile;
+    private final String cmapQueryFile;
     private final String xmapFile;
-    private CMapContainer cmapContainer;
+    private CMapContainer cmapContainerRef;
+    private CMapContainer cmapContainerQry;
     private XMap xmap;
 
-    public BionanoCoverageInfo(String cmapReferenceFile, String xmapFile) {
+    public BionanoCoverageInfo(String cmapReferenceFile, String cmapQueryFile, String xmapFile) {
         this.cmapReferenceFile = cmapReferenceFile;
+        this.cmapQueryFile = cmapQueryFile;
         this.xmapFile = xmapFile;
     }
 
     @Override
     public void open() throws Exception {
-        cmapContainer = new CMapParser().parse(cmapReferenceFile);
+        cmapContainerRef = new CMapParser().parse(cmapReferenceFile);
+        cmapContainerQry = new CMapParser().parse(cmapQueryFile);
         xmap = new XMapParser().parse(xmapFile);
+        xmap.findQuerySitesForReferenceSite();
     }
 
     @Override
@@ -30,7 +35,10 @@ public class BionanoCoverageInfo implements CoverageInfo {
 
     @Override
     public long getCoverage(Chromosome chromosome, int position) {
-        return 0;
+        CMap chromosomeCMap = cmapContainer.get(chromosome.number);
+        CMapEntry entry = chromosomeCMap.findNearestEntry(new Float(position));
+
+        return xmap.getSiteCoverage(chromosome.number, entry.getSiteId());
     }
 
     @Override
