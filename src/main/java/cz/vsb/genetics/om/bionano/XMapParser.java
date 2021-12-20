@@ -6,7 +6,6 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -47,14 +46,16 @@ public class XMapParser {
         entry.setRefLen(new Float(values[11]));
         entry.setLabelChannel(new Integer(values[12]));
         entry.setAlignment(values[13]);
-        entry.setAlignments(getAlignments(entry.getAlignment()));
+        entry.setAlignments(getAlignments(entry));
 
         return entry;
     }
 
-    private List<XMapEntry.XMapAlignmentEntry> getAlignments(String alignment) {
+    private List<XMapEntry.XMapAlignmentEntry> getAlignments(XMapEntry entry) {
+
         String regex = "\\((\\d+),(\\d+)\\)";
 
+        String alignment = entry.getAlignment();
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(alignment);
 
@@ -62,7 +63,8 @@ public class XMapParser {
 
         while(matcher.find()) {
             alignmentEntries.add(
-                    new XMapEntry.XMapAlignmentEntry(new Integer(matcher.group(1)), new Integer(matcher.group(2))));
+                    new XMapEntry.XMapAlignmentEntry(entry.getRefContigID(), entry.getQryContigID(),
+                            new Integer(matcher.group(1)), new Integer(matcher.group(2))));
 
         }
 

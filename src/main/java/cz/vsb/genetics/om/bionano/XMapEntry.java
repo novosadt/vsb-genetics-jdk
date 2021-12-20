@@ -157,12 +157,25 @@ public class XMapEntry {
     }
 
     public static class XMapAlignmentEntry {
+        private final Integer refContigId;
+        private final Integer qryContigId;
         private final Integer refContigSiteId;
         private final Integer qryContigSiteId;
 
-        public XMapAlignmentEntry(Integer refContigSiteId, Integer qryContigSiteId) {
+        public XMapAlignmentEntry(Integer refContigId, Integer qryContigId,
+                                  Integer refContigSiteId, Integer qryContigSiteId) {
+            this.refContigId = refContigId;
+            this.qryContigId = qryContigId;
             this.refContigSiteId = refContigSiteId;
             this.qryContigSiteId = qryContigSiteId;
+        }
+
+        public Integer getRefContigId() {
+            return refContigId;
+        }
+
+        public Integer getQryContigId() {
+            return qryContigId;
         }
 
         public Integer getRefContigSiteId() {

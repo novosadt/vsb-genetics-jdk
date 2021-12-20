@@ -45,9 +45,10 @@ public class TestBionanoCoverage {
 
     public static void testOmCoverageAtPosition(Chromosome chromosome, int position) throws Exception {
         String refCMap = "./data/om/test_ref.cmap";
+        String qryCMap = "./data/om/test_query.cmap";
         String xmap = "./data/om/test.xmap";
 
-        BionanoCoverageInfo coverageInfo = new BionanoCoverageInfo(refCMap, xmap);
+        BionanoCoverageInfo coverageInfo = new BionanoCoverageInfo(refCMap, qryCMap, xmap);
         coverageInfo.open();
         long coverage = coverageInfo.getCoverage(chromosome, position);
 
