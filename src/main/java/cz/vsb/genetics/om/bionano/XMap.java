@@ -15,7 +15,7 @@ public class XMap {
         return entries;
     }
 
-    public Integer getSiteCoverage(Integer contigId, Integer siteId) {
+    public long getSiteCoverage(Integer contigId, Integer siteId) {
         Map<Integer, List<XMapEntry.XMapAlignmentEntry>> contigSites = refSiteToQuerySites.get(contigId);
 
         if (contigSites == null)

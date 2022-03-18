@@ -1,9 +1,6 @@
 package cz.vsb.genetics.om.bionano;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 public class CMap {
     private final Integer id;
@@ -33,7 +30,7 @@ public class CMap {
         return entries.get(siteId);
     }
 
-    public CMapEntry findNearestEntry(Float position) {
+    public CMapEntry findNearestEntry(float position) {
         if (entryPosition.size() == 0)
             return null;
 
@@ -47,6 +44,18 @@ public class CMap {
 
 
         return  low != null ? low.getValue() : high.getValue();
+    }
+
+    public List<CMapEntry> findEntriesAtInterval(int start, int end) {
+        if (entryPosition.size() == 0)
+            return null;
+
+        CMapEntry startEntry = findNearestEntry(start);
+        CMapEntry endEntry = findNearestEntry(end);
+
+        List<CMapEntry> entries = new ArrayList<>(entryPosition.values());
+
+        return entries.subList(entries.indexOf(startEntry), entries.indexOf(endEntry));
     }
 
     @Override

@@ -75,10 +75,7 @@ public class BamCoverageInfoMT extends BamCoverageInfoUtils implements CoverageI
             int a = start + i * delta;
             int b = i == threads - 1 ? end : a + delta - 1;
 
-            IntervalCoverageCalculator calculator = step == -1
-                    ? new IntervalCoverageCalculator(chromosome, a, b, samReaders[i])
-                    : new IntervalCoverageCalculator(chromosome, a, b, step, samReaders[i]);
-
+            IntervalCoverageCalculator calculator = new IntervalCoverageCalculator(chromosome, a, b, step, samReaders[i]);
             calculators.add(calculator);
             calculator.start();
         }
@@ -121,23 +118,19 @@ public class BamCoverageInfoMT extends BamCoverageInfoUtils implements CoverageI
         private final Chromosome chromosome;
         private final int start;
         private final int end;
-        private int step = -1;
+        private final int step;
 
-        public IntervalCoverageCalculator(Chromosome chromosome, int start, int end, SamReader samReader) {
+        public IntervalCoverageCalculator(Chromosome chromosome, int start, int end, int step, SamReader samReader) {
             this.samReader = samReader;
             this.chromosome = chromosome;
             this.start = start;
             this.end = end;
-        }
-
-        public IntervalCoverageCalculator(Chromosome chromosome, int start, int end, int step, SamReader samReader) {
-            this(chromosome, start, end, samReader);
             this.step = step;
         }
 
         @Override
         public void run() {
-            if (step == -1)
+            if (step < 2)
                 coverages = getCoverage(chromosome, start, end, samReader);
             else
                 coverages = getCoverage(chromosome, start, end, step, samReader);

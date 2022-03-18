@@ -21,18 +21,23 @@ package cz.bach.vsb.genetics.test.ngs;
 
 import cz.vsb.genetics.common.Chromosome;
 import cz.vsb.genetics.coverage.om.BionanoCoverageInfo;
+import cz.vsb.genetics.om.bionano.CMapEntry;
 import org.apache.commons.lang3.time.StopWatch;
+
+import java.util.List;
 
 public class TestBionanoCoverage {
     public static void main(String args[]) {
         try {
             Chromosome chromosome = Chromosome.chr1;
-            int position = 12935517;
+            int start = 12935517;
+            int end = 13935517;
 
             StopWatch stopWatch = new StopWatch();
             stopWatch.start();
 
-            testOmCoverageAtPosition(chromosome, position);
+            testOmCoverageAtPosition(chromosome, start);
+            testOmCoverageAtInterval(chromosome, start, end);
 
             stopWatch.stop();
             System.out.println("Time (mils): " + stopWatch.getTime());
@@ -52,9 +57,25 @@ public class TestBionanoCoverage {
         coverageInfo.open();
         long coverage = coverageInfo.getCoverage(chromosome, position);
 
-        String info = String.format("Coverage at position %s:%d - %d", chromosome.toString(), position, coverage);
+        String info = String.format("Coverage at label closest to position %s:%d - %d", chromosome, position, coverage);
 
         System.out.println(info);
+
+        coverageInfo.close();
+    }
+
+    public static void testOmCoverageAtInterval(Chromosome chromosome, int start, int end) throws Exception {
+        String refCMap = "./data/om/test_ref.cmap";
+        String qryCMap = "./data/om/test_query.cmap";
+        String xmap = "./data/om/test.xmap";
+
+        BionanoCoverageInfo coverageInfo = new BionanoCoverageInfo(refCMap, qryCMap, xmap);
+        coverageInfo.open();
+        List<Long> coverages = coverageInfo.getCoverage(chromosome, start, end);
+
+        System.out.printf("Coverages at labels at interval %s:%d - %d\n", chromosome, start, end);
+        for (Long coverage : coverages)
+            System.out.printf("Coverage: - %d\n", coverage);
 
         coverageInfo.close();
     }
