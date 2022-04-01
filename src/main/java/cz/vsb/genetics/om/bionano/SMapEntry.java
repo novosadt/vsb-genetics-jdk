@@ -5,11 +5,11 @@ public class SMapEntry {
     private Integer qryContigID;
     private Integer refcontigID1;
     private Integer refcontigID2;
-    private Float qryStartPos;
-    private Float qryEndPos;
-    private Float refStartPos;
-    private Float refEndPos;
-    private Float confidence;
+    private Double qryStartPos;
+    private Double qryEndPos;
+    private Double refStartPos;
+    private Double refEndPos;
+    private Double confidence;
     private String type;
     private Integer xmapID1;
     private Integer xmapID2;
@@ -21,24 +21,24 @@ public class SMapEntry {
     private String zygosity;
     private Integer genotype;
     private Integer genotypeGroup;
-    private Float rawConfidence;
-    private Float rawConfidenceLeft;
-    private Float rawConfidenceRight;
-    private Float rawConfidenceCenter;
-
-    private Float svSize;
-    private Float svFreq;
+    private Double rawConfidence;
+    private Double rawConfidenceLeft;
+    private Double rawConfidenceRight;
+    private Double rawConfidenceCenter;
+    private Double svSize;
+    private Double svFreq;
     private String orientation;
+    private String vaf;
     private String sample;
     private String algorithm;
     private Integer size;
-    private Float presentInPercentBngControlSamples;
-    private Float presentInPercentBngControlSamplesSameEnzyme;
+    private Double presentInPercentBngControlSamples;
+    private Double presentInPercentBngControlSamplesSameEnzyme;
     private String failAssemblyChimericScore;
     private Integer numOverlapDgvCalls;
     private String overlapGenes;
     private String nearestNonOverlapGene;
-    private Integer nearestNonOverlapGeneDistance;
+    private Double nearestNonOverlapGeneDistance;
     private String putativeGeneFusion;
     private String foundInSelfMolecules;
     private Integer selfMoleculeCount;
@@ -79,43 +79,43 @@ public class SMapEntry {
         this.refcontigID2 = refcontigID2;
     }
 
-    public Float getQryStartPos() {
+    public Double getQryStartPos() {
         return qryStartPos;
     }
 
-    public void setQryStartPos(Float qryStartPos) {
+    public void setQryStartPos(Double qryStartPos) {
         this.qryStartPos = qryStartPos;
     }
 
-    public Float getQryEndPos() {
+    public Double getQryEndPos() {
         return qryEndPos;
     }
 
-    public void setQryEndPos(Float qryEndPos) {
+    public void setQryEndPos(Double qryEndPos) {
         this.qryEndPos = qryEndPos;
     }
 
-    public Float getRefStartPos() {
+    public Double getRefStartPos() {
         return refStartPos;
     }
 
-    public void setRefStartPos(Float refStartPos) {
+    public void setRefStartPos(Double refStartPos) {
         this.refStartPos = refStartPos;
     }
 
-    public Float getRefEndPos() {
+    public Double getRefEndPos() {
         return refEndPos;
     }
 
-    public void setRefEndPos(Float refEndPos) {
+    public void setRefEndPos(Double refEndPos) {
         this.refEndPos = refEndPos;
     }
 
-    public Float getConfidence() {
+    public Double getConfidence() {
         return confidence;
     }
 
-    public void setConfidence(Float confidence) {
+    public void setConfidence(Double confidence) {
         this.confidence = confidence;
     }
 
@@ -207,51 +207,51 @@ public class SMapEntry {
         this.genotypeGroup = genotypeGroup;
     }
 
-    public Float getRawConfidence() {
+    public Double getRawConfidence() {
         return rawConfidence;
     }
 
-    public void setRawConfidence(Float rawConfidence) {
+    public void setRawConfidence(Double rawConfidence) {
         this.rawConfidence = rawConfidence;
     }
 
-    public Float getRawConfidenceLeft() {
+    public Double getRawConfidenceLeft() {
         return rawConfidenceLeft;
     }
 
-    public void setRawConfidenceLeft(Float rawConfidenceLeft) {
+    public void setRawConfidenceLeft(Double rawConfidenceLeft) {
         this.rawConfidenceLeft = rawConfidenceLeft;
     }
 
-    public Float getRawConfidenceRight() {
+    public Double getRawConfidenceRight() {
         return rawConfidenceRight;
     }
 
-    public void setRawConfidenceRight(Float rawConfidenceRight) {
+    public void setRawConfidenceRight(Double rawConfidenceRight) {
         this.rawConfidenceRight = rawConfidenceRight;
     }
 
-    public Float getRawConfidenceCenter() {
+    public Double getRawConfidenceCenter() {
         return rawConfidenceCenter;
     }
 
-    public void setRawConfidenceCenter(Float rawConfidenceCenter) {
+    public void setRawConfidenceCenter(Double rawConfidenceCenter) {
         this.rawConfidenceCenter = rawConfidenceCenter;
     }
 
-    public Float getSvSize() {
+    public Double getSvSize() {
         return svSize;
     }
 
-    public void setSvSize(Float svSize) {
+    public void setSvSize(Double svSize) {
         this.svSize = svSize;
     }
 
-    public Float getSvFreq() {
+    public Double getSvFreq() {
         return svFreq;
     }
 
-    public void setSvFreq(Float svFreq) {
+    public void setSvFreq(Double svFreq) {
         this.svFreq = svFreq;
     }
 
@@ -261,6 +261,14 @@ public class SMapEntry {
 
     public void setOrientation(String orientation) {
         this.orientation = orientation;
+    }
+
+    public String getVaf() {
+        return vaf;
+    }
+
+    public void setVaf(String vaf) {
+        this.vaf = vaf;
     }
 
     public String getSample() {
@@ -287,19 +295,19 @@ public class SMapEntry {
         this.size = size;
     }
 
-    public Float getPresentInPercentBngControlSamples() {
+    public Double getPresentInPercentBngControlSamples() {
         return presentInPercentBngControlSamples;
     }
 
-    public void setPresentInPercentBngControlSamples(Float presentInPercentBngControlSamples) {
+    public void setPresentInPercentBngControlSamples(Double presentInPercentBngControlSamples) {
         this.presentInPercentBngControlSamples = presentInPercentBngControlSamples;
     }
 
-    public Float getPresentInPercentBngControlSamplesSameEnzyme() {
+    public Double getPresentInPercentBngControlSamplesSameEnzyme() {
         return presentInPercentBngControlSamplesSameEnzyme;
     }
 
-    public void setPresentInPercentBngControlSamplesSameEnzyme(Float presentInPercentBngControlSamplesSameEnzyme) {
+    public void setPresentInPercentBngControlSamplesSameEnzyme(Double presentInPercentBngControlSamplesSameEnzyme) {
         this.presentInPercentBngControlSamplesSameEnzyme = presentInPercentBngControlSamplesSameEnzyme;
     }
 
@@ -335,11 +343,11 @@ public class SMapEntry {
         this.nearestNonOverlapGene = nearestNonOverlapGene;
     }
 
-    public Integer getNearestNonOverlapGeneDistance() {
+    public Double getNearestNonOverlapGeneDistance() {
         return nearestNonOverlapGeneDistance;
     }
 
-    public void setNearestNonOverlapGeneDistance(Integer nearestNonOverlapGeneDistance) {
+    public void setNearestNonOverlapGeneDistance(Double nearestNonOverlapGeneDistance) {
         this.nearestNonOverlapGeneDistance = nearestNonOverlapGeneDistance;
     }
 

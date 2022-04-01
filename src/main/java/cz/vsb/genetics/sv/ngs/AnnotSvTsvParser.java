@@ -27,19 +27,21 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class AnnotSvTsvParser extends SvResultParserBase {
     private final Pattern chromLocPatternWithChr = Pattern.compile("(chr\\d+|MT|M|T|mt|m|t|X|Y|x|y):(\\d+)");
     private final Pattern chromLocPatternWithoutChr = Pattern.compile("(\\d+|MT|M|T|mt|m|t|X|Y|x|y):(\\d+)");
+    private String[] header;
 
     @Override
     public void parseResultFile(String file, String delim) throws Exception {
         BufferedReader reader = new BufferedReader(new FileReader(file));
 
-        //skip header line
-        reader.readLine();
+        header = reader.readLine().split(delim);
 
         String line;
         while((line = reader.readLine()) != null) {
@@ -58,26 +60,37 @@ public class AnnotSvTsvParser extends SvResultParserBase {
     }
 
     private void parseLine(String line, String delim) throws Exception {
-        String[] values = line.split(delim);
+        String[] tmp = line.split(delim);
+
+        assert tmp.length == header.length;
+
+        Map<String, String> values = new HashMap<>();
+        for (int i = 0; i < tmp.length; i++)
+            values.put(header[i], tmp[i]);
 
         addStructuralVariant(values);
     }
 
-    private void addStructuralVariant(String[] values) throws Exception {
-        String srcChromId = "ch" + values[1];
+    private void addStructuralVariant(Map<String, String> values) throws Exception {
+        String srcChromId = "chr" + values.get("SV_chrom");
         String dstChromId = srcChromId;
-        Long srcLoc = new Long(values[2]);
-        Long dstLoc = new Long(values[3]);
-        Long svLength = StringUtils.isBlank(values[4]) ? 0 : Math.abs(new Long(values[4]));
-        String svType = values[5].toLowerCase();
-        String annotSvType = StringUtils.isBlank(values[15]) ? "" : values[15].toLowerCase();
-        String gene = values[16];
+        Long srcLoc = new Long(values.get("SV_start"));
+        Long dstLoc = new Long(values.get("SV_end"));
+        Long svLength = StringUtils.isBlank(values.get("SV_length")) ? 0 : Math.abs(new Long(values.get("SV_length")));
+        String svType = values.get("SV_type").toLowerCase();
 
-        if (!annotSvType.equals("full"))
+        // To preserve backward compatibility. Column label differs between versions of AnnotSV
+        String annotSvType = values.get("AnnotSV_type") == null ? null : values.get("AnnotSV_type").toLowerCase();
+        if (annotSvType == null)
+            annotSvType = values.get("Annotation_mode") == null ? null : values.get("Annotation_mode").toLowerCase();
+
+        String gene = values.get("Gene_name");
+
+        if (!"full".equals(annotSvType))
             return;
 
         if (svType.equals("bnd")) {
-            String chromLoc = values[9];
+            String chromLoc = values.get("ALT");
             Matcher m = chromLocPatternWithChr.matcher(chromLoc);
             if (!m.find()) {
                 m = chromLocPatternWithoutChr.matcher(chromLoc);
