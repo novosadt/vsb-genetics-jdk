@@ -28,7 +28,9 @@ public class StructuralVariant {
     private final Long dstLoc;
     private final Long size;
     private final String gene;
+    private Double frequency;
     private StructuralVariantType variantType;
+    private StructuralVariantOrientation orientation;
 
     public StructuralVariant(Chromosome srcChromosome, Long srcLoc, Chromosome dstChromosome, Long dstLoc,
                              Long size, String gene) {
@@ -96,5 +98,13 @@ public class StructuralVariant {
 
     public void setVariantType(StructuralVariantType variantType) {
         this.variantType = variantType;
+    }
+
+    public StructuralVariantOrientation getOrientation() {
+        return orientation;
+    }
+
+    public void setOrientation(StructuralVariantOrientation orientation) {
+        this.orientation = orientation;
     }
 }
