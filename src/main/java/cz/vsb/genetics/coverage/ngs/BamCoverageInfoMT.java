@@ -20,12 +20,13 @@ package cz.vsb.genetics.coverage.ngs;
 
 import cz.vsb.genetics.common.Chromosome;
 import cz.vsb.genetics.coverage.CoverageInfo;
+import cz.vsb.genetics.ngs.bam.BamUtils;
 import htsjdk.samtools.SamReader;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class BamCoverageInfoMT extends BamCoverageInfoUtils implements CoverageInfo {
+public class BamCoverageInfoMT implements CoverageInfo {
     private SamReader[] samReaders;
     private final int threads;
     private final String bamFile;
@@ -42,7 +43,7 @@ public class BamCoverageInfoMT extends BamCoverageInfoUtils implements CoverageI
         samReaders = new SamReader[threads];
 
         for (int i = 0; i < threads; i++)
-            samReaders[i] = getSamReader(bamFile, indexFile);
+            samReaders[i] = BamUtils.getSamReader(bamFile, indexFile);
     }
 
     @Override
@@ -53,7 +54,7 @@ public class BamCoverageInfoMT extends BamCoverageInfoUtils implements CoverageI
 
     @Override
     public long getCoverage(Chromosome chromosome, int position) {
-        return getCoverage(chromosome, position, samReaders[0]);
+        return BamCoverageInfoUtils.getCoverage(chromosome, position, samReaders[0]);
     }
 
     @Override
@@ -131,9 +132,9 @@ public class BamCoverageInfoMT extends BamCoverageInfoUtils implements CoverageI
         @Override
         public void run() {
             if (step < 2)
-                coverages = getCoverage(chromosome, start, end, samReader);
+                coverages = BamCoverageInfoUtils.getCoverage(chromosome, start, end, samReader);
             else
-                coverages = getCoverage(chromosome, start, end, step, samReader);
+                coverages = BamCoverageInfoUtils.getCoverage(chromosome, start, end, step, samReader);
         }
 
         public List<Long> getCoverages() {

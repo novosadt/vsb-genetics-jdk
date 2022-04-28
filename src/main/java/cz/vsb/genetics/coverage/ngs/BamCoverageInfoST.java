@@ -20,11 +20,10 @@ package cz.vsb.genetics.coverage.ngs;
 
 import cz.vsb.genetics.common.Chromosome;
 import cz.vsb.genetics.coverage.CoverageInfo;
+import cz.vsb.genetics.ngs.bam.BamUtils;
 import htsjdk.samtools.SamReader;
 
 import java.util.List;
-
-import static cz.vsb.genetics.coverage.ngs.BamCoverageInfoUtils.getSamReader;
 
 public class BamCoverageInfoST implements CoverageInfo {
     private SamReader samReader;
@@ -38,7 +37,7 @@ public class BamCoverageInfoST implements CoverageInfo {
 
     @Override
     public void open() {
-        samReader = getSamReader(bamFile, indexFile);
+        samReader = BamUtils.getSamReader(bamFile, indexFile);
     }
 
     @Override

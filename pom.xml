@@ -29,9 +29,6 @@
             <artifactId>htsjdk</artifactId>
             <version>${htsjdk.version}</version>
         </dependency>
-
-
-
     </dependencies>
 
     <build>
