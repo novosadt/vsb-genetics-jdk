@@ -30,7 +30,8 @@ public class StructuralVariant {
     private final String gene;
     private Double frequency;
     private StructuralVariantType variantType;
-    private StructuralVariantOrientation orientation;
+    private StructuralVariantOrientation srcOrientation;
+    private StructuralVariantOrientation dstOrientation;
 
     public StructuralVariant(Chromosome srcChromosome, Long srcLoc, Chromosome dstChromosome, Long dstLoc,
                              Long size, String gene) {
@@ -100,11 +101,27 @@ public class StructuralVariant {
         this.variantType = variantType;
     }
 
-    public StructuralVariantOrientation getOrientation() {
-        return orientation;
+    public Double getFrequency() {
+        return frequency;
     }
 
-    public void setOrientation(StructuralVariantOrientation orientation) {
-        this.orientation = orientation;
+    public void setFrequency(Double frequency) {
+        this.frequency = frequency;
+    }
+
+    public StructuralVariantOrientation getSrcOrientation() {
+        return srcOrientation;
+    }
+
+    public void setSrcOrientation(StructuralVariantOrientation srcOrientation) {
+        this.srcOrientation = srcOrientation;
+    }
+
+    public StructuralVariantOrientation getDstOrientation() {
+        return dstOrientation;
+    }
+
+    public void setDstOrientation(StructuralVariantOrientation dstOrientation) {
+        this.dstOrientation = dstOrientation;
     }
 }
