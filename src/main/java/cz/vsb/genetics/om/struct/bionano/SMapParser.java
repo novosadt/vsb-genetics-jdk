@@ -1,4 +1,4 @@
-package cz.vsb.genetics.om.bionano;
+package cz.vsb.genetics.om.struct.bionano;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -71,7 +71,7 @@ public class SMapParser {
         entry.setSvSize(values.get("SVsize") != null ? new Double(values.get("SVsize")) : null);
         entry.setSvFreq(values.get("SVfreq") != null ? new Double(values.get("SVfreq")) : null);
         entry.setOrientation(values.get("Orientation"));
-        entry.setVaf(values.get("VAF"));
+        entry.setVaf(values.get("VAF") != null ? new Double(values.get("VAF")) : null);
         entry.setSample(values.get("Sample"));
         entry.setAlgorithm(values.get("Algorithm"));
         entry.setSize(values.get("Size") != null ? new Integer(values.get("Size")) : null);

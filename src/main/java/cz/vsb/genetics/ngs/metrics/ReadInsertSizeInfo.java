@@ -1,4 +1,4 @@
-package cz.vsb.genetics.metrics.ngs;
+package cz.vsb.genetics.ngs.metrics;
 
 public class ReadInsertSizeInfo {
     int minInsertSize = Integer.MAX_VALUE;

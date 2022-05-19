@@ -21,14 +21,18 @@ package cz.vsb.genetics.sv;
 
 import cz.vsb.genetics.common.Chromosome;
 
+import java.util.Map;
+
 public class StructuralVariant {
+    private String id;
     private final Chromosome srcChromosome;
     private final Long srcLoc;
     private final Chromosome dstChromosome;
     private final Long dstLoc;
     private final Long size;
     private final String gene;
-    private Double frequency;
+    private Double variantAlleleFraction;
+    private Map<String, String> info;
     private StructuralVariantType variantType;
     private StructuralVariantOrientation srcOrientation;
     private StructuralVariantOrientation dstOrientation;
@@ -46,26 +50,30 @@ public class StructuralVariant {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof StructuralVariant)) return false;
+        if (o == null || getClass() != o.getClass()) return false;
 
         StructuralVariant that = (StructuralVariant) o;
 
-        if (getSrcChromosome() != that.getSrcChromosome()) return false;
-        if (!getSrcLoc().equals(that.getSrcLoc())) return false;
-        if (getDstChromosome() != that.getDstChromosome()) return false;
-        if (!getDstLoc().equals(that.getDstLoc())) return false;
-        if (!getSize().equals(that.getSize())) return false;
-        return getVariantType() == that.getVariantType();
+        if (id != null ? !id.equals(that.id) : that.id != null) return false;
+        if (srcChromosome != that.srcChromosome) return false;
+        if (!srcLoc.equals(that.srcLoc)) return false;
+        if (dstChromosome != that.dstChromosome) return false;
+        if (!dstLoc.equals(that.dstLoc)) return false;
+        if (!size.equals(that.size)) return false;
+        if (srcOrientation != that.srcOrientation) return false;
+        return dstOrientation == that.dstOrientation;
     }
 
     @Override
     public int hashCode() {
-        int result = getSrcChromosome().hashCode();
-        result = 31 * result + getSrcLoc().hashCode();
-        result = 31 * result + getDstChromosome().hashCode();
-        result = 31 * result + getDstLoc().hashCode();
-        result = 31 * result + getSize().hashCode();
-        result = 31 * result + getVariantType().hashCode();
+        int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + srcChromosome.hashCode();
+        result = 31 * result + srcLoc.hashCode();
+        result = 31 * result + dstChromosome.hashCode();
+        result = 31 * result + dstLoc.hashCode();
+        result = 31 * result + size.hashCode();
+        result = 31 * result + (srcOrientation != null ? srcOrientation.hashCode() : 0);
+        result = 31 * result + (dstOrientation != null ? dstOrientation.hashCode() : 0);
         return result;
     }
 
@@ -101,12 +109,12 @@ public class StructuralVariant {
         this.variantType = variantType;
     }
 
-    public Double getFrequency() {
-        return frequency;
+    public Double getVariantAlleleFraction() {
+        return variantAlleleFraction;
     }
 
-    public void setFrequency(Double frequency) {
-        this.frequency = frequency;
+    public void setVariantAlleleFraction(Double variantAlleleFraction) {
+        this.variantAlleleFraction = variantAlleleFraction;
     }
 
     public StructuralVariantOrientation getSrcOrientation() {
@@ -123,5 +131,21 @@ public class StructuralVariant {
 
     public void setDstOrientation(StructuralVariantOrientation dstOrientation) {
         this.dstOrientation = dstOrientation;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public Map<String, String> getInfo() {
+        return info;
+    }
+
+    public void setInfo(Map<String, String> info) {
+        this.info = info;
     }
 }

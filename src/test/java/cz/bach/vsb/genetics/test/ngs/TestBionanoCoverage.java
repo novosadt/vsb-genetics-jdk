@@ -20,8 +20,7 @@
 package cz.bach.vsb.genetics.test.ngs;
 
 import cz.vsb.genetics.common.Chromosome;
-import cz.vsb.genetics.coverage.om.BionanoCoverageInfo;
-import cz.vsb.genetics.om.bionano.CMapEntry;
+import cz.vsb.genetics.om.coverage.BionanoCoverageInfo;
 import org.apache.commons.lang3.time.StopWatch;
 
 import java.util.List;

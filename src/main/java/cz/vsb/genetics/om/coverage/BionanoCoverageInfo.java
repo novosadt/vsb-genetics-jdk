@@ -17,11 +17,11 @@
  */
 
 
-package cz.vsb.genetics.coverage.om;
+package cz.vsb.genetics.om.coverage;
 
 import cz.vsb.genetics.common.Chromosome;
 import cz.vsb.genetics.coverage.CoverageInfo;
-import cz.vsb.genetics.om.bionano.*;
+import cz.vsb.genetics.om.struct.bionano.*;
 
 import java.util.ArrayList;
 import java.util.List;

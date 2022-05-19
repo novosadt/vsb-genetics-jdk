@@ -17,12 +17,12 @@
  */
 
 
-package cz.vsb.genetics.sv.om;
+package cz.vsb.genetics.om.sv;
 
 import cz.vsb.genetics.common.Chromosome;
-import cz.vsb.genetics.om.bionano.SMap;
-import cz.vsb.genetics.om.bionano.SMapEntry;
-import cz.vsb.genetics.om.bionano.SMapParser;
+import cz.vsb.genetics.om.struct.bionano.SMap;
+import cz.vsb.genetics.om.struct.bionano.SMapEntry;
+import cz.vsb.genetics.om.struct.bionano.SMapParser;
 import cz.vsb.genetics.sv.StructuralVariant;
 import cz.vsb.genetics.sv.StructuralVariantType;
 import cz.vsb.genetics.sv.SvResultParserBase;
@@ -59,6 +59,7 @@ public class BionanoPipelineResultParser extends SvResultParserBase {
         Chromosome dstChrom = Chromosome.getChromosome(dstChromId);
 
         StructuralVariant sv = new StructuralVariant(srcChrom, srcLoc, dstChrom, dstLoc, size, gene);
+        sv.setVariantAlleleFraction(entry.getVaf());
 
         if (type.contains("translocation"))
             addStructuralVariant(sv, translocations, StructuralVariantType.BND);

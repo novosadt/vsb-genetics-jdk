@@ -1,4 +1,4 @@
-package cz.vsb.genetics.om.bionano;
+package cz.vsb.genetics.om.struct.bionano;
 
 public class CMapEntry {
     private final Integer cmapId;

@@ -1,11 +1,10 @@
-package cz.vsb.genetics.sv.ngs;
+package cz.vsb.genetics.ngs.sv;
 
 import cz.vsb.genetics.common.Chromosome;
-import cz.vsb.genetics.metrics.ngs.ReadInsertSizeInfo;
-import cz.vsb.genetics.metrics.ngs.ReadSizeMetrics;
+import cz.vsb.genetics.ngs.metrics.ReadInsertSizeInfo;
+import cz.vsb.genetics.ngs.metrics.ReadSizeMetrics;
 import cz.vsb.genetics.ngs.bam.BamUtils;
 import cz.vsb.genetics.sv.StructuralVariant;
-import htsjdk.samtools.SAMFileHeader;
 import htsjdk.samtools.SAMRecord;
 import htsjdk.samtools.SamReader;
 import htsjdk.samtools.util.CloseableIterator;

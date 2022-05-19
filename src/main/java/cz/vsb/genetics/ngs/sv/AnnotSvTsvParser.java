@@ -17,7 +17,7 @@
  */
 
 
-package cz.vsb.genetics.sv.ngs;
+package cz.vsb.genetics.ngs.sv;
 
 import cz.vsb.genetics.common.Chromosome;
 import cz.vsb.genetics.sv.StructuralVariant;
@@ -36,6 +36,15 @@ public class AnnotSvTsvParser extends SvResultParserBase {
     private final Pattern chromLocPatternWithChr = Pattern.compile("(chr\\d+|MT|M|T|mt|m|t|X|Y|x|y):(\\d+)");
     private final Pattern chromLocPatternWithoutChr = Pattern.compile("(\\d+|MT|M|T|mt|m|t|X|Y|x|y):(\\d+)");
     private String[] header;
+    private final boolean preferSvType2;
+
+    public AnnotSvTsvParser() {
+        this.preferSvType2 = true;
+    }
+
+    public AnnotSvTsvParser(boolean preferSvType2) {
+        this.preferSvType2 = preferSvType2;
+    }
 
     @Override
     public void parseResultFile(String file, String delim) throws Exception {
@@ -109,9 +118,11 @@ public class AnnotSvTsvParser extends SvResultParserBase {
         Chromosome dstChrom = Chromosome.getChromosome(dstChromId);
 
         StructuralVariant sv = new StructuralVariant(srcChrom, srcLoc, dstChrom, dstLoc, svLength, gene);
+        sv.setId(values.get("ID"));
+        sv.setInfo(getInfo(values.get("INFO")));
 
         switch (svType) {
-            case "bnd" : addStructuralVariant(sv, translocations, StructuralVariantType.BND); break;
+            case "bnd" : addStructuralVariant(sv, translocations, getBndVariantType(sv)); break;
             case "cnv" : addStructuralVariant(sv, copyNumberVariations, StructuralVariantType.CNV); break;
             case "del" : addStructuralVariant(sv, deletions, StructuralVariantType.DEL); break;
             case "ins" : addStructuralVariant(sv, insertions, StructuralVariantType.INS); break;
@@ -119,5 +130,30 @@ public class AnnotSvTsvParser extends SvResultParserBase {
             case "inv" : addStructuralVariant(sv, inversions, StructuralVariantType.INV); break;
             default: addStructuralVariant(sv, unknown, StructuralVariantType.UNK);
         }
+    }
+
+    private Map<String, String> getInfo(String info) {
+        String[] infoValues = info.split(";");
+
+        Map<String, String> values = new HashMap<>();
+
+        for (String infoValue : infoValues) {
+            String[] keyValue = infoValue.split("=");
+            values.put(keyValue[0], keyValue[1]);
+        }
+
+        return values;
+    }
+
+    private StructuralVariantType getBndVariantType(StructuralVariant structuralVariant) {
+        if (!preferSvType2)
+            return StructuralVariantType.BND;
+
+        String svType2 = structuralVariant.getInfo().get("SVTYPE2");
+
+        if (StringUtils.isBlank(svType2))
+            return StructuralVariantType.BND;
+
+        return StructuralVariantType.valueOf(svType2.toUpperCase());
     }
 }

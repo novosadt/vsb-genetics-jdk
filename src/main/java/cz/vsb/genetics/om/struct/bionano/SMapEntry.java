@@ -1,4 +1,4 @@
-package cz.vsb.genetics.om.bionano;
+package cz.vsb.genetics.om.struct.bionano;
 
 public class SMapEntry {
     private final Integer smapEntryID;
@@ -28,7 +28,7 @@ public class SMapEntry {
     private Double svSize;
     private Double svFreq;
     private String orientation;
-    private String vaf;
+    private Double vaf;
     private String sample;
     private String algorithm;
     private Integer size;
@@ -263,11 +263,11 @@ public class SMapEntry {
         this.orientation = orientation;
     }
 
-    public String getVaf() {
+    public Double getVaf() {
         return vaf;
     }
 
-    public void setVaf(String vaf) {
+    public void setVaf(Double vaf) {
         this.vaf = vaf;
     }
 

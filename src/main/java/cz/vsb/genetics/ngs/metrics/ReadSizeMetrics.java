@@ -1,4 +1,4 @@
-package cz.vsb.genetics.metrics.ngs;
+package cz.vsb.genetics.ngs.metrics;
 
 import cz.vsb.genetics.ngs.bam.BamUtils;
 import htsjdk.samtools.SAMRecord;

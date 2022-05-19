@@ -1,4 +1,4 @@
-package cz.vsb.genetics.om.bionano;
+package cz.vsb.genetics.om.struct.bionano;
 
 import org.apache.commons.lang3.StringUtils;
 

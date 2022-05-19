@@ -19,7 +19,10 @@
 
 package cz.vsb.genetics.sv;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 
 public enum StructuralVariantType {
@@ -48,4 +51,6 @@ public enum StructuralVariantType {
 
         return types;
     }
+
+
 }
