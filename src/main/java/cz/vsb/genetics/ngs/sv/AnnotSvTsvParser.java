@@ -36,14 +36,14 @@ public class AnnotSvTsvParser extends SvResultParserBase {
     private final Pattern chromLocPatternWithChr = Pattern.compile("(chr\\d+|MT|M|T|mt|m|t|X|Y|x|y):(\\d+)");
     private final Pattern chromLocPatternWithoutChr = Pattern.compile("(\\d+|MT|M|T|mt|m|t|X|Y|x|y):(\\d+)");
     private String[] header;
-    private final boolean preferSvType2;
+    private final boolean preferBaseSvType;
 
     public AnnotSvTsvParser() {
-        this.preferSvType2 = true;
+        this.preferBaseSvType = false;
     }
 
-    public AnnotSvTsvParser(boolean preferSvType2) {
-        this.preferSvType2 = preferSvType2;
+    public AnnotSvTsvParser(boolean preferBaseSvType) {
+        this.preferBaseSvType = preferBaseSvType;
     }
 
     @Override
@@ -139,14 +139,14 @@ public class AnnotSvTsvParser extends SvResultParserBase {
 
         for (String infoValue : infoValues) {
             String[] keyValue = infoValue.split("=");
-            values.put(keyValue[0], keyValue[1]);
+            values.put(keyValue[0], keyValue.length == 1 ? null : keyValue[1]);
         }
 
         return values;
     }
 
     private StructuralVariantType getBndVariantType(StructuralVariant structuralVariant) {
-        if (!preferSvType2)
+        if (preferBaseSvType)
             return StructuralVariantType.BND;
 
         String svType2 = structuralVariant.getInfo().get("SVTYPE2");

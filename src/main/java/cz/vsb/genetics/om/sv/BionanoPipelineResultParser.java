@@ -60,6 +60,7 @@ public class BionanoPipelineResultParser extends SvResultParserBase {
 
         StructuralVariant sv = new StructuralVariant(srcChrom, srcLoc, dstChrom, dstLoc, size, gene);
         sv.setVariantAlleleFraction(entry.getVaf());
+        sv.setId(entry.getSmapEntryID().toString());
 
         if (type.contains("translocation"))
             addStructuralVariant(sv, translocations, StructuralVariantType.BND);

@@ -54,26 +54,24 @@ public class StructuralVariant {
 
         StructuralVariant that = (StructuralVariant) o;
 
-        if (id != null ? !id.equals(that.id) : that.id != null) return false;
         if (srcChromosome != that.srcChromosome) return false;
         if (!srcLoc.equals(that.srcLoc)) return false;
         if (dstChromosome != that.dstChromosome) return false;
         if (!dstLoc.equals(that.dstLoc)) return false;
         if (!size.equals(that.size)) return false;
-        if (srcOrientation != that.srcOrientation) return false;
-        return dstOrientation == that.dstOrientation;
+        if (variantType != that.variantType) return false;
+
+        return true;
     }
 
     @Override
     public int hashCode() {
-        int result = id != null ? id.hashCode() : 0;
-        result = 31 * result + srcChromosome.hashCode();
+        int result = srcChromosome.hashCode();
         result = 31 * result + srcLoc.hashCode();
         result = 31 * result + dstChromosome.hashCode();
         result = 31 * result + dstLoc.hashCode();
         result = 31 * result + size.hashCode();
-        result = 31 * result + (srcOrientation != null ? srcOrientation.hashCode() : 0);
-        result = 31 * result + (dstOrientation != null ? dstOrientation.hashCode() : 0);
+        result = 31 * result + variantType.hashCode();
         return result;
     }
 
