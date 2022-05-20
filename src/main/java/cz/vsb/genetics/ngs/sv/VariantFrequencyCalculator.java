@@ -1,6 +1,7 @@
 package cz.vsb.genetics.ngs.sv;
 
 import cz.vsb.genetics.common.Chromosome;
+import cz.vsb.genetics.ngs.metrics.ReadCountInfo;
 import cz.vsb.genetics.ngs.metrics.ReadInsertSizeInfo;
 import cz.vsb.genetics.ngs.metrics.ReadSizeMetrics;
 import cz.vsb.genetics.ngs.bam.BamUtils;
@@ -13,7 +14,7 @@ import java.util.*;
 
 public class VariantFrequencyCalculator {
     // number of base-pairs tolerance threshold which we allow breaks to be inexact.
-    private int threshold = 6;
+    private int breakThreshold = 6;
 
     // minimum number of base-pairs a "normal" read must overlap break to be counted.
     private int normalReadOverlap = 10;
@@ -81,15 +82,89 @@ public class VariantFrequencyCalculator {
     }
 
     private void getReadCountsAtPosition(List<SAMRecord> reads, int position, int minInsert, int maxInsert) {
+        ReadCountInfo readCountInfo = new ReadCountInfo();
+
         for (int i = 0; i < reads.size() - 1; i++) {
-            SAMRecord read1 = reads.get(i);
-            SAMRecord read2 = reads.get(i+1);
+            SAMRecord read = reads.get(i);
+            SAMRecord mate = reads.get(i+1);
 
+            if (isNormalNonOverlap(read, mate, position, minInsert, maxInsert))
+                continue;
+            else if (isNormalAcrossBreak(read, position, minInsert, maxInsert)) {
+                readCountInfo.splitNormal.add(read);
+                readCountInfo.splitNormalCount++;
+                readCountInfo.splitNormalBasesOverlap += getNormalOverlapBaseCount(read, position);
+            }
+            else if (isSupportingSplitRead(read, position, maxInsert)) {
 
+            }
 
 
         }
     }
 
+    private boolean isNormalNonOverlap(SAMRecord read, SAMRecord mate, int position, int minInsert, int maxInsert) {
+        if (!read.getContig().equals(mate.getContig()))
+            return false;
+
+        int readInsertSize = Math.abs(read.getInferredInsertSize());
+        int mateInsertSize = Math.abs(mate.getInferredInsertSize());
+        int readRefStart = read.getReferencePositionAtReadPosition(read.getAlignmentStart());
+        int readRefEnd = read.getReferencePositionAtReadPosition(read.getAlignmentEnd());
+        int mateRefStart = read.getReferencePositionAtReadPosition(mate.getAlignmentStart());
+        int mateRefEnd = read.getReferencePositionAtReadPosition(mate.getAlignmentEnd());
+
+        return !isSoftClipped(read) &&
+                (readInsertSize < maxInsert && readInsertSize > minInsert) &&
+                (mateInsertSize < maxInsert && mateInsertSize > minInsert) &&
+                !(readRefStart < (position + breakThreshold) && readRefEnd > (position - breakThreshold)) &&
+                !(mateRefStart < (position + breakThreshold) && mateRefEnd > (position - breakThreshold)) &&
+                !(readRefStart < position && mateRefEnd > position);
+    }
+
+    private boolean isSoftClipped(SAMRecord read) {
+        return read.getAlignmentStart() != 0 || read.getAlignmentEnd() != read.getReadLength();
+    }
+    
+    private boolean isNormalAcrossBreak(SAMRecord read, int position, int minInsert, int maxInsert) {
+        int insertSize = Math.abs(read.getInferredInsertSize());
+        int refStart = read.getReferencePositionAtReadPosition(read.getAlignmentStart());
+        int refEnd = read.getReferencePositionAtReadPosition(read.getAlignmentEnd());
+        
+        return isBelowSoftClippingThreshold(read, 2) &&
+                (insertSize < maxInsert && insertSize > minInsert) &&
+                (refStart < position - normalReadOverlap) && (refEnd > position + normalReadOverlap);
+                
+    }
+    
+    private boolean isBelowSoftClippingThreshold(SAMRecord read, int threshold) {
+        return read.getAlignmentStart() < threshold && 
+               read.getReadLength() - read.getAlignmentEnd() < threshold;
+    }
+
+    private int getNormalOverlapBaseCount(SAMRecord read, int position) {
+        int refStart = read.getReferencePositionAtReadPosition(read.getAlignmentStart());
+        int refEnd= read.getReferencePositionAtReadPosition(read.getAlignmentEnd());
+
+        return Math.min(Math.abs(refStart - position), Math.abs(refEnd - position));
+    }
+
+    // Return whether read is a supporting split read. Doesn't yet check whether the soft-clip aligns to the other side.
+    private boolean isSupportingSplitRead(SAMRecord read, int position, int maxInsert) {
+        int alignmentStart = read.getAlignmentStart();
+        int alignmentEnd = read.getAlignmentEnd();
+        int refStart = read.getReferencePositionAtReadPosition(alignmentStart);
+        int refEnd = read.getReferencePositionAtReadPosition(alignmentEnd);
+        int insertSize = read.getInferredInsertSize();
+
+        if (alignmentStart < breakThreshold)
+            return refEnd > (position - breakThreshold) && refEnd < (position + breakThreshold) &&
+                    read.getReadLength() - alignmentEnd >= supportReadSoftClipLength &&
+                    Math.abs(insertSize) < maxInsert;
+
+        return refStart > (position - breakThreshold) && refStart < (position + breakThreshold) &&
+                alignmentStart >= supportReadSoftClipLength &&
+                Math.abs(insertSize) < maxInsert;
+    }
 
 }

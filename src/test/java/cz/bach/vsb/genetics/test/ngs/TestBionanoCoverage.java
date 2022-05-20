@@ -26,6 +26,10 @@ import org.apache.commons.lang3.time.StopWatch;
 import java.util.List;
 
 public class TestBionanoCoverage {
+    private static String CMAP_REF = "./src/test/resources/coverage/bionano/test_ref.cmap";
+    private static String CMAP_QRY = "./src/test/resources/coverage/bionano/test_query.cmap";
+    private static String XMAP = "./src/test/resources/coverage/bionano/test.xmap";
+
     public static void main(String args[]) {
         try {
             Chromosome chromosome = Chromosome.chr1;
@@ -48,11 +52,7 @@ public class TestBionanoCoverage {
     }
 
     public static void testOmCoverageAtPosition(Chromosome chromosome, int position) throws Exception {
-        String refCMap = "./data/om/test_ref.cmap";
-        String qryCMap = "./data/om/test_query.cmap";
-        String xmap = "./data/om/test.xmap";
-
-        BionanoCoverageInfo coverageInfo = new BionanoCoverageInfo(refCMap, qryCMap, xmap);
+        BionanoCoverageInfo coverageInfo = new BionanoCoverageInfo(CMAP_REF, CMAP_QRY, XMAP);
         coverageInfo.open();
         long coverage = coverageInfo.getCoverage(chromosome, position);
 
@@ -64,11 +64,7 @@ public class TestBionanoCoverage {
     }
 
     public static void testOmCoverageAtInterval(Chromosome chromosome, int start, int end) throws Exception {
-        String refCMap = "./data/om/test_ref.cmap";
-        String qryCMap = "./data/om/test_query.cmap";
-        String xmap = "./data/om/test.xmap";
-
-        BionanoCoverageInfo coverageInfo = new BionanoCoverageInfo(refCMap, qryCMap, xmap);
+        BionanoCoverageInfo coverageInfo = new BionanoCoverageInfo(CMAP_REF, CMAP_QRY, XMAP);
         coverageInfo.open();
         List<Long> coverages = coverageInfo.getCoverage(chromosome, start, end);
 

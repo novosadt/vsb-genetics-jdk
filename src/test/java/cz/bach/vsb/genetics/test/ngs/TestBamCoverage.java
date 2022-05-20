@@ -28,6 +28,9 @@ import org.apache.commons.lang3.time.StopWatch;
 import java.util.List;
 
 public class TestBamCoverage {
+    private static String BAM_FILE = "./src/test/resources/coverage/bam/test.bam";
+    private static String BAM_INDEX_FILE = "./src/test/resources/coverage/bam/test.bai";
+
     public static void main(String[] args) {
         try {
             Chromosome chromosome = Chromosome.chr17;
@@ -53,10 +56,7 @@ public class TestBamCoverage {
     public static void testBamCoverageAtPosition(Chromosome chromosome, int position) throws Exception {
         System.out.println("\nTesting bam coverage info at position.");
 
-        String bamFile = "./data/ngs/bam/test.bam";
-        String indexFile = "./data/ngs/bam/test.bai";
-
-        BamCoverageInfoST coverageInfo = new BamCoverageInfoST(bamFile, indexFile);
+        BamCoverageInfoST coverageInfo = new BamCoverageInfoST(BAM_FILE, BAM_INDEX_FILE);
         coverageInfo.open();
         long coverage = coverageInfo.getCoverage(chromosome, position);
 
@@ -70,10 +70,7 @@ public class TestBamCoverage {
     public static void testBamCoverageAtIntervalST(Chromosome chromosome, int start, int end) throws Exception {
         System.out.println("\nTesting bam coverage info at interval - single-threaded.");
 
-        String bamFile = "./data/ngs/bam/test.bam";
-        String indexFile = "./data/ngs/bam/test.bai";
-
-        CoverageInfo coverageInfo = new BamCoverageInfoST(bamFile, indexFile);
+        CoverageInfo coverageInfo = new BamCoverageInfoST(BAM_FILE, BAM_INDEX_FILE);
         coverageInfo.open();
         List<Long> coverages = coverageInfo.getCoverage(chromosome, start, end);
 
@@ -86,10 +83,7 @@ public class TestBamCoverage {
     public static void testBamCoverageAtIntervalMT(Chromosome chromosome, int start, int end, int threads) throws Exception {
         System.out.println("\nTesting bam coverage info at interval - multi-threaded.");
 
-        String bamFile = "./data/ngs/bam/test.bam";
-        String indexFile = "./data/ngs/bam/test.bai";
-
-        CoverageInfo coverageInfo = new BamCoverageInfoMT(bamFile, indexFile, threads);
+        CoverageInfo coverageInfo = new BamCoverageInfoMT(BAM_FILE, BAM_INDEX_FILE, threads);
         coverageInfo.open();
         List<Long> coverages = coverageInfo.getCoverage(chromosome, start, end);
 
