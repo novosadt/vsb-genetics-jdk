@@ -38,10 +38,6 @@ public class AnnotSvTsvParser extends SvResultParserBase {
     private String[] header;
     private final boolean preferBaseSvType;
 
-    public AnnotSvTsvParser() {
-        this.preferBaseSvType = false;
-    }
-
     public AnnotSvTsvParser(boolean preferBaseSvType) {
         this.preferBaseSvType = preferBaseSvType;
     }
@@ -87,6 +83,7 @@ public class AnnotSvTsvParser extends SvResultParserBase {
         Long dstLoc = new Long(values.get("SV_end"));
         Long svLength = StringUtils.isBlank(values.get("SV_length")) ? 0 : Math.abs(new Long(values.get("SV_length")));
         String svType = values.get("SV_type").toLowerCase();
+        Map<String, String> info = getInfo(values.get("INFO"));
 
         // To preserve backward compatibility. Column label differs between versions of AnnotSV
         String annotSvType = values.get("AnnotSV_type") == null ? null : values.get("AnnotSV_type").toLowerCase();
@@ -99,16 +96,22 @@ public class AnnotSvTsvParser extends SvResultParserBase {
             return;
 
         if (svType.equals("bnd")) {
-            String chromLoc = values.get("ALT");
-            Matcher m = chromLocPatternWithChr.matcher(chromLoc);
-            if (!m.find()) {
-                m = chromLocPatternWithoutChr.matcher(chromLoc);
-                if (!m.find())
-                    throw new Exception("Unsupported chromosome:location format: " + chromLoc);
-            }
+            StructuralVariantType type = getBndVariantType(info);
+            if (type == StructuralVariantType.BND) {
+                String chromLoc = values.get("ALT");
+                Matcher m = chromLocPatternWithChr.matcher(chromLoc);
+                if (!m.find()) {
+                    m = chromLocPatternWithoutChr.matcher(chromLoc);
+                    if (!m.find())
+                        throw new Exception("Unsupported chromosome:location format: " + chromLoc);
+                }
 
-            dstChromId = m.group(1);
-            dstLoc = new Long(m.group(2));
+                dstChromId = m.group(1);
+                dstLoc = new Long(m.group(2));
+            }
+            else {
+                svType = type.toString().toLowerCase();
+            }
         }
 
         if (svType.equals("ins"))
@@ -119,10 +122,10 @@ public class AnnotSvTsvParser extends SvResultParserBase {
 
         StructuralVariant sv = new StructuralVariant(srcChrom, srcLoc, dstChrom, dstLoc, svLength, gene);
         sv.setId(values.get("ID"));
-        sv.setInfo(getInfo(values.get("INFO")));
+        sv.setInfo(info);
 
         switch (svType) {
-            case "bnd" : addStructuralVariant(sv, translocations, getBndVariantType(sv)); break;
+            case "bnd" : addStructuralVariant(sv, translocations, StructuralVariantType.BND); break;
             case "cnv" : addStructuralVariant(sv, copyNumberVariations, StructuralVariantType.CNV); break;
             case "del" : addStructuralVariant(sv, deletions, StructuralVariantType.DEL); break;
             case "ins" : addStructuralVariant(sv, insertions, StructuralVariantType.INS); break;
@@ -145,11 +148,11 @@ public class AnnotSvTsvParser extends SvResultParserBase {
         return values;
     }
 
-    private StructuralVariantType getBndVariantType(StructuralVariant structuralVariant) {
+    private StructuralVariantType getBndVariantType(Map<String, String> info) {
         if (preferBaseSvType)
             return StructuralVariantType.BND;
 
-        String svType2 = structuralVariant.getInfo().get("SVTYPE2");
+        String svType2 = info.get("SVTYPE2");
 
         if (StringUtils.isBlank(svType2))
             return StructuralVariantType.BND;
