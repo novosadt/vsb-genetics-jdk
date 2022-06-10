@@ -81,26 +81,37 @@ public class VariantFrequencyCalculator {
         return alignments;
     }
 
-    private void getReadCountsAtPosition(List<SAMRecord> reads, int position, int minInsert, int maxInsert) {
+    private ReadCountInfo getReadCountsAtPosition(List<SAMRecord> reads, int position, int minInsert, int maxInsert) {
         ReadCountInfo readCountInfo = new ReadCountInfo();
 
-        for (int i = 0; i < reads.size() - 1; i++) {
+        for (int i = 0; i < reads.size(); i++) {
             SAMRecord read = reads.get(i);
-            SAMRecord mate = reads.get(i+1);
+            SAMRecord mate = i + 1 < reads.size() ? reads.get(i + 1) : null;
 
-            if (isNormalNonOverlap(read, mate, position, minInsert, maxInsert))
+            if (mate != null && isNormalNonOverlap(read, mate, position, minInsert, maxInsert))
                 continue;
             else if (isNormalAcrossBreak(read, position, minInsert, maxInsert)) {
                 readCountInfo.splitNormal.add(read);
-                readCountInfo.splitNormalCount++;
                 readCountInfo.splitNormalBasesOverlap += getNormalOverlapBaseCount(read, position);
             }
             else if (isSupportingSplitRead(read, position, maxInsert)) {
-
+                readCountInfo.splitNormalSupporting.add(read);
+                readCountInfo.splitNormalSupportingBasesOverlap += getSoftClippedBasesCount(read);
             }
+            else if (mate != null && read.getReadName().equals(mate.getReadName()) &&
+                    isNormalSpanning(read, mate, position, minInsert, maxInsert) &&
+                    !isNormalAcrossBreak(read, position, minInsert, maxInsert) &&
+                    !isNormalAcrossBreak(mate, position, minInsert, maxInsert)) {
+                readCountInfo.splitNormal.add(read);
 
-
+                if (i + 1 == reads.size())
+                    readCountInfo.splitNormal.add(mate);
+            }
+            else
+                readCountInfo.anomalous.add(read);
         }
+
+        return readCountInfo;
     }
 
     private boolean isNormalNonOverlap(SAMRecord read, SAMRecord mate, int position, int minInsert, int maxInsert) {
@@ -167,4 +178,21 @@ public class VariantFrequencyCalculator {
                 Math.abs(insertSize) < maxInsert;
     }
 
+    private int getSoftClippedBasesCount(SAMRecord read) {
+        if (read.getAlignmentStart() < breakThreshold)
+            return read.getReadLength() - read.getAlignmentEnd();
+        else
+            return read.getAlignmentStart();
+    }
+
+    private boolean isNormalSpanning(SAMRecord read, SAMRecord mate, int position, int minInsert, int maxInsert) {
+        if (!isSoftClipped(read) && !isSoftClipped(mate) && read.getReadNegativeStrandFlag() != mate.getReadNegativeStrandFlag()) {
+            return Math.abs(read.getInferredInsertSize()) < maxInsert && Math.abs(read.getInferredInsertSize()) > minInsert &&
+                    read.getReferencePositionAtReadPosition(read.getAlignmentStart()) < position + supportReadSoftClipLength &&
+                    mate.getReferencePositionAtReadPosition(mate.getAlignmentEnd()) > position - supportReadSoftClipLength;
+        }
+
+        return false;
+
+    }
 }
