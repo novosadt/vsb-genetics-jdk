@@ -1,3 +1,26 @@
+/*
+ * Copyright (C) 2022  Tomas Novosad
+ * VSB-TUO, Faculty of Electrical Engineering and Computer Science
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*
+ * Source code for variant frequency calculation is based on SVClone python
+ * package for structural variant frequency calculation.
+ */
+
 package cz.vsb.genetics.ngs.sv;
 
 import cz.vsb.genetics.common.Chromosome;
@@ -81,26 +104,37 @@ public class VariantFrequencyCalculator {
         return alignments;
     }
 
-    private void getReadCountsAtPosition(List<SAMRecord> reads, int position, int minInsert, int maxInsert) {
+    private ReadCountInfo getReadCountsAtPosition(List<SAMRecord> reads, int position, int minInsert, int maxInsert) {
         ReadCountInfo readCountInfo = new ReadCountInfo();
 
-        for (int i = 0; i < reads.size() - 1; i++) {
+        for (int i = 0; i < reads.size(); i++) {
             SAMRecord read = reads.get(i);
-            SAMRecord mate = reads.get(i+1);
+            SAMRecord mate = i + 1 < reads.size() ? reads.get(i + 1) : null;
 
-            if (isNormalNonOverlap(read, mate, position, minInsert, maxInsert))
+            if (mate != null && isNormalNonOverlap(read, mate, position, minInsert, maxInsert))
                 continue;
             else if (isNormalAcrossBreak(read, position, minInsert, maxInsert)) {
                 readCountInfo.splitNormal.add(read);
-                readCountInfo.splitNormalCount++;
                 readCountInfo.splitNormalBasesOverlap += getNormalOverlapBaseCount(read, position);
             }
             else if (isSupportingSplitRead(read, position, maxInsert)) {
-
+                readCountInfo.splitNormalSupporting.add(read);
+                readCountInfo.splitNormalSupportingBasesOverlap += getSoftClippedBasesCount(read);
             }
+            else if (mate != null && read.getReadName().equals(mate.getReadName()) &&
+                    isNormalSpanning(read, mate, position, minInsert, maxInsert) &&
+                    !isNormalAcrossBreak(read, position, minInsert, maxInsert) &&
+                    !isNormalAcrossBreak(mate, position, minInsert, maxInsert)) {
+                readCountInfo.splitNormal.add(read);
 
-
+                if (i + 1 == reads.size())
+                    readCountInfo.splitNormal.add(mate);
+            }
+            else
+                readCountInfo.anomalous.add(read);
         }
+
+        return readCountInfo;
     }
 
     private boolean isNormalNonOverlap(SAMRecord read, SAMRecord mate, int position, int minInsert, int maxInsert) {
@@ -167,4 +201,21 @@ public class VariantFrequencyCalculator {
                 Math.abs(insertSize) < maxInsert;
     }
 
+    private int getSoftClippedBasesCount(SAMRecord read) {
+        if (read.getAlignmentStart() < breakThreshold)
+            return read.getReadLength() - read.getAlignmentEnd();
+        else
+            return read.getAlignmentStart();
+    }
+
+    private boolean isNormalSpanning(SAMRecord read, SAMRecord mate, int position, int minInsert, int maxInsert) {
+        if (!isSoftClipped(read) && !isSoftClipped(mate) && read.getReadNegativeStrandFlag() != mate.getReadNegativeStrandFlag()) {
+            return Math.abs(read.getInferredInsertSize()) < maxInsert && Math.abs(read.getInferredInsertSize()) > minInsert &&
+                    read.getReferencePositionAtReadPosition(read.getAlignmentStart()) < position + supportReadSoftClipLength &&
+                    mate.getReferencePositionAtReadPosition(mate.getAlignmentEnd()) > position - supportReadSoftClipLength;
+        }
+
+        return false;
+
+    }
 }
