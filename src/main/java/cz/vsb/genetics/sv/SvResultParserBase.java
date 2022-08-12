@@ -44,6 +44,21 @@ public abstract class SvResultParserBase implements SvResultParser {
     }
 
     @Override
+    public List<StructuralVariant> getVariants() {
+        List<StructuralVariant> variants = new ArrayList<>();
+
+        variants.addAll(getTranslocations());
+        variants.addAll(getDuplications());
+        variants.addAll(getInversions());
+        variants.addAll(getDeletions());
+        variants.addAll(getInsertions());
+        variants.addAll(getCopyNumberVariations());
+        variants.addAll(getUnknown());
+
+        return variants;
+    }
+
+    @Override
     public List<StructuralVariant> getTranslocations() {
         return translocations;
     }

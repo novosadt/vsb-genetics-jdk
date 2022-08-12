@@ -41,4 +41,6 @@ public interface SvResultParser {
     List<StructuralVariant> getCopyNumberVariations();
 
     List<StructuralVariant> getUnknown();
+
+    List<StructuralVariant> getVariants();
 }
