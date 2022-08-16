@@ -18,9 +18,6 @@
 
 package cz.vsb.genetics.sv;
 
-import cz.vsb.genetics.sv.StructuralVariant;
-import cz.vsb.genetics.sv.StructuralVariantType;
-import cz.vsb.genetics.sv.SvResultParser;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.FileWriter;
