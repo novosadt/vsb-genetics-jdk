@@ -4,8 +4,13 @@ import cz.vsb.genetics.om.sv.BionanoPipelineResultParser;
 import cz.vsb.genetics.sv.StructuralVariant;
 import cz.vsb.genetics.sv.SvResultParser;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.util.*;
 import java.util.concurrent.*;
 
 public class SamplotBionanoVariantGenerator {
@@ -13,21 +18,30 @@ public class SamplotBionanoVariantGenerator {
                          String samplotWorkdir, int forks) throws Exception {
 
         List<String> commands = new ArrayList<>();
+        List<String> variantFiles = new ArrayList<>();
 
         for (StructuralVariant variant : bionanoParser.getVariants()) {
-            String command = String.format("%s -n %s --sv_file_name %s.samplot.csv -o %s.samplot.png -c %d -s %d -e %d -t %s",
+            String variantFileCsv = samplotWorkdir + "/" + variant.getId() + ".samplot.csv";
+
+            String command = String.format("%s -n %s --sv_file_name %s -o %s -c %d -s %d -e %d -t %s",
                     samplotCmdBase,
                     variant.getId(),
-                    samplotWorkdir + "/" + variant.getId(),
-                    samplotWorkdir + "/" + variant.getId(),
+                    variantFileCsv,
+                    variantFileCsv.replace(".csv", ".png"),
                     variant.getSrcChromosome().number,
                     variant.getSrcLoc(),
                     variant.getDstLoc(),
                     variant.getVariantType().toString());
 
             commands.add(command);
+            variantFiles.add(variantFileCsv);
         }
 
+        processCommands(commands, forks);
+        assemblyVariants(variantFiles, samplotVariantFile);
+    }
+
+    private void processCommands(List<String> commands, int forks) throws Exception {
         ExecutorService executorService = Executors.newFixedThreadPool(forks);
         List<Callable<Integer>> tasks = new ArrayList<>();
         for (String command : commands) {
@@ -49,12 +63,24 @@ public class SamplotBionanoVariantGenerator {
         executorService.shutdown();
     }
 
-    private void processCommands(List<String> commands, String batchName) throws Exception {
-        for (String command : commands) {
-            System.out.println("Exec: " + batchName + " " + command);
+    private void assemblyVariants(List<String> variantFiles, String samplotVariantFile) throws Exception {
+        Path output = Paths.get(samplotVariantFile);
 
-            Process p = Runtime.getRuntime().exec(command);
-            p.waitFor();
+        boolean headerWritten = false;
+        Charset charset = StandardCharsets.UTF_8;
+
+        for (String variantFile : variantFiles) {
+            Path path = Paths.get(variantFile);
+            List<String> lines = Files.readAllLines(path);
+
+            if (!headerWritten) {
+                Files.write(output, Collections.singletonList(lines.get(0)), charset, StandardOpenOption.CREATE);
+                headerWritten = true;
+            }
+
+            lines.remove(0);
+
+            Files.write(output, new ArrayList<>(new HashSet<>(lines)), charset, StandardOpenOption.APPEND);
         }
     }
 }
