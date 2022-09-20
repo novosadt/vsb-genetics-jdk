@@ -20,16 +20,18 @@
 package cz.vsb.genetics.sv;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public abstract class SvResultParserBase implements SvResultParser {
-    protected final List<StructuralVariant> translocations = new ArrayList<>();
-    protected final List<StructuralVariant> duplications = new ArrayList<>();
-    protected final List<StructuralVariant> inversions = new ArrayList<>();
-    protected final List<StructuralVariant> deletions = new ArrayList<>();
-    protected final List<StructuralVariant> insertions = new ArrayList<>();
-    protected final List<StructuralVariant> copyNumberVariations = new ArrayList<>();
-    protected final List<StructuralVariant> unknown = new ArrayList<>();
+    protected final Set<StructuralVariant> translocations = new HashSet<>();
+    protected final Set<StructuralVariant> duplications = new HashSet<>();
+    protected final Set<StructuralVariant> inversions = new HashSet<>();
+    protected final Set<StructuralVariant> deletions = new HashSet<>();
+    protected final Set<StructuralVariant> insertions = new HashSet<>();
+    protected final Set<StructuralVariant> copyNumberVariations = new HashSet<>();
+    protected final Set<StructuralVariant> unknown = new HashSet<>();
 
     private boolean removeDuplicateVariants = false;
 
@@ -59,37 +61,37 @@ public abstract class SvResultParserBase implements SvResultParser {
     }
 
     @Override
-    public List<StructuralVariant> getTranslocations() {
+    public Set<StructuralVariant> getTranslocations() {
         return translocations;
     }
 
     @Override
-    public List<StructuralVariant> getDuplications() {
+    public Set<StructuralVariant> getDuplications() {
         return duplications;
     }
 
     @Override
-    public List<StructuralVariant> getInversions() {
+    public Set<StructuralVariant> getInversions() {
         return inversions;
     }
 
     @Override
-    public List<StructuralVariant> getDeletions() {
+    public Set<StructuralVariant> getDeletions() {
         return deletions;
     }
 
     @Override
-    public List<StructuralVariant> getInsertions() {
+    public Set<StructuralVariant> getInsertions() {
         return insertions;
     }
 
     @Override
-    public List<StructuralVariant> getCopyNumberVariations() {
+    public Set<StructuralVariant> getCopyNumberVariations() {
         return copyNumberVariations;
     }
 
     @Override
-    public List<StructuralVariant> getUnknown() {
+    public Set<StructuralVariant> getUnknown() {
         return unknown;
     }
 
@@ -110,7 +112,7 @@ public abstract class SvResultParserBase implements SvResultParser {
         System.out.println("Unknown SV type (CNV):\t" + getUnknown().size());
     }
 
-    protected void addStructuralVariant(StructuralVariant variant, List<StructuralVariant> variants, StructuralVariantType svType) {
+    protected void addStructuralVariant(StructuralVariant variant, Set<StructuralVariant> variants, StructuralVariantType svType) {
         variant.setVariantType(svType);
 
         if (!removeDuplicateVariants || !variants.contains(variant))

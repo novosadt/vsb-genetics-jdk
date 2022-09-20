@@ -20,6 +20,7 @@
 package cz.vsb.genetics.sv;
 
 import java.util.List;
+import java.util.Set;
 
 public interface SvResultParser {
     void parseResultFile(String file, String delim) throws Exception;
@@ -28,19 +29,19 @@ public interface SvResultParser {
 
     void setRemoveDuplicateVariants(boolean value);
 
-    List<StructuralVariant> getTranslocations();
+    Set<StructuralVariant> getTranslocations();
 
-    List<StructuralVariant> getDuplications();
+    Set<StructuralVariant> getDuplications();
 
-    List<StructuralVariant> getInversions();
+    Set<StructuralVariant> getInversions();
 
-    List<StructuralVariant> getDeletions();
+    Set<StructuralVariant> getDeletions();
 
-    List<StructuralVariant> getInsertions();
+    Set<StructuralVariant> getInsertions();
 
-    List<StructuralVariant> getCopyNumberVariations();
+    Set<StructuralVariant> getCopyNumberVariations();
 
-    List<StructuralVariant> getUnknown();
+    Set<StructuralVariant> getUnknown();
 
     List<StructuralVariant> getVariants();
 }
