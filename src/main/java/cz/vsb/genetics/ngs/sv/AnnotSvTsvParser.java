@@ -123,6 +123,7 @@ public class AnnotSvTsvParser extends SvResultParserBase {
         StructuralVariant sv = new StructuralVariant(srcChrom, srcLoc, dstChrom, dstLoc, svLength, gene);
         sv.setId(values.get("ID"));
         sv.setInfo(info);
+        sv.setVariantAlleleFraction(getAllelicFraction(info));
 
         switch (svType) {
             case "bnd" : addStructuralVariant(sv, translocations, StructuralVariantType.BND); break;
@@ -158,5 +159,16 @@ public class AnnotSvTsvParser extends SvResultParserBase {
             return StructuralVariantType.BND;
 
         return StructuralVariantType.valueOf(svType2.toUpperCase());
+    }
+
+    private Double getAllelicFraction(Map<String, String> info) {
+        String allelicFrac = info.get("ALLELIC_FRAC");
+
+        try {
+            return new Double(allelicFrac);
+        }
+        catch (NumberFormatException e) {
+            return null;
+        }
     }
 }

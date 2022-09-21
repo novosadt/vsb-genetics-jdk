@@ -96,7 +96,7 @@ public class StructuralVariant {
     }
 
     public String getGene() {
-        return gene;
+        return gene == null ? "" : gene;
     }
 
     public StructuralVariantType getVariantType() {
@@ -107,7 +107,7 @@ public class StructuralVariant {
         this.variantType = variantType;
     }
 
-    public Double getVariantAlleleFraction() {
+    public Double getVariantAllelicFraction() {
         return variantAlleleFraction;
     }
 

@@ -181,7 +181,7 @@ public class MultipleSvComparator {
                 svLabelMain + "_src_pos\t" +
                 svLabelMain + "_dst_pos\t" +
                 svLabelMain + "_sv_size\t" +
-                svLabelMain + "_sv_freq\t" +
+                svLabelMain + "_sv_fraction\t" +
                 svLabelMain + "_gene\t" +
                 svLabelMain + "_id";
 
@@ -190,11 +190,14 @@ public class MultipleSvComparator {
                 svLabelOther + "_src_pos\t" +
                 svLabelOther + "_dst_pos\t" +
                 svLabelOther + "_sv_size\t" +
+                svLabelOther + "_sv_fraction\t" +
                 svLabelOther + "_src_pos_dist\t" +
                 svLabelOther + "_dst_pos_dist\t" +
                 svLabelOther + "_dist_var\t" +
                 svLabelOther + "_gene\t" +
                 svLabelOther + "_common_genes\t" +
+                svLabelOther + "_size_difference\t" +
+                svLabelOther + "_size_proportion\t" +
                 svLabelOther + "_id";
         }
 
@@ -220,24 +223,26 @@ public class MultipleSvComparator {
                     variant.getSrcLoc() + "\t" +
                     variant.getDstLoc() + "\t" +
                     variant.getSize() + "\t" +
-                    variant.getVariantAlleleFraction() + "\t" +
+                    getAllelicFraction(variant) + "\t" +
                     variant.getGene() + "\t" +
-                    variant.getId();
+                    getVariantId(variant);
 
             mainPrinted = true;
         }
-
 
         line += "\t" +
                 similarStructuralVariant.getSrcLoc() + "\t" +
                 similarStructuralVariant.getDstLoc() + "\t" +
                 similarStructuralVariant.getSize() + "\t" +
+                getAllelicFraction(similarStructuralVariant) + "\t" +
                 srcDist + "\t" +
                 dstDist + "\t" +
                 (srcDist + dstDist) + "\t" +
                 similarStructuralVariant.getGene() + "\t" +
                 commonGenes + "\t" +
-                similarStructuralVariant.getId();
+                getSizeDifference(variant, similarStructuralVariant) + "\t" +
+                getSizeProportion(variant, similarStructuralVariant) + "\t" +
+                getVariantId(similarStructuralVariant);
 
         fileWriter.write(line);
     }
@@ -257,5 +262,30 @@ public class MultipleSvComparator {
         }
 
         return commonGenes;
+    }
+
+    private String getAllelicFraction(StructuralVariant structuralVariant) {
+        if (structuralVariant.getVariantAllelicFraction() == null)
+            return "";
+
+        return String.format("%.02f", structuralVariant.getVariantAllelicFraction());
+    }
+
+    private String getSizeDifference(StructuralVariant main, StructuralVariant other) {
+        if (main.getSize() == 0 || other.getSize() == 0)
+            return "";
+
+        return new Long(other.getSize() - main.getSize()).toString();
+    }
+
+    private String getSizeProportion(StructuralVariant main, StructuralVariant other) {
+        if (main.getSize() == 0 || other.getSize() == 0)
+            return "";
+
+        return String.format("%.02f", (double)other.getSize() / (double)main.getSize()).replaceAll("-","");
+    }
+
+    private String getVariantId(StructuralVariant structuralVariant) {
+        return structuralVariant.getId() == null ? "" : structuralVariant.getId();
     }
 }
