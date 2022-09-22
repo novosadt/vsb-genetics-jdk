@@ -25,8 +25,9 @@ import java.util.*;
 
 public class MultipleSvComparator {
     private FileWriter fileWriter;
-    private boolean reportOnlyCommonGenes = false;
+    private boolean onlyCommonGenes = false;
     private Long variantDistance = null;
+    private Double minimalProportion = null;
     private Set<StructuralVariantType> svTypes;
     private String svLabelMain;
     private List<String> svLabelOthers;
@@ -34,13 +35,9 @@ public class MultipleSvComparator {
     private List<SvResultParser> svParserOthers;
     private boolean mainPrinted;
 
-
-    public void compareStructuralVariants(SvResultParser svParserMain, String svLabelMain, List<SvResultParser> svParserOthers, List<String> svLabelOthers,
-                                          String outputFile, boolean reportOnlyCommonGeneVariants, Long variantDistance, Set<StructuralVariantType> svTypes) throws Exception {
+    public void compareStructuralVariants(SvResultParser svParserMain, String svLabelMain, List<SvResultParser> svParserOthers,
+                                          List<String> svLabelOthers, String outputFile) throws Exception {
         fileWriter = new FileWriter(outputFile);
-        this.reportOnlyCommonGenes = reportOnlyCommonGeneVariants;
-        this.variantDistance = variantDistance;
-        this.svTypes = svTypes;
         this.svLabelMain = svLabelMain;
         this.svLabelOthers = svLabelOthers;
         this.svParserMain = svParserMain;
@@ -59,7 +56,39 @@ public class MultipleSvComparator {
 
         fileWriter.close();
     }
-    
+
+    public boolean isOnlyCommonGenes() {
+        return onlyCommonGenes;
+    }
+
+    public void setOnlyCommonGenes(boolean onlyCommonGenes) {
+        this.onlyCommonGenes = onlyCommonGenes;
+    }
+
+    public Long getVariantDistance() {
+        return variantDistance;
+    }
+
+    public void setVariantDistance(Long variantDistance) {
+        this.variantDistance = variantDistance;
+    }
+
+    public Set<StructuralVariantType> getSvTypes() {
+        return svTypes;
+    }
+
+    public void setVariantType(Set<StructuralVariantType> svTypes) {
+        this.svTypes = svTypes;
+    }
+
+    public Double getMinimalProportion() {
+        return minimalProportion;
+    }
+
+    public void setMinimalProportion(Double minimalProportion) {
+        this.minimalProportion = minimalProportion;
+    }
+
     private void processStructuralVariants(StructuralVariantType svType) throws Exception {
         Set<StructuralVariant> mainVariants = null;
         List<Set<StructuralVariant>> otherVariants = new ArrayList<>();
@@ -158,13 +187,17 @@ public class MultipleSvComparator {
             Long dstDist = Math.abs(structuralVariant.getDstLoc() - otherVariant.getDstLoc());
             Long distSum = srcDist + dstDist;
 
-            if (reportOnlyCommonGenes) {
+            if (onlyCommonGenes) {
                 List<String> commonGenes = getCommonGenes(structuralVariant, otherVariant);
                 if (commonGenes.size() < 1)
                     continue;
             }
 
             if (variantDistance != null && distSum > variantDistance)
+                continue;
+
+            Double proportion = getSizeProportion(structuralVariant, otherVariant);
+            if (minimalProportion != null && proportion != null && proportion < minimalProportion)
                 continue;
 
             similarStructuralVariants.put(distSum, otherVariant);
@@ -241,7 +274,7 @@ public class MultipleSvComparator {
                 similarStructuralVariant.getGene() + "\t" +
                 commonGenes + "\t" +
                 getSizeDifference(variant, similarStructuralVariant) + "\t" +
-                getSizeProportion(variant, similarStructuralVariant) + "\t" +
+                getSizeProportionAsString(variant, similarStructuralVariant) + "\t" +
                 getVariantId(similarStructuralVariant);
 
         fileWriter.write(line);
@@ -278,11 +311,17 @@ public class MultipleSvComparator {
         return new Long(other.getSize() - main.getSize()).toString();
     }
 
-    private String getSizeProportion(StructuralVariant main, StructuralVariant other) {
-        if (main.getSize() == 0 || other.getSize() == 0)
-            return "";
+    private String getSizeProportionAsString(StructuralVariant main, StructuralVariant other) {
+        Double proportion = getSizeProportion(main, other);
 
-        return String.format("%.02f", (double)other.getSize() / (double)main.getSize()).replaceAll("-","");
+        return proportion == null ? "" : String.format("%.02f", proportion).replaceAll("-","");
+    }
+
+    private Double getSizeProportion(StructuralVariant main, StructuralVariant other) {
+        if (main.getSize() == 0 || other.getSize() == 0)
+            return null;
+
+        return (double)other.getSize() / (double)main.getSize();
     }
 
     private String getVariantId(StructuralVariant structuralVariant) {

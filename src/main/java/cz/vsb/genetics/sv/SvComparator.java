@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2021  Tomas Novosad
+* Copyright (C) 2022  Tomas Novosad
 * VSB-TUO, Faculty of Electrical Engineering and Computer Science
 *
 * This program is free software: you can redistribute it and/or modify
@@ -18,18 +18,15 @@
 
 package cz.vsb.genetics.sv;
 
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.Set;
 
 public class SvComparator extends MultipleSvComparator{
 
-
     public void compareStructuralVariants(SvResultParser svParser1, String svLabel1, SvResultParser svParser2, String svLabel2,
-                                          String outputFile, boolean reportOnlyCommonGeneVariants, Long variantDistance, Set<StructuralVariantType> svTypes) throws Exception {
+                                          String outputFile) throws Exception {
 
         compareStructuralVariants(svParser1, svLabel1, Collections.singletonList(svParser2), Collections.singletonList(svLabel2),
-                outputFile, reportOnlyCommonGeneVariants, variantDistance, svTypes);
+                outputFile);
     }
 
 }
