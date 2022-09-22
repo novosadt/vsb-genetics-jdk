@@ -218,4 +218,31 @@ public class VariantFrequencyCalculator {
         return false;
 
     }
+
+    // Counts normal non-soft-clipped reads within window range
+    private int getWindowedNormalReadCount(List<SAMRecord> reads, ReadInsertSizeInfo insertSizeInfo, int minInsert, int maxInsert) {
+        int count = 0;
+
+        for (int i = 0; i < reads.size() - 1; i++) {
+            SAMRecord read1 = reads.get(i);
+            SAMRecord read2 = reads.get(i + 1);
+
+            if (!read1.getReadName().equals(read2.getReadName()) || read1.getContig().equals(read2.getContig()))
+                continue;
+
+            int insertDistance = read2.getReadPositionAtReferencePosition(read2.getAlignmentEnd())
+                    - read1.getReadPositionAtReferencePosition(read1.getAlignmentStart());
+
+            boolean isFacing = !read1.getReadNegativeStrandFlag() && read2.getReadNegativeStrandFlag();
+
+            if (!isSoftClipped(read1) && !isSoftClipped(read2) && isFacing && insertDistance > minInsert && insertDistance < maxInsert)
+                count += 2;
+        }
+
+        return count;
+    }
+
+//    private ReadCountInfo getSpanningReadCount(StructuralVariant variant, List<SAMRecord> reads, ReadInsertSizeInfo insertSizeInfo, int minInsert, int maxInsert) {
+//
+//    }
 }
