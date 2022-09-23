@@ -26,7 +26,7 @@ import java.util.*;
 public class MultipleSvComparator {
     private FileWriter fileWriter;
     private boolean onlyCommonGenes = false;
-    private Long variantDistance = null;
+    private Long distanceVariance = null;
     private Double minimalProportion = null;
     private Set<StructuralVariantType> svTypes;
     private String svLabelMain;
@@ -37,6 +37,9 @@ public class MultipleSvComparator {
 
     public void compareStructuralVariants(SvResultParser svParserMain, String svLabelMain, List<SvResultParser> svParserOthers,
                                           List<String> svLabelOthers, String outputFile) throws Exception {
+
+        checkOtherParsers(svParserOthers, svLabelOthers);
+
         fileWriter = new FileWriter(outputFile);
         this.svLabelMain = svLabelMain;
         this.svLabelOthers = svLabelOthers;
@@ -57,6 +60,15 @@ public class MultipleSvComparator {
         fileWriter.close();
     }
 
+    private void checkOtherParsers(List<SvResultParser> parsers, List<String> labels) {
+        if (parsers.size() != labels.size())
+            throw new IllegalArgumentException("Structural variant parsers list do not correspond to its labels list - are of different size");
+
+        for (String label : labels)
+            if (StringUtils.isBlank(label))
+                throw new IllegalArgumentException("List of labels for structural variant parsers contains empty label.");
+    }
+
     public boolean isOnlyCommonGenes() {
         return onlyCommonGenes;
     }
@@ -65,12 +77,12 @@ public class MultipleSvComparator {
         this.onlyCommonGenes = onlyCommonGenes;
     }
 
-    public Long getVariantDistance() {
-        return variantDistance;
+    public Long getDistanceVariance() {
+        return distanceVariance;
     }
 
-    public void setVariantDistance(Long variantDistance) {
-        this.variantDistance = variantDistance;
+    public void setDistanceVariance(Long distanceVariance) {
+        this.distanceVariance = distanceVariance;
     }
 
     public Set<StructuralVariantType> getSvTypes() {
@@ -92,10 +104,7 @@ public class MultipleSvComparator {
     private void processStructuralVariants(StructuralVariantType svType) throws Exception {
         Set<StructuralVariant> mainVariants = null;
         List<Set<StructuralVariant>> otherVariants = new ArrayList<>();
-        for (int i = 0; i < svParserOthers.size(); i++) {
-            SvResultParser other = svParserOthers.get(i);
-            String labelOther = svLabelOthers.get(i);
-
+        for (SvResultParser other : svParserOthers) {
             switch (svType) {
                 case BND:
                     mainVariants = svParserMain.getTranslocations();
@@ -129,24 +138,24 @@ public class MultipleSvComparator {
         processStructuralVariants(mainVariants, otherVariants, svType);
     }
 
-    private void processStructuralVariants(Set<StructuralVariant> structuralVariants1, List<Set<StructuralVariant>> structuralVariants2,
+    private void processStructuralVariants(Set<StructuralVariant> mainVariants, List<Set<StructuralVariant>> otherParsersVariants,
                                            StructuralVariantType svType) throws Exception {
         Set<StructuralVariant> processedVariants = new HashSet<>();
 
         if (svTypes != null && !svTypes.contains(svType))
             return;
 
-        int[] similarVariantCounts = new int[structuralVariants2.size()];
+        int[] similarVariantCounts = new int[otherParsersVariants.size()];
 
-        for (StructuralVariant structuralVariant : structuralVariants1) {
+        for (StructuralVariant structuralVariant : mainVariants) {
             if (!processedVariants.contains(structuralVariant))
                 processedVariants.add(structuralVariant);
             else
                 continue;
 
             int similarVariantsTotal = 0;
-            for (int i = 0; i < structuralVariants2.size(); i++) {
-                Set<StructuralVariant> others = structuralVariants2.get(i);
+            for (int i = 0; i < otherParsersVariants.size(); i++) {
+                Set<StructuralVariant> others = otherParsersVariants.get(i);
 
                 List<StructuralVariant> similarVariants = findNearestStructuralVariants(structuralVariant, others);
                 similarVariantsTotal += similarVariants.size();
@@ -164,12 +173,12 @@ public class MultipleSvComparator {
                 fileWriter.write("\n");
         }
 
-        for (int i = 0; i < structuralVariants2.size(); i++) {
-            double percentage = structuralVariants1.size() == 0 ? 0.0 :
-                    (double) similarVariantCounts[i] / (double) structuralVariants1.size() * 100.0;
+        for (int i = 0; i < otherParsersVariants.size(); i++) {
+            double percentage = mainVariants.size() == 0 ? 0.0 :
+                    (double) similarVariantCounts[i] / (double) mainVariants.size() * 100.0;
 
             System.out.printf("Common SV (%s with %s / %s) - %s:\t%d/%d (%.02f%%)%n", svLabelMain, svLabelOthers.get(i), svLabelMain, svType.toString(),
-                    similarVariantCounts[i], structuralVariants1.size(), percentage);
+                    similarVariantCounts[i], mainVariants.size(), percentage);
         }
 
     }
@@ -193,7 +202,7 @@ public class MultipleSvComparator {
                     continue;
             }
 
-            if (variantDistance != null && distSum > variantDistance)
+            if (distanceVariance != null && distSum > distanceVariance)
                 continue;
 
             Double proportion = getSizeProportion(structuralVariant, otherVariant);
@@ -308,7 +317,7 @@ public class MultipleSvComparator {
         if (main.getSize() == 0 || other.getSize() == 0)
             return "";
 
-        return new Long(other.getSize() - main.getSize()).toString();
+        return Long.toString(other.getSize() - main.getSize());
     }
 
     private String getSizeProportionAsString(StructuralVariant main, StructuralVariant other) {
