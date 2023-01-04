@@ -77,6 +77,7 @@ public class AnnotSvTsvParser extends SvResultParserBase {
     }
 
     private void addStructuralVariant(Map<String, String> values) throws Exception {
+        String id = values.get("ID");
         String srcChromId = "chr" + values.get("SV_chrom");
         String dstChromId = srcChromId;
         Long srcLoc = new Long(values.get("SV_start"));
@@ -102,8 +103,10 @@ public class AnnotSvTsvParser extends SvResultParserBase {
                 Matcher m = chromLocPatternWithChr.matcher(chromLoc);
                 if (!m.find()) {
                     m = chromLocPatternWithoutChr.matcher(chromLoc);
-                    if (!m.find())
-                        throw new Exception("Unsupported chromosome:location format: " + chromLoc);
+                    if (!m.find()) {
+                        System.err.printf("Skipping BND variant (%s) - unsupported destination chromosome location format: %s\n", id, chromLoc);
+                        return;
+                    }
                 }
 
                 dstChromId = m.group(1);
@@ -121,7 +124,7 @@ public class AnnotSvTsvParser extends SvResultParserBase {
         Chromosome dstChrom = Chromosome.getChromosome(dstChromId);
 
         StructuralVariant sv = new StructuralVariant(srcChrom, srcLoc, dstChrom, dstLoc, svLength, gene);
-        sv.setId(values.get("ID"));
+        sv.setId(id);
         sv.setInfo(info);
         sv.setVariantAlleleFraction(getAllelicFraction(info));
 
