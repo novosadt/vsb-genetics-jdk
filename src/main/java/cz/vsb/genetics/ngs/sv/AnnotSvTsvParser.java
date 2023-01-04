@@ -164,6 +164,9 @@ public class AnnotSvTsvParser extends SvResultParserBase {
     private Double getAllelicFraction(Map<String, String> info) {
         String allelicFrac = info.get("ALLELIC_FRAC");
 
+        if (allelicFrac == null)
+            return null;
+
         try {
             return new Double(allelicFrac);
         }
