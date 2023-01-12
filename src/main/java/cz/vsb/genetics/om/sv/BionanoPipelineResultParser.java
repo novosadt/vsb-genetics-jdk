@@ -55,6 +55,9 @@ public class BionanoPipelineResultParser extends SvResultParserBase {
         if (type.contains("translocation"))
             size = 0L;
 
+        if (type.contains("inversion") && dstLoc == -1)
+            return;
+
         Chromosome srcChrom = Chromosome.getChromosome(srcChromId);
         Chromosome dstChrom = Chromosome.getChromosome(dstChromId);
 
