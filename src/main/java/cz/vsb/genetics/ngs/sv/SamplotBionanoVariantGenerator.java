@@ -1,6 +1,5 @@
 package cz.vsb.genetics.ngs.sv;
 
-import cz.vsb.genetics.om.sv.BionanoPipelineResultParser;
 import cz.vsb.genetics.sv.StructuralVariant;
 import cz.vsb.genetics.sv.StructuralVariantType;
 import cz.vsb.genetics.sv.SvResultParser;
@@ -11,8 +10,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class SamplotBionanoVariantGenerator {
     public void generate(SvResultParser bionanoParser, String samplotVariantFile, String samplotCmdBase,
@@ -36,7 +40,7 @@ public class SamplotBionanoVariantGenerator {
 
     private String getSamplotCommand(String samplotCmdBase, StructuralVariant variant, String variantFileCsv) {
         if (variant.getVariantType() == StructuralVariantType.BND) {
-            return String.format("%s -n %s --sv_file_name %s -o %s -c %d -s %d -e %d -c %d -s %d -e %d -t %s --zoom",
+            return String.format("%s -n %s --sv_file_name %s -o %s -c %d -s %d -e %d -c %d -s %d -e %d -t %s --zoom 10000",
                     samplotCmdBase,
                     variant.getId(),
                     variantFileCsv,
