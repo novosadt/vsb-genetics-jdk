@@ -109,7 +109,7 @@ public abstract class SvResultParserBase implements SvResultParser {
         System.out.println("Deletions (DEL):\t\t" + getDeletions().size());
         System.out.println("Insertions (INS):\t\t" + getInsertions().size());
         System.out.println("Copy number var. (CNV):\t" + getCopyNumberVariations().size());
-        System.out.println("Unknown SV type (CNV):\t" + getUnknown().size());
+        System.out.println("Unknown SV type (UNK):\t" + getUnknown().size());
     }
 
     protected void addStructuralVariant(StructuralVariant variant, Set<StructuralVariant> variants, StructuralVariantType svType) {
