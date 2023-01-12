@@ -38,6 +38,11 @@ public class StructuralVariant {
     private StructuralVariantOrientation dstOrientation;
 
     public StructuralVariant(Chromosome srcChromosome, Long srcLoc, Chromosome dstChromosome, Long dstLoc,
+                             Long size) {
+        this(srcChromosome, srcLoc, dstChromosome, dstLoc, size, null);
+    }
+
+    public StructuralVariant(Chromosome srcChromosome, Long srcLoc, Chromosome dstChromosome, Long dstLoc,
                              Long size, String gene) {
         this.srcChromosome = srcChromosome;
         this.srcLoc = srcLoc;
