@@ -64,7 +64,7 @@ public class AnnotSvTsvParser extends SvResultParserBase {
         printStructuralVariantStats("AnnotSV");
     }
 
-    private void parseLine(String line, String delim) throws Exception {
+    private void parseLine(String line, String delim) {
         String[] tmp = line.split(delim);
 
         assert tmp.length == header.length;
@@ -76,7 +76,7 @@ public class AnnotSvTsvParser extends SvResultParserBase {
         addStructuralVariant(values);
     }
 
-    private void addStructuralVariant(Map<String, String> values) throws Exception {
+    private void addStructuralVariant(Map<String, String> values) {
         String id = values.get("ID");
         String srcChromId = "chr" + values.get("SV_chrom");
         String dstChromId = srcChromId;
@@ -97,24 +97,19 @@ public class AnnotSvTsvParser extends SvResultParserBase {
             return;
 
         if (svType.equals("bnd")) {
-            StructuralVariantType type = getBndVariantType(info);
-            if (type == StructuralVariantType.BND) {
-                String chromLoc = values.get("ALT");
-                Matcher m = chromLocPatternWithChr.matcher(chromLoc);
+            String chromLoc = values.get("ALT");
+            Matcher m = chromLocPatternWithChr.matcher(chromLoc);
+            if (!m.find()) {
+                m = chromLocPatternWithoutChr.matcher(chromLoc);
                 if (!m.find()) {
-                    m = chromLocPatternWithoutChr.matcher(chromLoc);
-                    if (!m.find()) {
-                        System.err.printf("Skipping BND variant (%s) - unsupported destination chromosome location format: %s\n", id, chromLoc);
-                        return;
-                    }
+                    System.err.printf("Skipping BND variant (%s) - unsupported destination chromosome location format: %s\n", id, chromLoc);
+                    return;
                 }
+            }
 
-                dstChromId = m.group(1);
-                dstLoc = new Long(m.group(2));
-            }
-            else {
-                svType = type.toString().toLowerCase();
-            }
+            dstChromId = m.group(1);
+            dstLoc = new Long(m.group(2));
+            svType = getBndVariantType(info).toString().toLowerCase();
         }
 
         if (svType.equals("ins"))
