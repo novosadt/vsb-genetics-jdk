@@ -26,8 +26,8 @@ import java.util.Map;
 public class StructuralVariant {
     private String id;
     private final Chromosome srcChromosome;
-    private final Long srcLoc;
     private final Chromosome dstChromosome;
+    private final Long srcLoc;
     private final Long dstLoc;
     private final Long size;
     private final String gene;
