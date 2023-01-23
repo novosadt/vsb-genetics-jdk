@@ -61,14 +61,14 @@ public enum Chromosome {
         label = label.toLowerCase();
         label = label.replaceAll("chr", "");
 
-        if (label.contains("mt") || label.contains("m"))
+        if (label.contains("mt") || label.contains("m") || label.contains("25"))
             return chrM;
 
-        if (label.contains("x"))
-            return chrX;
-
-        if (label.contains("y"))
+        if (label.contains("y") || label.contains("24"))
             return chrY;
+
+        if (label.contains("x") || label.contains("23"))
+            return chrX;
 
         if (label.contains("22"))
             return chr22;

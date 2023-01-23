@@ -52,7 +52,7 @@ public class LongRangerVcfParser extends SvResultParserBase {
         printStructuralVariantStats("VCF-LongRanger");
     }
 
-    private void parseLine(String line, String delim) throws Exception {
+    private void parseLine(String line, String delim) {
         String[] tmp = line.split(delim);
 
         assert tmp.length == header.length;
@@ -75,6 +75,10 @@ public class LongRangerVcfParser extends SvResultParserBase {
         String svType = info.get("SVTYPE").toLowerCase();
 
         if (svType.equals("bnd")) {
+            // There are paired entries in VCF with BND structural variant type - for now skip them
+            if (srcLoc > dstLoc)
+                return;
+
             String chromLoc = values.get("ALT");
             Matcher m = chromLocPatternWithChr.matcher(chromLoc);
             if (!m.find()) {
@@ -92,6 +96,11 @@ public class LongRangerVcfParser extends SvResultParserBase {
 
         if (svType.equals("ins"))
             dstLoc = srcLoc + svLength;
+
+        //Structural variant type determined from SVTYPE2 differs from BND, but there is no information SVLEN,
+        //so we have to calculate it by hand
+        if (!svType.equals("bnd") && svLength == 0)
+            svLength = dstLoc - srcLoc;
 
         Chromosome srcChrom = Chromosome.getChromosome(srcChromId);
         Chromosome dstChrom = Chromosome.getChromosome(dstChromId);

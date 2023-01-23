@@ -94,27 +94,26 @@ public class BionanoPipelineResultParser extends SvResultParserBase {
             if (!(type.equals("inversion") || type.equals("inversion_paired")))
                 continue;
 
-            StructuralVariant base = breakpoint;
             StructuralVariant link = inversionBreakpoints.get(inversionBreakpointLinks.get(breakpoint.getId()));
 
-            long baseStart = base.getDstLoc() != -1 ? base.getDstLoc() : base.getSrcLoc();
+            long baseStart = breakpoint.getDstLoc() != -1 ? breakpoint.getDstLoc() : breakpoint.getSrcLoc();
             long linkStart = link.getSrcLoc() != -1 ? link.getSrcLoc() : link.getDstLoc();
 
-            StructuralVariant breakpointA = base;
+            StructuralVariant breakpointA = breakpoint;
             StructuralVariant breakpointB = link;
 
             if (baseStart > linkStart) {
                 breakpointA = link;
-                breakpointB = base;
+                breakpointB = breakpoint;
             }
 
-            long startPos = breakpointA.getDstLoc();
-            long endPos = breakpointB.getSrcLoc();
+            long startPos = breakpointA.getDstLoc() != -1 ? breakpointA.getDstLoc() : breakpointA.getSrcLoc();
+            long endPos = breakpointB.getSrcLoc() != -1 ? breakpointB.getSrcLoc() : breakpointB.getDstLoc();
             long size = endPos - startPos;
 
-            StructuralVariant inversion = new StructuralVariant(base.getSrcChromosome(), startPos, base.getDstChromosome(), endPos, size, base.getGene());
-            inversion.setVariantAlleleFraction(base.getVariantAllelicFraction());
-            inversion.setId(base.getId());
+            StructuralVariant inversion = new StructuralVariant(breakpoint.getSrcChromosome(), startPos, breakpoint.getDstChromosome(), endPos, size, breakpoint.getGene());
+            inversion.setVariantAlleleFraction(breakpoint.getVariantAllelicFraction());
+            inversion.setId(breakpoint.getId());
 
             addStructuralVariant(inversion, inversions, StructuralVariantType.INV);
         }
