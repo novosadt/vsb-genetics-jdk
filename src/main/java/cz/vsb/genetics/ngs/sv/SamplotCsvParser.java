@@ -81,12 +81,13 @@ public class SamplotCsvParser extends SvResultParserBase {
         StructuralVariant sv = new StructuralVariant(srcChrom, srcLoc, dstChrom, dstLoc, svLength, null);
 
         switch (svType) {
-            case "InterChrm" : addStructuralVariant(sv, translocations, StructuralVariantType.BND); break;
+            case "InterChrm" :
+            case "InterChrmInversion" :
+                addStructuralVariant(sv, translocations, StructuralVariantType.BND); break;
             case "Deletion/Normal" : addStructuralVariant(sv, deletions, StructuralVariantType.DEL); break;
             case "Deletion" : addStructuralVariant(sv, deletions, StructuralVariantType.DEL); break;
             case "Duplication" : addStructuralVariant(sv, duplications, StructuralVariantType.DUP); break;
             case "Inversion" : addStructuralVariant(sv, inversions, StructuralVariantType.INV); break;
-            case "InterChrmInversion" : addStructuralVariant(sv, inversions, StructuralVariantType.INV); break;
             default: addStructuralVariant(sv, unknown, StructuralVariantType.UNK);
         }
     }
