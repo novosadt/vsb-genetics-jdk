@@ -1,5 +1,6 @@
 package cz.vsb.genetics.ngs.sv;
 
+import cz.vsb.genetics.common.Chromosome;
 import cz.vsb.genetics.sv.StructuralVariant;
 import cz.vsb.genetics.sv.StructuralVariantType;
 import cz.vsb.genetics.sv.SvResultParser;
@@ -40,26 +41,26 @@ public class SamplotBionanoVariantGenerator {
 
     private String getSamplotCommand(String samplotCmdBase, StructuralVariant variant, String variantFileCsv) {
         if (variant.getVariantType() == StructuralVariantType.BND) {
-            return String.format("%s -n %s --sv_file_name %s -o %s -c %d -s %d -e %d -c %d -s %d -e %d -t %s --zoom 10000",
+            return String.format("%s -n %s --sv_file_name %s -o %s -c %s -s %d -e %d -c %s -s %d -e %d -t %s --zoom 10000",
                     samplotCmdBase,
                     variant.getId(),
                     variantFileCsv,
                     variantFileCsv.replace(".csv", ".png"),
-                    variant.getSrcChromosome().number,
+                    getChromosomeForOutput(variant.getSrcChromosome()),
                     variant.getSrcLoc(),
                     variant.getSrcLoc(),
-                    variant.getDstChromosome().number,
+                    getChromosomeForOutput(variant.getDstChromosome()),
                     variant.getDstLoc(),
                     variant.getDstLoc(),
                     variant.getVariantType().toString());
         }
 
-        return String.format("%s -n %s --sv_file_name %s -o %s -c %d -s %d -e %d -t %s",
+        return String.format("%s -n %s --sv_file_name %s -o %s -c %s -s %d -e %d -t %s",
                 samplotCmdBase,
                 variant.getId(),
                 variantFileCsv,
                 variantFileCsv.replace(".csv", ".png"),
-                variant.getSrcChromosome().number,
+                getChromosomeForOutput(variant.getSrcChromosome()),
                 variant.getSrcLoc(),
                 variant.getDstLoc(),
                 variant.getVariantType().toString());
@@ -112,5 +113,15 @@ public class SamplotBionanoVariantGenerator {
 
             Files.write(output, new ArrayList<>(new HashSet<>(lines)), charset, StandardOpenOption.APPEND);
         }
+    }
+
+    private String getChromosomeForOutput(Chromosome chromosome) {
+        if (chromosome == Chromosome.chrX)
+            return "X";
+
+        if (chromosome == Chromosome.chrY)
+            return "Y";
+
+        return Integer.toString(chromosome.number);
     }
 }
