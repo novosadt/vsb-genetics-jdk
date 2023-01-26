@@ -46,10 +46,10 @@ public class SamplotBionanoVariantGenerator {
                     variant.getId(),
                     variantFileCsv,
                     variantFileCsv.replace(".csv", ".png"),
-                    getChromosomeForOutput(variant.getSrcChromosome()),
+                    getChromosomeForCommand(variant.getSrcChromosome()),
                     variant.getSrcLoc(),
                     variant.getSrcLoc(),
-                    getChromosomeForOutput(variant.getDstChromosome()),
+                    getChromosomeForCommand(variant.getDstChromosome()),
                     variant.getDstLoc(),
                     variant.getDstLoc(),
                     variant.getVariantType().toString());
@@ -60,7 +60,7 @@ public class SamplotBionanoVariantGenerator {
                 variant.getId(),
                 variantFileCsv,
                 variantFileCsv.replace(".csv", ".png"),
-                getChromosomeForOutput(variant.getSrcChromosome()),
+                getChromosomeForCommand(variant.getSrcChromosome()),
                 variant.getSrcLoc(),
                 variant.getDstLoc(),
                 variant.getVariantType().toString());
@@ -115,7 +115,7 @@ public class SamplotBionanoVariantGenerator {
         }
     }
 
-    private String getChromosomeForOutput(Chromosome chromosome) {
+    private String getChromosomeForCommand(Chromosome chromosome) {
         if (chromosome == Chromosome.chrX)
             return "X";
 
