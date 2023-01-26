@@ -75,10 +75,6 @@ public class LongRangerVcfParser extends SvResultParserBase {
         String svType = info.get("SVTYPE").toLowerCase();
 
         if (svType.equals("bnd")) {
-            // There are paired entries in VCF with BND structural variant type - for now skip them
-            if (srcLoc > dstLoc)
-                return;
-
             String chromLoc = values.get("ALT");
             Matcher m = chromLocPatternWithChr.matcher(chromLoc);
             if (!m.find()) {
@@ -92,6 +88,13 @@ public class LongRangerVcfParser extends SvResultParserBase {
             dstChromId = m.group(1);
             dstLoc = new Long(m.group(2));
             svType = getBndVariantType(info).toString().toLowerCase();
+
+            // There are paired entries for Inversions and Duplications
+            // in VCF with BND structural variant type. If a variant is of type Inversion or Duplication
+            // on the same chromosome, take only one of them - skip entry with start breakpoint location
+            // greater than end breakpoint location
+            if ((svType.equals("inv") || svType.equals("dup")) && srcLoc > dstLoc)
+                return;
         }
 
         if (svType.equals("ins"))
