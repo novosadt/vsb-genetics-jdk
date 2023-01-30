@@ -19,6 +19,8 @@
 
 package cz.vsb.genetics.sv;
 
+import cz.vsb.genetics.common.Chromosome;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -114,6 +116,21 @@ public abstract class SvResultParserBase implements SvResultParser {
 
     protected void addStructuralVariant(StructuralVariant variant, Set<StructuralVariant> variants, StructuralVariantType svType) {
         variant.setVariantType(svType);
+
+        // In case of translocation sort chromosomes
+        if (variant.getVariantType() == StructuralVariantType.BND) {
+            Chromosome srcChromosome = variant.getSrcChromosome();
+            Chromosome dstChromosome = variant.getDstChromosome();
+            long srcLoc = variant.getSrcLoc();
+            long dstLoc = variant.getDstLoc();
+
+            if (srcChromosome.number > dstChromosome.number) {
+                variant.setSrcChromosome(dstChromosome);
+                variant.setDstChromosome(srcChromosome);
+                variant.setSrcLoc(dstLoc);
+                variant.setDstLoc(srcLoc);
+            }
+        }
 
         if (!removeDuplicateVariants || !variants.contains(variant))
             variants.add(variant);

@@ -25,10 +25,10 @@ import java.util.Map;
 
 public class StructuralVariant {
     private String id;
-    private final Chromosome srcChromosome;
-    private final Chromosome dstChromosome;
-    private final Long srcLoc;
-    private final Long dstLoc;
+    private Chromosome srcChromosome;
+    private Chromosome dstChromosome;
+    private Long srcLoc;
+    private Long dstLoc;
     private final Long size;
     private final String gene;
     private Double variantAlleleFraction;
@@ -136,6 +136,22 @@ public class StructuralVariant {
         this.dstOrientation = dstOrientation;
     }
 
+    public void setSrcChromosome(Chromosome srcChromosome) {
+        this.srcChromosome = srcChromosome;
+    }
+
+    public void setDstChromosome(Chromosome dstChromosome) {
+        this.dstChromosome = dstChromosome;
+    }
+
+    public void setSrcLoc(Long srcLoc) {
+        this.srcLoc = srcLoc;
+    }
+
+    public void setDstLoc(Long dstLoc) {
+        this.dstLoc = dstLoc;
+    }
+
     public String getId() {
         return id;
     }
@@ -151,4 +167,6 @@ public class StructuralVariant {
     public void setInfo(Map<String, String> info) {
         this.info = info;
     }
+
+
 }
