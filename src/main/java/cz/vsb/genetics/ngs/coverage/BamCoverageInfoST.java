@@ -46,17 +46,22 @@ public class BamCoverageInfoST implements CoverageInfo {
     }
 
     @Override
-    public long getCoverage(Chromosome chromosome, int position) {
+    public long getPositionCoverage(Chromosome chromosome, int position) {
         return BamCoverageInfoUtils.getCoverage(chromosome, position, samReader);
     }
 
     @Override
-    public List<Long> getCoverage(Chromosome chromosome, int start, int end) {
+    public List<Long> getChromosomeCoverage(Chromosome chromosome, int step) {
+        return null;
+    }
+
+    @Override
+    public List<Long> getIntervalCoverage(Chromosome chromosome, int start, int end) {
         return BamCoverageInfoUtils.getCoverage(chromosome, start, end, samReader);
     }
 
     @Override
-    public List<Long> getCoverage(Chromosome chromosome, int start, int end, int step) {
+    public List<Long> getIntervalCoverage(Chromosome chromosome, int start, int end, int step) {
         return BamCoverageInfoUtils.getCoverage(chromosome, start, end, step, samReader);
     }
 

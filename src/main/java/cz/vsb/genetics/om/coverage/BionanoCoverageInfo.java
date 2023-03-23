@@ -54,7 +54,7 @@ public class BionanoCoverageInfo implements CoverageInfo {
     }
 
     @Override
-    public long getCoverage(Chromosome chromosome, int position) {
+    public long getPositionCoverage(Chromosome chromosome, int position) {
         CMap chromosomeCMap = cmapContainerRef.get(chromosome.number);
         CMapEntry entry = chromosomeCMap.findNearestEntry(position);
 
@@ -62,17 +62,22 @@ public class BionanoCoverageInfo implements CoverageInfo {
     }
 
     @Override
-    public List<Long> getCoverage(Chromosome chromosome, int start, int end) {
+    public List<Long> getChromosomeCoverage(Chromosome chromosome, int step) {
+        return null;
+    }
+
+    @Override
+    public List<Long> getIntervalCoverage(Chromosome chromosome, int start, int end) {
         List<Long> coverages = new ArrayList<>();
 
         for (int i = start; i <= end; i++)
-            coverages.add(getCoverage(chromosome, i));
+            coverages.add(this.getPositionCoverage(chromosome, i));
 
         return coverages;
     }
 
     @Override
-    public List<Long> getCoverage(Chromosome chromosome, int start, int end, int step) {
+    public List<Long> getIntervalCoverage(Chromosome chromosome, int start, int end, int step) {
         CMap chromosomeCMap = cmapContainerRef.get(chromosome.number);
         List<CMapEntry> entries = chromosomeCMap.findEntriesAtInterval(start, end);
         List<Long> coverages = new ArrayList<>();
@@ -87,7 +92,7 @@ public class BionanoCoverageInfo implements CoverageInfo {
     public double getMeanCoverage(Chromosome chromosome, int start, int end) {
         long total = 0;
 
-        List<Long> coverages = getCoverage(chromosome, start, end);
+        List<Long> coverages = getIntervalCoverage(chromosome, start, end);
 
         for (Long coverage : coverages)
             total += coverage;
@@ -99,7 +104,7 @@ public class BionanoCoverageInfo implements CoverageInfo {
     public double getMeanCoverage(Chromosome chromosome, int start, int end, int step) {
         long total = 0;
 
-        List<Long> coverages = getCoverage(chromosome, start, end, step);
+        List<Long> coverages = getIntervalCoverage(chromosome, start, end, step);
 
         for (Long coverage : coverages)
             total += coverage;

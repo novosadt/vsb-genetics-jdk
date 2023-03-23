@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Tomas Novosad
+ * Copyright (C) 2022  Tomas Novosad
  * VSB-TUO, Faculty of Electrical Engineering and Computer Science
  *
  * This program is free software: you can redistribute it and/or modify
@@ -27,11 +27,13 @@ public interface CoverageInfo {
 
     void close() throws Exception;
 
-    long getCoverage(Chromosome chromosome, int position);
+    long getPositionCoverage(Chromosome chromosome, int position);
 
-    List<Long> getCoverage(Chromosome chromosome, int start, int end) throws Exception;
+    List<Long> getChromosomeCoverage(Chromosome chromosome, int step);
 
-    List<Long> getCoverage(Chromosome chromosome, int start, int end, int step) throws Exception;
+    List<Long> getIntervalCoverage(Chromosome chromosome, int start, int end) throws Exception;
+
+    List<Long> getIntervalCoverage(Chromosome chromosome, int start, int end, int step) throws Exception;
 
     double getMeanCoverage(Chromosome chromosome, int start, int end) throws Exception;
 

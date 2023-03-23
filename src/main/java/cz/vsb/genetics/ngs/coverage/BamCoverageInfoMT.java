@@ -53,17 +53,22 @@ public class BamCoverageInfoMT implements CoverageInfo {
     }
 
     @Override
-    public long getCoverage(Chromosome chromosome, int position) {
+    public long getPositionCoverage(Chromosome chromosome, int position) {
         return BamCoverageInfoUtils.getCoverage(chromosome, position, samReaders[0]);
     }
 
     @Override
-    public List<Long> getCoverage(Chromosome chromosome, int start, int end) throws Exception {
+    public List<Long> getChromosomeCoverage(Chromosome chromosome, int step) {
+        return null;
+    }
+
+    @Override
+    public List<Long> getIntervalCoverage(Chromosome chromosome, int start, int end) throws Exception {
         return calculateCoverage(chromosome, start, end, -1);
     }
 
     @Override
-    public List<Long> getCoverage(Chromosome chromosome, int start, int end, int step) throws Exception {
+    public List<Long> getIntervalCoverage(Chromosome chromosome, int start, int end, int step) throws Exception {
         return calculateCoverage(chromosome, start, end, step);
     }
 
@@ -94,7 +99,7 @@ public class BamCoverageInfoMT implements CoverageInfo {
     @Override
     public double getMeanCoverage(Chromosome chromosome, int start, int end) throws Exception {
         double sum = 0.0;
-        List<Long> coverages = getCoverage(chromosome, start, end);
+        List<Long> coverages = getIntervalCoverage(chromosome, start, end);
 
         for (long coverage : coverages)
             sum += (double)coverage;
@@ -105,7 +110,7 @@ public class BamCoverageInfoMT implements CoverageInfo {
     @Override
     public double getMeanCoverage(Chromosome chromosome, int start, int end, int step) throws Exception {
         double sum = 0.0;
-        List<Long> coverages = getCoverage(chromosome, start, end, step);
+        List<Long> coverages = getIntervalCoverage(chromosome, start, end, step);
 
         for (long coverage : coverages)
             sum += (double)coverage;

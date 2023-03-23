@@ -28,8 +28,8 @@ import org.apache.commons.lang3.time.StopWatch;
 import java.util.List;
 
 public class TestBamCoverage {
-    private static String BAM_FILE = "./src/test/resources/coverage/bam/test.bam";
-    private static String BAM_INDEX_FILE = "./src/test/resources/coverage/bam/test.bai";
+    private static final String BAM_FILE = "./src/test/resources/coverage/bam/test.bam";
+    private static final String BAM_INDEX_FILE = "./src/test/resources/coverage/bam/test.bai";
 
     public static void main(String[] args) {
         try {
@@ -58,7 +58,7 @@ public class TestBamCoverage {
 
         BamCoverageInfoST coverageInfo = new BamCoverageInfoST(BAM_FILE, BAM_INDEX_FILE);
         coverageInfo.open();
-        long coverage = coverageInfo.getCoverage(chromosome, position);
+        long coverage = coverageInfo.getPositionCoverage(chromosome, position);
 
         String info = String.format("Coverage at position %s:%d - %d", chromosome.toString(), position, coverage);
 
@@ -72,7 +72,7 @@ public class TestBamCoverage {
 
         CoverageInfo coverageInfo = new BamCoverageInfoST(BAM_FILE, BAM_INDEX_FILE);
         coverageInfo.open();
-        List<Long> coverages = coverageInfo.getCoverage(chromosome, start, end);
+        List<Long> coverages = coverageInfo.getIntervalCoverage(chromosome, start, end);
 
         for (Long coverage : coverages)
             System.out.printf("Coverage at position %s:%d - %d%n", chromosome.toString(), start++, coverage);
@@ -85,7 +85,7 @@ public class TestBamCoverage {
 
         CoverageInfo coverageInfo = new BamCoverageInfoMT(BAM_FILE, BAM_INDEX_FILE, threads);
         coverageInfo.open();
-        List<Long> coverages = coverageInfo.getCoverage(chromosome, start, end);
+        List<Long> coverages = coverageInfo.getIntervalCoverage(chromosome, start, end);
 
         for (Long coverage : coverages)
             System.out.printf("Coverage at position %s:%d - %d%n", chromosome.toString(), start++, coverage);

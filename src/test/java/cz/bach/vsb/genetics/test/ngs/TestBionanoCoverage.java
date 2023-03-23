@@ -26,11 +26,11 @@ import org.apache.commons.lang3.time.StopWatch;
 import java.util.List;
 
 public class TestBionanoCoverage {
-    private static String CMAP_REF = "./src/test/resources/coverage/bionano/test_ref.cmap";
-    private static String CMAP_QRY = "./src/test/resources/coverage/bionano/test_query.cmap";
-    private static String XMAP = "./src/test/resources/coverage/bionano/test.xmap";
+    private static final String CMAP_REF = "./src/test/resources/coverage/bionano/test_ref.cmap";
+    private static final String CMAP_QRY = "./src/test/resources/coverage/bionano/test_query.cmap";
+    private static final String XMAP = "./src/test/resources/coverage/bionano/test.xmap";
 
-    public static void main(String args[]) {
+    public static void main(String[] args) {
         try {
             Chromosome chromosome = Chromosome.chr1;
             int start = 12935517;
@@ -54,7 +54,7 @@ public class TestBionanoCoverage {
     public static void testOmCoverageAtPosition(Chromosome chromosome, int position) throws Exception {
         BionanoCoverageInfo coverageInfo = new BionanoCoverageInfo(CMAP_REF, CMAP_QRY, XMAP);
         coverageInfo.open();
-        long coverage = coverageInfo.getCoverage(chromosome, position);
+        long coverage = coverageInfo.getPositionCoverage(chromosome, position);
 
         String info = String.format("Coverage at label closest to position %s:%d - %d", chromosome, position, coverage);
 
@@ -66,7 +66,7 @@ public class TestBionanoCoverage {
     public static void testOmCoverageAtInterval(Chromosome chromosome, int start, int end) throws Exception {
         BionanoCoverageInfo coverageInfo = new BionanoCoverageInfo(CMAP_REF, CMAP_QRY, XMAP);
         coverageInfo.open();
-        List<Long> coverages = coverageInfo.getCoverage(chromosome, start, end);
+        List<Long> coverages = coverageInfo.getIntervalCoverage(chromosome, start, end);
 
         System.out.printf("Coverages at labels at interval %s:%d - %d\n", chromosome, start, end);
         for (Long coverage : coverages)
