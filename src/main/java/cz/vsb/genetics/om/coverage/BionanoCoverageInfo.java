@@ -23,9 +23,6 @@ import cz.vsb.genetics.common.Chromosome;
 import cz.vsb.genetics.coverage.CoverageInfo;
 import cz.vsb.genetics.om.struct.bionano.*;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class BionanoCoverageInfo implements CoverageInfo {
     private final String cmapReferenceFile;
     private final String cmapQueryFile;
@@ -62,28 +59,11 @@ public class BionanoCoverageInfo implements CoverageInfo {
     }
 
     @Override
-    public List<Long> getChromosomeCoverage(Chromosome chromosome, int step) {
-        return null;
-    }
+    public long[] getIntervalCoverage(Chromosome chromosome, int start, int end) {
+        long[] coverages = new long[end - start];
 
-    @Override
-    public List<Long> getIntervalCoverage(Chromosome chromosome, int start, int end) {
-        List<Long> coverages = new ArrayList<>();
-
-        for (int i = start; i <= end; i++)
-            coverages.add(this.getPositionCoverage(chromosome, i));
-
-        return coverages;
-    }
-
-    @Override
-    public List<Long> getIntervalCoverage(Chromosome chromosome, int start, int end, int step) {
-        CMap chromosomeCMap = cmapContainerRef.get(chromosome.number);
-        List<CMapEntry> entries = chromosomeCMap.findEntriesAtInterval(start, end);
-        List<Long> coverages = new ArrayList<>();
-
-        for (int i = 0; i < entries.size(); i += step)
-            coverages.add(xmap.getSiteCoverage(chromosome.number, entries.get(i).getSiteId()));
+        for (int i = 0; i <= coverages.length; i++)
+            coverages[i] = getPositionCoverage(chromosome, start + i);
 
         return coverages;
     }
@@ -92,23 +72,11 @@ public class BionanoCoverageInfo implements CoverageInfo {
     public double getMeanCoverage(Chromosome chromosome, int start, int end) {
         long total = 0;
 
-        List<Long> coverages = getIntervalCoverage(chromosome, start, end);
+        long[] coverages = getIntervalCoverage(chromosome, start, end);
 
         for (Long coverage : coverages)
             total += coverage;
 
-        return (double)total / (double)coverages.size();
-    }
-
-    @Override
-    public double getMeanCoverage(Chromosome chromosome, int start, int end, int step) {
-        long total = 0;
-
-        List<Long> coverages = getIntervalCoverage(chromosome, start, end, step);
-
-        for (Long coverage : coverages)
-            total += coverage;
-
-        return (double)total / (double)coverages.size();
+        return (double)total / (double)coverages.length;
     }
 }

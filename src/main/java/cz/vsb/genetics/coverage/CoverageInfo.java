@@ -20,8 +20,6 @@ package cz.vsb.genetics.coverage;
 
 import cz.vsb.genetics.common.Chromosome;
 
-import java.util.List;
-
 public interface CoverageInfo {
     void open() throws Exception;
 
@@ -29,13 +27,7 @@ public interface CoverageInfo {
 
     long getPositionCoverage(Chromosome chromosome, int position);
 
-    List<Long> getChromosomeCoverage(Chromosome chromosome, int step);
-
-    List<Long> getIntervalCoverage(Chromosome chromosome, int start, int end) throws Exception;
-
-    List<Long> getIntervalCoverage(Chromosome chromosome, int start, int end, int step) throws Exception;
+    long[] getIntervalCoverage(Chromosome chromosome, int start, int end) throws Exception;
 
     double getMeanCoverage(Chromosome chromosome, int start, int end) throws Exception;
-
-    double getMeanCoverage(Chromosome chromosome, int start, int end, int step) throws Exception;
 }

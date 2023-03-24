@@ -22,6 +22,7 @@ import cz.vsb.genetics.common.Chromosome;
 import cz.vsb.genetics.coverage.CoverageInfo;
 import cz.vsb.genetics.ngs.bam.BamUtils;
 import htsjdk.samtools.SamReader;
+import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,21 +59,11 @@ public class BamCoverageInfoMT implements CoverageInfo {
     }
 
     @Override
-    public List<Long> getChromosomeCoverage(Chromosome chromosome, int step) {
-        return null;
+    public long[] getIntervalCoverage(Chromosome chromosome, int start, int end) throws Exception {
+        return calculateCoverage(chromosome, start, end);
     }
 
-    @Override
-    public List<Long> getIntervalCoverage(Chromosome chromosome, int start, int end) throws Exception {
-        return calculateCoverage(chromosome, start, end, -1);
-    }
-
-    @Override
-    public List<Long> getIntervalCoverage(Chromosome chromosome, int start, int end, int step) throws Exception {
-        return calculateCoverage(chromosome, start, end, step);
-    }
-
-    public List<Long> calculateCoverage(Chromosome chromosome, int start, int end, int step) throws Exception {
+    public long[] calculateCoverage(Chromosome chromosome, int start, int end) throws Exception {
         List<IntervalCoverageCalculator> calculators = new ArrayList<>();
 
         int delta = (end - start) / threads;
@@ -81,7 +72,7 @@ public class BamCoverageInfoMT implements CoverageInfo {
             int a = start + i * delta;
             int b = i == threads - 1 ? end : a + delta - 1;
 
-            IntervalCoverageCalculator calculator = new IntervalCoverageCalculator(chromosome, a, b, step, samReaders[i]);
+            IntervalCoverageCalculator calculator = new IntervalCoverageCalculator(chromosome, a, b, samReaders[i]);
             calculators.add(calculator);
             calculator.start();
         }
@@ -89,9 +80,9 @@ public class BamCoverageInfoMT implements CoverageInfo {
         for (IntervalCoverageCalculator calculator : calculators)
             calculator.join();
 
-        List<Long> coverages = new ArrayList<>();
+        long[] coverages = new long[0];
         for (IntervalCoverageCalculator calculator : calculators)
-            coverages.addAll(calculator.getCoverages());
+            coverages = ArrayUtils.addAll(coverages, calculator.getCoverages());
 
         return coverages;
     }
@@ -99,50 +90,34 @@ public class BamCoverageInfoMT implements CoverageInfo {
     @Override
     public double getMeanCoverage(Chromosome chromosome, int start, int end) throws Exception {
         double sum = 0.0;
-        List<Long> coverages = getIntervalCoverage(chromosome, start, end);
+        long[] coverages = getIntervalCoverage(chromosome, start, end);
 
         for (long coverage : coverages)
             sum += (double)coverage;
 
-        return sum / (double)coverages.size();
-    }
-
-    @Override
-    public double getMeanCoverage(Chromosome chromosome, int start, int end, int step) throws Exception {
-        double sum = 0.0;
-        List<Long> coverages = getIntervalCoverage(chromosome, start, end, step);
-
-        for (long coverage : coverages)
-            sum += (double)coverage;
-
-        return sum / (double)coverages.size();
+        return sum / (double)coverages.length;
     }
 
     private static class IntervalCoverageCalculator extends Thread {
-        private List<Long> coverages;
+        private long[] coverages;
         private final SamReader samReader;
         private final Chromosome chromosome;
         private final int start;
         private final int end;
-        private final int step;
 
-        public IntervalCoverageCalculator(Chromosome chromosome, int start, int end, int step, SamReader samReader) {
+        public IntervalCoverageCalculator(Chromosome chromosome, int start, int end, SamReader samReader) {
             this.samReader = samReader;
             this.chromosome = chromosome;
             this.start = start;
             this.end = end;
-            this.step = step;
         }
 
         @Override
         public void run() {
-            if (step < 2)
-                coverages = BamCoverageInfoUtils.getCoverage(chromosome, start, end, samReader);
-            else
-                coverages = BamCoverageInfoUtils.getCoverage(chromosome, start, end, step, samReader);
+            coverages = BamCoverageInfoUtils.getCoverage(chromosome, start, end, samReader);
         }
 
-        public List<Long> getCoverages() {
+        public long[] getCoverages() {
             return coverages;
         }
     }

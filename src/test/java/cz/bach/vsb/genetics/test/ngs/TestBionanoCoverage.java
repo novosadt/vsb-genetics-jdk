@@ -23,7 +23,10 @@ import cz.vsb.genetics.common.Chromosome;
 import cz.vsb.genetics.om.coverage.BionanoCoverageInfo;
 import org.apache.commons.lang3.time.StopWatch;
 
-import java.util.List;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
 
 public class TestBionanoCoverage {
     private static final String CMAP_REF = "./src/test/resources/coverage/bionano/test_ref.cmap";
@@ -36,14 +39,8 @@ public class TestBionanoCoverage {
             int start = 12935517;
             int end = 13935517;
 
-            StopWatch stopWatch = new StopWatch();
-            stopWatch.start();
-
             testOmCoverageAtPosition(chromosome, start);
             testOmCoverageAtInterval(chromosome, start, end);
-
-            stopWatch.stop();
-            System.out.println("Time (mils): " + stopWatch.getTime());
         }
         catch (Exception e) {
             System.out.println(e.getMessage() + "\n");
@@ -52,26 +49,43 @@ public class TestBionanoCoverage {
     }
 
     public static void testOmCoverageAtPosition(Chromosome chromosome, int position) throws Exception {
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
+
         BionanoCoverageInfo coverageInfo = new BionanoCoverageInfo(CMAP_REF, CMAP_QRY, XMAP);
         coverageInfo.open();
         long coverage = coverageInfo.getPositionCoverage(chromosome, position);
-
-        String info = String.format("Coverage at label closest to position %s:%d - %d", chromosome, position, coverage);
-
-        System.out.println(info);
-
         coverageInfo.close();
+
+        stopWatch.stop();
+        printTime(stopWatch.getTime());
+
+        System.out.printf("Coverage at label closest to position %s:%d - %d\n", chromosome, position, coverage);
     }
 
     public static void testOmCoverageAtInterval(Chromosome chromosome, int start, int end) throws Exception {
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
+
         BionanoCoverageInfo coverageInfo = new BionanoCoverageInfo(CMAP_REF, CMAP_QRY, XMAP);
         coverageInfo.open();
-        List<Long> coverages = coverageInfo.getIntervalCoverage(chromosome, start, end);
+        long[] coverages = coverageInfo.getIntervalCoverage(chromosome, start, end);
+        coverageInfo.close();
+
+        stopWatch.stop();
+        printTime(stopWatch.getTime());
 
         System.out.printf("Coverages at labels at interval %s:%d - %d\n", chromosome, start, end);
         for (Long coverage : coverages)
             System.out.printf("Coverage: - %d\n", coverage);
+    }
 
-        coverageInfo.close();
+    private static void printTime(long mils) {
+        Date time = new Date(mils);
+
+        DateFormat df = new SimpleDateFormat("HH:mm:ss.SSS");
+        df.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+        System.out.println("Time elapsed: " + df.format(time));
     }
 }

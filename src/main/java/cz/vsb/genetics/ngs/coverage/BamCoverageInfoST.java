@@ -23,8 +23,6 @@ import cz.vsb.genetics.coverage.CoverageInfo;
 import cz.vsb.genetics.ngs.bam.BamUtils;
 import htsjdk.samtools.SamReader;
 
-import java.util.List;
-
 public class BamCoverageInfoST implements CoverageInfo {
     private SamReader samReader;
     private final String bamFile;
@@ -51,27 +49,12 @@ public class BamCoverageInfoST implements CoverageInfo {
     }
 
     @Override
-    public List<Long> getChromosomeCoverage(Chromosome chromosome, int step) {
-        return null;
-    }
-
-    @Override
-    public List<Long> getIntervalCoverage(Chromosome chromosome, int start, int end) {
+    public long[] getIntervalCoverage(Chromosome chromosome, int start, int end) {
         return BamCoverageInfoUtils.getCoverage(chromosome, start, end, samReader);
-    }
-
-    @Override
-    public List<Long> getIntervalCoverage(Chromosome chromosome, int start, int end, int step) {
-        return BamCoverageInfoUtils.getCoverage(chromosome, start, end, step, samReader);
     }
 
     @Override
     public double getMeanCoverage(Chromosome chromosome, int start, int end) {
         return BamCoverageInfoUtils.getMeanCoverage(chromosome, start, end, samReader);
-    }
-
-    @Override
-    public double getMeanCoverage(Chromosome chromosome, int start, int end, int step) {
-        return BamCoverageInfoUtils.getMeanCoverage(chromosome, start, end, step, samReader);
     }
 }

@@ -19,11 +19,10 @@
 package cz.vsb.genetics.ngs.coverage;
 
 import cz.vsb.genetics.common.Chromosome;
-import htsjdk.samtools.*;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
+import htsjdk.samtools.AlignmentBlock;
+import htsjdk.samtools.SAMRecord;
+import htsjdk.samtools.SAMRecordIterator;
+import htsjdk.samtools.SamReader;
 
 public class BamCoverageInfoUtils {
 
@@ -38,44 +37,60 @@ public class BamCoverageInfoUtils {
         return count;
     }
 
-    public static List<Long> getCoverage(Chromosome chromosome, int start, int end, SamReader samReader) {
-        List<Long> coverages = new ArrayList<>();
+    public static long[] getCoverage(Chromosome chromosome, int start, int end, SamReader samReader) {
+        if (end < start)
+            return new long[0];
 
-        for (int pos = start; pos <= end; pos++)
-            coverages.add(getCoverage(chromosome, pos, samReader));
+        if (end - start == 0)
+            return new long[]{getCoverage(chromosome, start, samReader)};
 
-        return coverages;
-    }
+        long[] coverages = new long[end - start + 1];
 
-    public static List<Long> getCoverage(Chromosome chromosome, int start, int end, int step, SamReader samReader) {
-        List<Long> coverages = new ArrayList<>();
+        try (SAMRecordIterator it = samReader.queryOverlapping(chromosome.toString(), start, end)) {
+            while(it.hasNext()) {
+                SAMRecord samRecord = it.next();
 
-        for (int pos = start; pos <= end; pos += step)
-            coverages.add(getCoverage(chromosome, pos, samReader));
+                for (AlignmentBlock alignmentBlock : samRecord.getAlignmentBlocks()) {
+                    int startPosition = alignmentBlock.getReferenceStart();
+                    int endPosition = startPosition + alignmentBlock.getLength();
+                    int from = 0;
+                    int to = 0;
 
-        //start and end positions should be included
-        coverages.add(getCoverage(chromosome, end, samReader));
+                    // alignment is inside the region of interest
+                    if (startPosition >= start && endPosition <= end) {
+                        from = startPosition - start;
+                        to = endPosition - startPosition + 1;
+                    }
+                    // alignment overlaps whole region of interest
+                    else if (startPosition <= start && endPosition >= end) {
+                        to = coverages.length;
+                    }
+                    // alignment starts outside the region and ends inside
+                    else if (startPosition <= start) {
+                        to = endPosition - start + 1;
+                    }
+                    // alignment starts inside the region and ends outside
+                    else if (endPosition >= end) {
+                        from = startPosition - start;
+                        to = coverages.length;
+                    }
+
+                    for (int i = from; i < to; i++)
+                        coverages[i]++;
+                }
+            }
+        }
 
         return coverages;
     }
 
     public static double getMeanCoverage(Chromosome chromosome, int start, int end, SamReader samReader) {
         double sum = 0.0;
-        List<Long> coverages = getCoverage(chromosome, start, end, samReader);
+        long[] coverages = getCoverage(chromosome, start, end, samReader);
 
         for (long coverage : coverages)
             sum += coverage;
 
-        return sum / (double)coverages.size();
-    }
-
-    public static double getMeanCoverage(Chromosome chromosome, int start, int end, int step, SamReader samReader) {
-        double sum = 0.0;
-        List<Long> coverages = getCoverage(chromosome, start, end, step, samReader);
-
-        for (long coverage : coverages)
-            sum += coverage;
-
-        return sum / (double)coverages.size();
+        return sum / (double)coverages.length;
     }
 }
