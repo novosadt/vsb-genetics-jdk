@@ -20,7 +20,7 @@
 package cz.bach.vsb.genetics.test.ngs;
 
 import cz.vsb.genetics.common.Chromosome;
-import cz.vsb.genetics.om.coverage.BionanoCoverageInfo;
+import cz.vsb.genetics.om.coverage.BionanoCoverageCalculator;
 import org.apache.commons.lang3.time.StopWatch;
 
 import java.text.DateFormat;
@@ -52,7 +52,7 @@ public class TestBionanoCoverage {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
 
-        BionanoCoverageInfo coverageInfo = new BionanoCoverageInfo(CMAP_REF, CMAP_QRY, XMAP);
+        BionanoCoverageCalculator coverageInfo = new BionanoCoverageCalculator(CMAP_REF, CMAP_QRY, XMAP);
         coverageInfo.open();
         long coverage = coverageInfo.getPositionCoverage(chromosome, position);
         coverageInfo.close();
@@ -67,16 +67,16 @@ public class TestBionanoCoverage {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
 
-        BionanoCoverageInfo coverageInfo = new BionanoCoverageInfo(CMAP_REF, CMAP_QRY, XMAP);
+        BionanoCoverageCalculator coverageInfo = new BionanoCoverageCalculator(CMAP_REF, CMAP_QRY, XMAP);
         coverageInfo.open();
-        long[] coverages = coverageInfo.getIntervalCoverage(chromosome, start, end);
+        int[] coverages = coverageInfo.getIntervalCoverage(chromosome, start, end).getCoverages();
         coverageInfo.close();
 
         stopWatch.stop();
         printTime(stopWatch.getTime());
 
         System.out.printf("Coverages at labels at interval %s:%d - %d\n", chromosome, start, end);
-        for (Long coverage : coverages)
+        for (int coverage : coverages)
             System.out.printf("Coverage: - %d\n", coverage);
     }
 

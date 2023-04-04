@@ -19,6 +19,7 @@
 package cz.vsb.genetics.ngs.coverage;
 
 import cz.vsb.genetics.common.Chromosome;
+import cz.vsb.genetics.coverage.CoverageCalculator;
 import cz.vsb.genetics.coverage.CoverageInfo;
 import cz.vsb.genetics.ngs.bam.BamUtils;
 import htsjdk.samtools.SamReader;
@@ -27,13 +28,13 @@ import org.apache.commons.lang3.ArrayUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BamCoverageInfoMT implements CoverageInfo {
+public class BamCoverageCalculatorMT implements CoverageCalculator {
     private SamReader[] samReaders;
     private final int threads;
     private final String bamFile;
     private final String indexFile;
 
-    public BamCoverageInfoMT(String bamFile, String indexFile, int threads) {
+    public BamCoverageCalculatorMT(String bamFile, String indexFile, int threads) {
         this.threads = threads;
         this.bamFile = bamFile;
         this.indexFile = indexFile;
@@ -54,16 +55,16 @@ public class BamCoverageInfoMT implements CoverageInfo {
     }
 
     @Override
-    public long getPositionCoverage(Chromosome chromosome, int position) {
-        return BamCoverageInfoUtils.getCoverage(chromosome, position, samReaders[0]);
+    public int getPositionCoverage(Chromosome chromosome, int position) {
+        return BamCoverageUtils.getCoverage(chromosome, position, samReaders[0]);
     }
 
     @Override
-    public long[] getIntervalCoverage(Chromosome chromosome, int start, int end) throws Exception {
+    public CoverageInfo getIntervalCoverage(Chromosome chromosome, int start, int end) throws Exception {
         return calculateCoverage(chromosome, start, end);
     }
 
-    public long[] calculateCoverage(Chromosome chromosome, int start, int end) throws Exception {
+    private CoverageInfo calculateCoverage(Chromosome chromosome, int start, int end) throws Exception {
         List<IntervalCoverageCalculator> calculators = new ArrayList<>();
 
         int delta = (end - start) / threads;
@@ -80,26 +81,37 @@ public class BamCoverageInfoMT implements CoverageInfo {
         for (IntervalCoverageCalculator calculator : calculators)
             calculator.join();
 
-        long[] coverages = new long[0];
-        for (IntervalCoverageCalculator calculator : calculators)
-            coverages = ArrayUtils.addAll(coverages, calculator.getCoverages());
+        int[] coverages = new int[0];
+        int maxCoverage = 0;
+        int minCoverage = Integer.MAX_VALUE;
+        for (IntervalCoverageCalculator calculator : calculators) {
+            CoverageInfo coverageInfo = calculator.getCoverageInfo();
 
-        return coverages;
+            coverages = ArrayUtils.addAll(coverages, coverageInfo.getCoverages());
+
+            if (coverageInfo.getMaxCoverage() > maxCoverage)
+                maxCoverage = coverageInfo.getMaxCoverage();
+
+            if (coverageInfo.getMinCoverage() < minCoverage)
+                minCoverage = coverageInfo.getMinCoverage();
+        }
+
+        return new CoverageInfo(coverages, minCoverage, maxCoverage);
     }
 
     @Override
     public double getMeanCoverage(Chromosome chromosome, int start, int end) throws Exception {
         double sum = 0.0;
-        long[] coverages = getIntervalCoverage(chromosome, start, end);
+        int[] coverages = getIntervalCoverage(chromosome, start, end).getCoverages();
 
-        for (long coverage : coverages)
+        for (int coverage : coverages)
             sum += (double)coverage;
 
         return sum / (double)coverages.length;
     }
 
     private static class IntervalCoverageCalculator extends Thread {
-        private long[] coverages;
+        CoverageInfo coverageInfo;
         private final SamReader samReader;
         private final Chromosome chromosome;
         private final int start;
@@ -114,11 +126,11 @@ public class BamCoverageInfoMT implements CoverageInfo {
 
         @Override
         public void run() {
-            coverages = BamCoverageInfoUtils.getCoverage(chromosome, start, end, samReader);
+            coverageInfo = BamCoverageUtils.getCoverage(chromosome, start, end, samReader);
         }
 
-        public long[] getCoverages() {
-            return coverages;
+        public CoverageInfo getCoverageInfo() {
+            return coverageInfo;
         }
     }
 }

@@ -19,32 +19,37 @@
 package cz.vsb.genetics.ngs.coverage;
 
 import cz.vsb.genetics.common.Chromosome;
+import cz.vsb.genetics.coverage.CoverageInfo;
 import htsjdk.samtools.AlignmentBlock;
 import htsjdk.samtools.SAMRecord;
 import htsjdk.samtools.SAMRecordIterator;
 import htsjdk.samtools.SamReader;
 
-public class BamCoverageInfoUtils {
+public class BamCoverageUtils {
 
 
-    public static long getCoverage(Chromosome chromosome, int position, SamReader samReader) {
+    public static int getCoverage(Chromosome chromosome, int position, SamReader samReader) {
         SAMRecordIterator it = samReader.queryOverlapping(chromosome.toString(), position, position);
 
-        long count = it.hasNext() ? it.stream().count() : 0;
+        int count = it.hasNext() ? (int)it.stream().count() : 0;
 
         it.close();
 
         return count;
     }
 
-    public static long[] getCoverage(Chromosome chromosome, int start, int end, SamReader samReader) {
+    public static CoverageInfo getCoverage(Chromosome chromosome, int start, int end, SamReader samReader) {
         if (end < start)
-            return new long[0];
+            return new CoverageInfo(new int[0], 0, 0);
 
-        if (end - start == 0)
-            return new long[]{getCoverage(chromosome, start, samReader)};
+        if (end - start == 0) {
+            int coverage = getCoverage(chromosome, start, samReader);
+            return new CoverageInfo(new int[]{coverage}, coverage, coverage);
+        }
 
-        long[] coverages = new long[end - start + 1];
+        int[] coverages = new int[end - start + 1];
+        int maxCoverage = 0;
+        int minCoverage = Integer.MAX_VALUE;
 
         try (SAMRecordIterator it = samReader.queryOverlapping(chromosome.toString(), start, end)) {
             while(it.hasNext()) {
@@ -75,18 +80,25 @@ public class BamCoverageInfoUtils {
                         to = coverages.length;
                     }
 
-                    for (int i = from; i < to; i++)
+                    for (int i = from; i < to; i++) {
                         coverages[i]++;
+
+                        if (coverages[i] > maxCoverage)
+                            maxCoverage = coverages[i];
+
+                        if (coverages[i] < minCoverage)
+                            minCoverage = coverages[i];
+                    }
                 }
             }
         }
 
-        return coverages;
+        return new CoverageInfo(coverages, minCoverage, maxCoverage);
     }
 
     public static double getMeanCoverage(Chromosome chromosome, int start, int end, SamReader samReader) {
         double sum = 0.0;
-        long[] coverages = getCoverage(chromosome, start, end, samReader);
+        int[] coverages = getCoverage(chromosome, start, end, samReader).getCoverages();
 
         for (long coverage : coverages)
             sum += coverage;

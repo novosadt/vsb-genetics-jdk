@@ -1,33 +1,39 @@
-/*
- * Copyright (C) 2022  Tomas Novosad
- * VSB-TUO, Faculty of Electrical Engineering and Computer Science
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
 package cz.vsb.genetics.coverage;
 
-import cz.vsb.genetics.common.Chromosome;
+public class CoverageInfo {
+    int[] coverages;
+    int minCoverage;
+    int maxCoverage;
+    int start;
+    int end;
 
-public interface CoverageInfo {
-    void open() throws Exception;
+    public CoverageInfo(int[] coverages, int minCoverage, int maxCoverage) {
+        this.coverages = coverages;
+        this.minCoverage = minCoverage;
+        this.maxCoverage = maxCoverage;
+    }
 
-    void close() throws Exception;
+    public int[] getCoverages() {
+        return coverages;
+    }
 
-    long getPositionCoverage(Chromosome chromosome, int position);
+    public void setCoverages(int[] coverages) {
+        this.coverages = coverages;
+    }
 
-    long[] getIntervalCoverage(Chromosome chromosome, int start, int end) throws Exception;
+    public int getMaxCoverage() {
+        return maxCoverage;
+    }
 
-    double getMeanCoverage(Chromosome chromosome, int start, int end) throws Exception;
+    public void setMaxCoverage(int maxCoverage) {
+        this.maxCoverage = maxCoverage;
+    }
+
+    public int getMinCoverage() {
+        return minCoverage;
+    }
+
+    public void setMinCoverage(int minCoverage) {
+        this.minCoverage = minCoverage;
+    }
 }

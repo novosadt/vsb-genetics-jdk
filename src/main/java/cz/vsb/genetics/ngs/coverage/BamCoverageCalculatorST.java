@@ -19,16 +19,17 @@
 package cz.vsb.genetics.ngs.coverage;
 
 import cz.vsb.genetics.common.Chromosome;
+import cz.vsb.genetics.coverage.CoverageCalculator;
 import cz.vsb.genetics.coverage.CoverageInfo;
 import cz.vsb.genetics.ngs.bam.BamUtils;
 import htsjdk.samtools.SamReader;
 
-public class BamCoverageInfoST implements CoverageInfo {
+public class BamCoverageCalculatorST implements CoverageCalculator {
     private SamReader samReader;
     private final String bamFile;
     private final String indexFile;
 
-    public BamCoverageInfoST(String bamFile, String indexFile) {
+    public BamCoverageCalculatorST(String bamFile, String indexFile) {
         this.bamFile = bamFile;
         this.indexFile = indexFile;
     }
@@ -44,17 +45,17 @@ public class BamCoverageInfoST implements CoverageInfo {
     }
 
     @Override
-    public long getPositionCoverage(Chromosome chromosome, int position) {
-        return BamCoverageInfoUtils.getCoverage(chromosome, position, samReader);
+    public int getPositionCoverage(Chromosome chromosome, int position) {
+        return BamCoverageUtils.getCoverage(chromosome, position, samReader);
     }
 
     @Override
-    public long[] getIntervalCoverage(Chromosome chromosome, int start, int end) {
-        return BamCoverageInfoUtils.getCoverage(chromosome, start, end, samReader);
+    public CoverageInfo getIntervalCoverage(Chromosome chromosome, int start, int end) {
+        return BamCoverageUtils.getCoverage(chromosome, start, end, samReader);
     }
 
     @Override
     public double getMeanCoverage(Chromosome chromosome, int start, int end) {
-        return BamCoverageInfoUtils.getMeanCoverage(chromosome, start, end, samReader);
+        return BamCoverageUtils.getMeanCoverage(chromosome, start, end, samReader);
     }
 }

@@ -1,6 +1,9 @@
 package cz.vsb.genetics.om.struct.bionano;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class XMap {
     private final List<XMapEntry> entries = new ArrayList<>();
@@ -15,7 +18,7 @@ public class XMap {
         return entries;
     }
 
-    public long getSiteCoverage(Integer contigId, Integer siteId) {
+    public int getSiteCoverage(Integer contigId, Integer siteId) {
         Map<Integer, List<XMapEntry.XMapAlignmentEntry>> contigSites = refSiteToQuerySites.get(contigId);
 
         if (contigSites == null)

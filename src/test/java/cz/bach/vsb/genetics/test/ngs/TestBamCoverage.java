@@ -20,9 +20,9 @@
 package cz.bach.vsb.genetics.test.ngs;
 
 import cz.vsb.genetics.common.Chromosome;
-import cz.vsb.genetics.coverage.CoverageInfo;
-import cz.vsb.genetics.ngs.coverage.BamCoverageInfoMT;
-import cz.vsb.genetics.ngs.coverage.BamCoverageInfoST;
+import cz.vsb.genetics.coverage.CoverageCalculator;
+import cz.vsb.genetics.ngs.coverage.BamCoverageCalculatorMT;
+import cz.vsb.genetics.ngs.coverage.BamCoverageCalculatorST;
 import org.apache.commons.lang3.time.StopWatch;
 
 import java.text.DateFormat;
@@ -57,7 +57,7 @@ public class TestBamCoverage {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
 
-        BamCoverageInfoST coverageInfo = new BamCoverageInfoST(BAM_FILE, BAM_INDEX_FILE);
+        BamCoverageCalculatorST coverageInfo = new BamCoverageCalculatorST(BAM_FILE, BAM_INDEX_FILE);
         coverageInfo.open();
         long coverage = coverageInfo.getPositionCoverage(chromosome, position);
         coverageInfo.close();
@@ -74,15 +74,15 @@ public class TestBamCoverage {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
 
-        CoverageInfo coverageInfo = new BamCoverageInfoST(BAM_FILE, BAM_INDEX_FILE);
-        coverageInfo.open();
-        long[] coverages = coverageInfo.getIntervalCoverage(chromosome, start, end);
-        coverageInfo.close();
+        CoverageCalculator coverageCalculator = new BamCoverageCalculatorST(BAM_FILE, BAM_INDEX_FILE);
+        coverageCalculator.open();
+        int[] coverages = coverageCalculator.getIntervalCoverage(chromosome, start, end).getCoverages();
+        coverageCalculator.close();
 
         stopWatch.stop();
         printTime(stopWatch.getTime());
 
-        for (Long coverage : coverages)
+        for (int coverage : coverages)
             System.out.printf("Coverage at position %s:%d - %d%n", chromosome.toString(), start++, coverage);
     }
 
@@ -92,15 +92,15 @@ public class TestBamCoverage {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
 
-        CoverageInfo coverageInfo = new BamCoverageInfoMT(BAM_FILE, BAM_INDEX_FILE, threads);
-        coverageInfo.open();
-        long[] coverages = coverageInfo.getIntervalCoverage(chromosome, start, end);
-        coverageInfo.close();
+        CoverageCalculator coverageCalculator = new BamCoverageCalculatorMT(BAM_FILE, BAM_INDEX_FILE, threads);
+        coverageCalculator.open();
+        int[] coverages = coverageCalculator.getIntervalCoverage(chromosome, start, end).getCoverages();
+        coverageCalculator.close();
 
         stopWatch.stop();
         printTime(stopWatch.getTime());
 
-        for (Long coverage : coverages)
+        for (int coverage : coverages)
             System.out.printf("Coverage at position %s:%d - %d%n", chromosome.toString(), start++, coverage);
     }
 

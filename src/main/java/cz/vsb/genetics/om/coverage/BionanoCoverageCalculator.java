@@ -20,17 +20,18 @@
 package cz.vsb.genetics.om.coverage;
 
 import cz.vsb.genetics.common.Chromosome;
+import cz.vsb.genetics.coverage.CoverageCalculator;
 import cz.vsb.genetics.coverage.CoverageInfo;
 import cz.vsb.genetics.om.struct.bionano.*;
 
-public class BionanoCoverageInfo implements CoverageInfo {
+public class BionanoCoverageCalculator implements CoverageCalculator {
     private final String cmapReferenceFile;
     private final String cmapQueryFile;
     private final String xmapFile;
     private CMapContainer cmapContainerRef;
     private XMap xmap;
 
-    public BionanoCoverageInfo(String cmapReferenceFile, String cmapQueryFile, String xmapFile) {
+    public BionanoCoverageCalculator(String cmapReferenceFile, String cmapQueryFile, String xmapFile) {
         this.cmapReferenceFile = cmapReferenceFile;
         this.cmapQueryFile = cmapQueryFile;
         this.xmapFile = xmapFile;
@@ -51,7 +52,7 @@ public class BionanoCoverageInfo implements CoverageInfo {
     }
 
     @Override
-    public long getPositionCoverage(Chromosome chromosome, int position) {
+    public int getPositionCoverage(Chromosome chromosome, int position) {
         CMap chromosomeCMap = cmapContainerRef.get(chromosome.number);
         CMapEntry entry = chromosomeCMap.findNearestEntry(position);
 
@@ -59,22 +60,31 @@ public class BionanoCoverageInfo implements CoverageInfo {
     }
 
     @Override
-    public long[] getIntervalCoverage(Chromosome chromosome, int start, int end) {
-        long[] coverages = new long[end - start];
+    public CoverageInfo getIntervalCoverage(Chromosome chromosome, int start, int end) {
+        int[] coverages = new int[end - start];
+        int minCoverage = Integer.MAX_VALUE;
+        int maxCoverage = 0;
 
-        for (int i = 0; i <= coverages.length; i++)
+        for (int i = 0; i <= coverages.length; i++) {
             coverages[i] = getPositionCoverage(chromosome, start + i);
 
-        return coverages;
+            if (coverages[i] > maxCoverage)
+                maxCoverage = coverages[i];
+
+            if (coverages[i] < minCoverage)
+                minCoverage = coverages[i];
+        }
+
+        return new CoverageInfo(coverages, minCoverage, maxCoverage);
     }
 
     @Override
     public double getMeanCoverage(Chromosome chromosome, int start, int end) {
         long total = 0;
 
-        long[] coverages = getIntervalCoverage(chromosome, start, end);
+        int[] coverages = getIntervalCoverage(chromosome, start, end).getCoverages();
 
-        for (Long coverage : coverages)
+        for (int coverage : coverages)
             total += coverage;
 
         return (double)total / (double)coverages.length;
