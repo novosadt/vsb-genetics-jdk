@@ -40,11 +40,11 @@ public class BamCoverageUtils {
 
     public static CoverageInfo getCoverage(Chromosome chromosome, int start, int end, SamReader samReader) {
         if (end < start)
-            return new CoverageInfo(new int[0], 0, 0);
+            return new CoverageInfo(new int[0], 0, 0, start, end);
 
         if (end - start == 0) {
             int coverage = getCoverage(chromosome, start, samReader);
-            return new CoverageInfo(new int[]{coverage}, coverage, coverage);
+            return new CoverageInfo(new int[]{coverage}, coverage, coverage, start, end);
         }
 
         int[] coverages = new int[end - start + 1];
@@ -64,7 +64,7 @@ public class BamCoverageUtils {
                     // alignment is inside the region of interest
                     if (startPosition >= start && endPosition <= end) {
                         from = startPosition - start;
-                        to = endPosition - startPosition + 1;
+                        to = from + alignmentBlock.getLength();
                     }
                     // alignment overlaps whole region of interest
                     else if (startPosition <= start && endPosition >= end) {
@@ -93,7 +93,7 @@ public class BamCoverageUtils {
             }
         }
 
-        return new CoverageInfo(coverages, minCoverage, maxCoverage);
+        return new CoverageInfo(coverages, minCoverage, maxCoverage, start, end);
     }
 
     public static double getMeanCoverage(Chromosome chromosome, int start, int end, SamReader samReader) {

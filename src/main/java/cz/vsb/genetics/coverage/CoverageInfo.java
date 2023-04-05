@@ -1,16 +1,19 @@
 package cz.vsb.genetics.coverage;
 
 public class CoverageInfo {
+    String title;
     int[] coverages;
     int minCoverage;
     int maxCoverage;
-    int start;
-    int end;
+    int positionStart;
+    int positionEnd;
 
-    public CoverageInfo(int[] coverages, int minCoverage, int maxCoverage) {
+    public CoverageInfo(int[] coverages, int minCoverage, int maxCoverage, int positionStart, int positionEnd) {
         this.coverages = coverages;
         this.minCoverage = minCoverage;
         this.maxCoverage = maxCoverage;
+        this.positionStart = positionStart;
+        this.positionEnd = positionEnd;
     }
 
     public int[] getCoverages() {
@@ -35,5 +38,29 @@ public class CoverageInfo {
 
     public void setMinCoverage(int minCoverage) {
         this.minCoverage = minCoverage;
+    }
+
+    public int getPositionStart() {
+        return positionStart;
+    }
+
+    public void setPositionStart(int positionStart) {
+        this.positionStart = positionStart;
+    }
+
+    public int getPositionEnd() {
+        return positionEnd;
+    }
+
+    public void setPositionEnd(int positionEnd) {
+        this.positionEnd = positionEnd;
+    }
+
+    public String getTitle() {
+        return title == null ? "" : title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 }

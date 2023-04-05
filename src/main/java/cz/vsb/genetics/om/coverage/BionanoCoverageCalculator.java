@@ -61,11 +61,11 @@ public class BionanoCoverageCalculator implements CoverageCalculator {
 
     @Override
     public CoverageInfo getIntervalCoverage(Chromosome chromosome, int start, int end) {
-        int[] coverages = new int[end - start];
+        int[] coverages = new int[end - start + 1];
         int minCoverage = Integer.MAX_VALUE;
         int maxCoverage = 0;
 
-        for (int i = 0; i <= coverages.length; i++) {
+        for (int i = 0; i < coverages.length; i++) {
             coverages[i] = getPositionCoverage(chromosome, start + i);
 
             if (coverages[i] > maxCoverage)
@@ -75,7 +75,7 @@ public class BionanoCoverageCalculator implements CoverageCalculator {
                 minCoverage = coverages[i];
         }
 
-        return new CoverageInfo(coverages, minCoverage, maxCoverage);
+        return new CoverageInfo(coverages, minCoverage, maxCoverage, start, end);
     }
 
     @Override

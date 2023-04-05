@@ -96,7 +96,7 @@ public class BamCoverageCalculatorMT implements CoverageCalculator {
                 minCoverage = coverageInfo.getMinCoverage();
         }
 
-        return new CoverageInfo(coverages, minCoverage, maxCoverage);
+        return new CoverageInfo(coverages, minCoverage, maxCoverage, start, end);
     }
 
     @Override
