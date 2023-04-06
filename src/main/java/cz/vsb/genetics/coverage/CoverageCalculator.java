@@ -20,7 +20,7 @@ package cz.vsb.genetics.coverage;
 
 import cz.vsb.genetics.common.Chromosome;
 
-public interface CoverageCalculator {
+public interface CoverageCalculator extends AutoCloseable {
     void open() throws Exception;
 
     void close() throws Exception;

@@ -7,6 +7,7 @@ public class CoverageInfo {
     int maxCoverage;
     int positionStart;
     int positionEnd;
+    int samplingSize = 0;
 
     public CoverageInfo(int[] coverages, int minCoverage, int maxCoverage, int positionStart, int positionEnd) {
         this.coverages = coverages;
@@ -62,5 +63,13 @@ public class CoverageInfo {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public int getSamplingSize() {
+        return samplingSize;
+    }
+
+    public void setSamplingSize(int samplingSize) {
+        this.samplingSize = samplingSize;
     }
 }
