@@ -8,6 +8,7 @@ public class CoverageInfo {
     int positionStart;
     int positionEnd;
     int samplingSize = 0;
+    int coverageLimit = 0;
 
     public CoverageInfo(int[] coverages, int minCoverage, int maxCoverage, int positionStart, int positionEnd) {
         this.coverages = coverages;
@@ -71,5 +72,13 @@ public class CoverageInfo {
 
     public void setSamplingSize(int samplingSize) {
         this.samplingSize = samplingSize;
+    }
+
+    public int getCoverageLimit() {
+        return coverageLimit;
+    }
+
+    public void setCoverageLimit(int coverageLimit) {
+        this.coverageLimit = coverageLimit;
     }
 }
