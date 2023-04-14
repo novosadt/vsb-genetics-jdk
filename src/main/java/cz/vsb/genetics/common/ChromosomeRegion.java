@@ -32,7 +32,7 @@ public class ChromosomeRegion {
         value = value.toLowerCase();
         value = value.replaceAll("\\s","");
 
-        String pattern = "(chr\\d+):(\\d+)-(\\d+)";
+        String pattern = "(chr.*):(\\d+)-(\\d+)";
         Pattern r = Pattern.compile(pattern);
         Matcher m = r.matcher(value);
 
