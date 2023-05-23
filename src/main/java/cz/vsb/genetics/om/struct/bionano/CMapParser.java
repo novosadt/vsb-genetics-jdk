@@ -49,26 +49,30 @@ public class CMapParser {
     private CMapEntry parseLine(String line) {
         String[] values = line.split("\t");
 
-        int l = values.length;
-        int i = 0;
+        CMapEntry entry = new CMapEntry(Integer.valueOf(values[0]), Integer.valueOf(values[3]));
 
-        CMapEntry entry = new CMapEntry(new Integer(values[0]), new Integer(values[3]));
-
-        entry.setContigLength(new Float(values[1]));
-        entry.setNumSites(new Integer(values[2]));
-        entry.setLabelChannel(new Integer(values[4]));
-        entry.setPosition(new Float(values[5]));
-        entry.setStdDev(new Float(values[6]));
-        entry.setCoverage(new Float(values[7]));
-        entry.setOccurrence(new Float(values[8]));
-        entry.setChimQuality(new Float(values[9]));
-        entry.setSegDupL(new Float(values[10]));
-        entry.setSegDupR(new Float(values[11]));
-        entry.setFragileL(new Float(values[12]));
-        entry.setFragileR(new Float(values[13]));
-        entry.setOutlierFrac(new Float(values[14]));
-        entry.setChimNorm(new Float(values[15]));
+        entry.setContigLength(getArrayFloatValue(values, 1));
+        entry.setNumSites(Integer.valueOf(values[2]));
+        entry.setLabelChannel(Integer.valueOf(values[4]));
+        entry.setPosition(getArrayFloatValue(values, 5));
+        entry.setStdDev(getArrayFloatValue(values, 6));
+        entry.setCoverage(getArrayFloatValue(values, 7));
+        entry.setOccurrence(getArrayFloatValue(values, 8));
+        entry.setChimQuality(getArrayFloatValue(values, 9));
+        entry.setSegDupL(getArrayFloatValue(values, 10));
+        entry.setSegDupR(getArrayFloatValue(values, 11));
+        entry.setFragileL(getArrayFloatValue(values, 12));
+        entry.setFragileR(getArrayFloatValue(values, 13));
+        entry.setOutlierFrac(getArrayFloatValue(values, 14));
+        entry.setChimNorm(getArrayFloatValue(values, 15));
 
         return entry;
+    }
+    
+    private Float getArrayFloatValue(String[] array, int index) {
+        if (index >= array.length)
+            return null;
+        
+        return Float.valueOf(array[index]);
     }
 }

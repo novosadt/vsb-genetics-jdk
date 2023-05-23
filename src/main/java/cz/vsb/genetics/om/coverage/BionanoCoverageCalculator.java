@@ -54,6 +54,9 @@ public class BionanoCoverageCalculator implements CoverageCalculator {
     @Override
     public int getPositionCoverage(Chromosome chromosome, int position) {
         CMap chromosomeCMap = cmapContainerRef.get(chromosome.number);
+        if (chromosomeCMap == null)
+            return 0;
+
         CMapEntry entry = chromosomeCMap.findNearestEntry(position);
 
         return xmap.getSiteCoverage(chromosome.number, entry.getSiteId());
