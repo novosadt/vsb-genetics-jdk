@@ -75,8 +75,8 @@ public class SamplotCsvParser extends SvResultParserBase {
         Long svLength = StringUtils.isBlank(values.get("sv_size")) ? 0 : Math.abs(new Long(values.get("sv_size")));
         String svType = values.get("sv_type");
 
-        Chromosome srcChrom = Chromosome.getChromosome(srcChromId);
-        Chromosome dstChrom = Chromosome.getChromosome(dstChromId);
+        Chromosome srcChrom = Chromosome.of(srcChromId);
+        Chromosome dstChrom = Chromosome.of(dstChromId);
 
         StructuralVariant sv = new StructuralVariant(srcChrom, srcLoc, dstChrom, dstLoc, svLength, null);
 

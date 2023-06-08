@@ -105,8 +105,8 @@ public class LongRangerVcfParser extends SvResultParserBase {
         if (!svType.equals("bnd") && svLength == 0)
             svLength = dstLoc - srcLoc;
 
-        Chromosome srcChrom = Chromosome.getChromosome(srcChromId);
-        Chromosome dstChrom = Chromosome.getChromosome(dstChromId);
+        Chromosome srcChrom = Chromosome.of(srcChromId);
+        Chromosome dstChrom = Chromosome.of(dstChromId);
 
         StructuralVariant sv = new StructuralVariant(srcChrom, srcLoc, dstChrom, dstLoc, svLength);
         sv.setId(id);

@@ -21,6 +21,9 @@ package cz.vsb.genetics.common;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public enum Chromosome {
     chr1(1),
     chr2(2),
@@ -49,12 +52,24 @@ public enum Chromosome {
     chrM(25);
 
     public final int number;
-    
+
+    private static final Map<Integer, Chromosome> map = new HashMap<>();
+
+    static
+    {
+        for (Chromosome item : Chromosome.values())
+            map.put(item.number, item);
+    }
+
     Chromosome(int number) {
         this.number = number;
     }
+
+    public static Chromosome of(Integer number) {
+        return map.get(number);
+    }
     
-    public static Chromosome getChromosome(String label) {
+    public static Chromosome of(String label) {
         if (StringUtils.isBlank(label))
             return null;
 

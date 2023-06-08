@@ -1,7 +1,7 @@
 package cz.vsb.genetics.coverage;
 
 public class CoverageInfo {
-    String title;
+    String name;
     int[] coverages;
     int minCoverage;
     int maxCoverage;
@@ -59,12 +59,12 @@ public class CoverageInfo {
         this.positionEnd = positionEnd;
     }
 
-    public String getTitle() {
-        return title == null ? "" : title;
+    public String getName() {
+        return name == null ? "" : name;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public int getSamplingSize() {

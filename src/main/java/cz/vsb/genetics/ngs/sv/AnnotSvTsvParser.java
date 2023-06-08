@@ -115,8 +115,8 @@ public class AnnotSvTsvParser extends SvResultParserBase {
         if (svType.equals("ins"))
             dstLoc = srcLoc + svLength;
 
-        Chromosome srcChrom = Chromosome.getChromosome(srcChromId);
-        Chromosome dstChrom = Chromosome.getChromosome(dstChromId);
+        Chromosome srcChrom = Chromosome.of(srcChromId);
+        Chromosome dstChrom = Chromosome.of(dstChromId);
 
         StructuralVariant sv = new StructuralVariant(srcChrom, srcLoc, dstChrom, dstLoc, svLength, gene);
         sv.setId(id);

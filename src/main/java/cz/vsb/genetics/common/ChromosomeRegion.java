@@ -6,6 +6,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ChromosomeRegion {
+    private String name;
     private final Chromosome chromosome;
     private final int start;
     private final int end;
@@ -28,6 +29,19 @@ public class ChromosomeRegion {
         return end;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s:%d-%d", chromosome, start, end);
+    }
+
     public static ChromosomeRegion valueOf(String value) {
         value = value.toLowerCase();
         value = value.replaceAll("\\s","");
@@ -46,6 +60,6 @@ public class ChromosomeRegion {
         if (StringUtils.isBlank(chromosome) || start == null || end == null)
             return null;
 
-        return new ChromosomeRegion(Chromosome.valueOf(chromosome), start, end);
+        return new ChromosomeRegion(Chromosome.of(chromosome), start, end);
     }
 }
