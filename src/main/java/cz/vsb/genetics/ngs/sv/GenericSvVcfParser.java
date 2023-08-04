@@ -13,14 +13,19 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class LongRangerVcfParser extends SvResultParserBase {
+public class GenericSvVcfParser extends SvResultParserBase {
     private String[] header;
     private final Pattern chromLocPatternWithChr = Pattern.compile("(chr\\d+|MT|M|T|mt|m|t|X|Y|x|y):(\\d+)");
     private final Pattern chromLocPatternWithoutChr = Pattern.compile("(\\d+|MT|M|T|mt|m|t|X|Y|x|y):(\\d+)");
     private final boolean preferBaseSvType;
 
-    public LongRangerVcfParser(boolean preferBaseSvType) {
+    public GenericSvVcfParser(String name) {
+        this(name, false);
+    }
+
+    public GenericSvVcfParser(String name, boolean preferBaseSvType) {
         this.preferBaseSvType = preferBaseSvType;
+        this.name = name;
     }
 
     @Override
@@ -47,9 +52,11 @@ public class LongRangerVcfParser extends SvResultParserBase {
         reader.close();
     }
 
+
+
     @Override
     public void printStructuralVariantStats() {
-        printStructuralVariantStats("VCF-LongRanger");
+        printStructuralVariantStats(name);
     }
 
     private void parseLine(String line, String delim) {
@@ -65,17 +72,17 @@ public class LongRangerVcfParser extends SvResultParserBase {
     }
 
     private void addStructuralVariant(Map<String, String> values) {
-        String id = values.get("ID");
         String srcChromId = values.get("CHROM");
+        Long srcLoc = new Long(values.get("POS"));
+        String id = values.get("ID");
         String dstChromId = srcChromId;
         Map<String, String> info = getInfo(values.get("INFO"));
-        Long srcLoc = new Long(values.get("POS"));
         Long dstLoc = info.containsKey("END") ? new Long(info.get("END")) : 0;
         Long svLength = StringUtils.isBlank(info.get("SVLEN")) ? 0 : Math.abs(new Long(info.get("SVLEN")));
         String svType = info.get("SVTYPE").toLowerCase();
 
         if (svType.equals("bnd")) {
-            String chromLoc = values.get("ALT");
+            String chromLoc = values.get("ALT").toLowerCase();
             Matcher m = chromLocPatternWithChr.matcher(chromLoc);
             if (!m.find()) {
                 m = chromLocPatternWithoutChr.matcher(chromLoc);
@@ -162,5 +169,6 @@ public class LongRangerVcfParser extends SvResultParserBase {
             return null;
         }
     }
+
 
 }

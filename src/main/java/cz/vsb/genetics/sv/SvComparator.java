@@ -22,11 +22,8 @@ import java.util.Collections;
 
 public class SvComparator extends MultipleSvComparator{
 
-    public void compareStructuralVariants(SvResultParser svParser1, String svLabel1, SvResultParser svParser2, String svLabel2,
-                                          String outputFile) throws Exception {
-
-        compareStructuralVariants(svParser1, svLabel1, Collections.singletonList(svParser2), Collections.singletonList(svLabel2),
-                outputFile);
+    public void compareStructuralVariants(SvResultParser svParser1, SvResultParser svParser2, String outputFile) throws Exception {
+        compareStructuralVariants(svParser1, Collections.singletonList(svParser2), outputFile);
     }
 
 }

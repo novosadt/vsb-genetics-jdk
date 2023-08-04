@@ -29,24 +29,16 @@ public class MultipleSvComparator {
     private Long distanceVariance = null;
     private Double minimalProportion = null;
     private Set<StructuralVariantType> svTypes;
-    private String svLabelMain;
-    private List<String> svLabelOthers;
     private SvResultParser svParserMain;
     private List<SvResultParser> svParserOthers;
     private boolean mainPrinted;
 
-    public void compareStructuralVariants(SvResultParser svParserMain, String svLabelMain, List<SvResultParser> svParserOthers,
-                                          List<String> svLabelOthers, String outputFile) throws Exception {
-
-        checkOtherParsers(svParserOthers, svLabelOthers);
-
+    public void compareStructuralVariants(SvResultParser svParserMain, List<SvResultParser> svParserOthers, String outputFile) throws Exception {
         fileWriter = new FileWriter(outputFile);
-        this.svLabelMain = svLabelMain;
-        this.svLabelOthers = svLabelOthers;
         this.svParserMain = svParserMain;
         this.svParserOthers = svParserOthers;
 
-        printHeader(svLabelMain, svLabelOthers);
+        printHeader(svParserMain, svParserOthers);
 
         mainPrinted = false;
         
@@ -58,15 +50,6 @@ public class MultipleSvComparator {
         processStructuralVariants(StructuralVariantType.UNK);
 
         fileWriter.close();
-    }
-
-    private void checkOtherParsers(List<SvResultParser> parsers, List<String> labels) {
-        if (parsers.size() != labels.size())
-            throw new IllegalArgumentException("Structural variant parsers list do not correspond to its labels list - are of different size");
-
-        for (String label : labels)
-            if (StringUtils.isBlank(label))
-                throw new IllegalArgumentException("List of labels for structural variant parsers contains empty label.");
     }
 
     public boolean isOnlyCommonGenes() {
@@ -177,8 +160,14 @@ public class MultipleSvComparator {
             double percentage = mainVariants.size() == 0 ? 0.0 :
                     (double) similarVariantCounts[i] / (double) mainVariants.size() * 100.0;
 
-            System.out.printf("Common SV (%s with %s / %s) - %s:\t%d/%d (%.02f%%)%n", svLabelMain, svLabelOthers.get(i), svLabelMain, svType.toString(),
-                    similarVariantCounts[i], mainVariants.size(), percentage);
+            System.out.printf("Common SV (%s with %s / %s) - %s:\t%d/%d (%.02f%%)%n",
+                    svParserMain.getName(),
+                    svParserOthers.get(i).getName(),
+                    svParserMain.getName(),
+                    svType.toString(),
+                    similarVariantCounts[i],
+                    mainVariants.size(),
+                    percentage);
         }
 
     }
@@ -215,19 +204,23 @@ public class MultipleSvComparator {
         return new ArrayList<>(similarStructuralVariants.values());
     }
 
-    private void printHeader(String svLabelMain, List<String> svLabelOthers) throws Exception {
+    private void printHeader(SvResultParser svParserMain, List<SvResultParser> svParserOthers) throws Exception {
+        String svLabelMain = svParserMain.getName();
+
         String header =
                 "sv_type\t" +
                 "src_chr\t" +
                 "dst_chr\t" +
-                svLabelMain + "_src_pos\t" +
-                svLabelMain + "_dst_pos\t" +
-                svLabelMain + "_sv_size\t" +
-                svLabelMain + "_sv_fraction\t" +
-                svLabelMain + "_gene\t" +
-                svLabelMain + "_id";
+                svParserMain + "_src_pos\t" +
+                svParserMain + "_dst_pos\t" +
+                svParserMain + "_sv_size\t" +
+                svParserMain + "_sv_fraction\t" +
+                svParserMain + "_gene\t" +
+                svParserMain + "_id";
 
-        for (String svLabelOther : svLabelOthers) {
+        for (SvResultParser svParserOther : svParserOthers) {
+            String svLabelOther = svParserOther.getName();
+
             header += "\t" +
                 svLabelOther + "_src_pos\t" +
                 svLabelOther + "_dst_pos\t" +

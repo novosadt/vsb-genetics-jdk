@@ -24,6 +24,12 @@ import cz.vsb.genetics.coverage.CoverageCalculator;
 import cz.vsb.genetics.coverage.CoverageInfo;
 import cz.vsb.genetics.om.struct.bionano.*;
 
+import javax.xml.stream.events.StartDocument;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 public class BionanoCoverageCalculator implements CoverageCalculator {
     private final String cmapReferenceFile;
     private final String cmapQueryFile;
@@ -78,7 +84,10 @@ public class BionanoCoverageCalculator implements CoverageCalculator {
                 minCoverage = coverages[i];
         }
 
-        return new CoverageInfo(coverages, minCoverage, maxCoverage, start, end);
+        CoverageInfo coverageInfo = new CoverageInfo(coverages, minCoverage, maxCoverage, start, end);
+        coverageInfo.setSiteCount(getIntervalSiteCount(chromosome, start, end));
+
+        return coverageInfo;
     }
 
     @Override
@@ -91,5 +100,19 @@ public class BionanoCoverageCalculator implements CoverageCalculator {
             total += coverage;
 
         return (double)total / (double)coverages.length;
+    }
+
+    private int getIntervalSiteCount(Chromosome chromosome, int start, int end) {
+        CMap chromosomeCMap = cmapContainerRef.get(chromosome.number);
+
+        Set<CMapEntry> entries = new HashSet<>();
+        for (int position = start; position <= end; position++) {
+            CMapEntry entry = chromosomeCMap.findNearestEntry(position);
+
+            if (entry.getPosition() >= start && entry.getPosition() <= end)
+                entries.add(chromosomeCMap.findNearestEntry(position));
+        }
+
+        return entries.size();
     }
 }

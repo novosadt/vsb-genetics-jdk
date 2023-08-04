@@ -37,6 +37,8 @@ public abstract class SvResultParserBase implements SvResultParser {
 
     private boolean removeDuplicateVariants = false;
 
+    protected String name;
+
     protected void reset() {
         translocations.clear();
         duplications.clear();
@@ -134,5 +136,10 @@ public abstract class SvResultParserBase implements SvResultParser {
 
         if (!removeDuplicateVariants || !variants.contains(variant))
             variants.add(variant);
+    }
+
+    @Override
+    public String getName() {
+        return name;
     }
 }

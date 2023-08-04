@@ -44,4 +44,6 @@ public interface SvResultParser {
     Set<StructuralVariant> getUnknown();
 
     List<StructuralVariant> getVariants();
+
+    String getName();
 }

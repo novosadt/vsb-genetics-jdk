@@ -33,6 +33,10 @@ import java.util.Map;
 public class SamplotCsvParser extends SvResultParserBase {
     private String[] header;
 
+    public SamplotCsvParser(String name) {
+        this.name = name;
+    }
+
     @Override
     public void parseResultFile(String file, String delim) throws Exception {
         BufferedReader reader = new BufferedReader(new FileReader(file));

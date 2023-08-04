@@ -35,6 +35,10 @@ public class BionanoPipelineResultParser extends SvResultParserBase {
     private Map<String, String> inversionBreakpointLinks = new HashMap<>();
     private Map<String, String> inversionBreakpointTypes = new HashMap<>();
 
+    public BionanoPipelineResultParser(String name) {
+        this.name = name;
+    }
+
     @Override
     public void parseResultFile(String file, String delim) throws Exception {
         SMapParser parser = new SMapParser();

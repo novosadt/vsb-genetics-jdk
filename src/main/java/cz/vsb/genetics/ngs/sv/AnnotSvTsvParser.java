@@ -38,8 +38,13 @@ public class AnnotSvTsvParser extends SvResultParserBase {
     private String[] header;
     private final boolean preferBaseSvType;
 
-    public AnnotSvTsvParser(boolean preferBaseSvType) {
+    public AnnotSvTsvParser(String name) {
+        this(name, false);
+    }
+
+    public AnnotSvTsvParser(String name, boolean preferBaseSvType) {
         this.preferBaseSvType = preferBaseSvType;
+        super.name = name;
     }
 
     @Override

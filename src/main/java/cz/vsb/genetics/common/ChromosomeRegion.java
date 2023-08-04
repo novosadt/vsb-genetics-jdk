@@ -37,6 +37,10 @@ public class ChromosomeRegion {
         this.name = name;
     }
 
+    public int getLength() {
+        return end - start;
+    }
+
     @Override
     public String toString() {
         return String.format("%s:%d-%d", chromosome, start, end);

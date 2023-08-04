@@ -9,6 +9,7 @@ public class CoverageInfo {
     int positionEnd;
     int samplingSize = 0;
     int coverageLimit = 0;
+    int siteCount = 0;
     Integer color;
 
     public CoverageInfo(int[] coverages, int minCoverage, int maxCoverage, int positionStart, int positionEnd) {
@@ -89,5 +90,13 @@ public class CoverageInfo {
 
     public void setColor(Integer color) {
         this.color = color;
+    }
+
+    public int getSiteCount() {
+        return siteCount;
+    }
+
+    public void setSiteCount(int siteCount) {
+        this.siteCount = siteCount;
     }
 }
