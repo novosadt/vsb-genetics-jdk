@@ -211,12 +211,12 @@ public class MultipleSvComparator {
                 "sv_type\t" +
                 "src_chr\t" +
                 "dst_chr\t" +
-                svParserMain + "_src_pos\t" +
-                svParserMain + "_dst_pos\t" +
-                svParserMain + "_sv_size\t" +
-                svParserMain + "_sv_fraction\t" +
-                svParserMain + "_gene\t" +
-                svParserMain + "_id";
+                svLabelMain + "_src_pos\t" +
+                svLabelMain + "_dst_pos\t" +
+                svLabelMain + "_sv_size\t" +
+                svLabelMain + "_sv_fraction\t" +
+                svLabelMain + "_gene\t" +
+                svLabelMain + "_id";
 
         for (SvResultParser svParserOther : svParserOthers) {
             String svLabelOther = svParserOther.getName();
