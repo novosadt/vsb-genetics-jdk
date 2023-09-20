@@ -180,13 +180,6 @@ public class MultipleSvComparator {
             return;
 
         int[] similarVariantCounts = new int[otherParsersVariants.size()];
-        List<List<StructuralVariant>> otherParserSimilarVariants = null;
-
-        if (isCalculateDistanceVarianceStats()) {
-            otherParserSimilarVariants = new ArrayList<>();
-            for (int i = 0; i < otherParsersVariants.size(); i++)
-                otherParserSimilarVariants.add(new ArrayList<>());
-        }
 
         for (StructuralVariant structuralVariant : mainVariants) {
             if (!processedVariants.contains(structuralVariant))
