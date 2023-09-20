@@ -64,12 +64,12 @@ public class MultipleSvComparator {
         for (SvResultParser svResultParser : svParserOthers) {
             String name = svResultParser.getName();
             
-            distanceVarianceStats.put(name + StructuralVariantType.BND, new StructuralVariantStatsItem(name, StructuralVariantType.BND));
-            distanceVarianceStats.put(name + StructuralVariantType.INV, new StructuralVariantStatsItem(name, StructuralVariantType.INV));
-            distanceVarianceStats.put(name + StructuralVariantType.DUP, new StructuralVariantStatsItem(name, StructuralVariantType.DUP));
-            distanceVarianceStats.put(name + StructuralVariantType.DEL, new StructuralVariantStatsItem(name, StructuralVariantType.DEL));
-            distanceVarianceStats.put(name + StructuralVariantType.INS, new StructuralVariantStatsItem(name, StructuralVariantType.INS));
-            distanceVarianceStats.put(name + StructuralVariantType.UNK, new StructuralVariantStatsItem(name, StructuralVariantType.UNK));
+            distanceVarianceStats.put(name + StructuralVariantType.BND, new StructuralVariantStatsItem(name, StructuralVariantType.BND, svParserMain.getTranslocations().size()));
+            distanceVarianceStats.put(name + StructuralVariantType.INV, new StructuralVariantStatsItem(name, StructuralVariantType.INV, svParserMain.getInversions().size()));
+            distanceVarianceStats.put(name + StructuralVariantType.DUP, new StructuralVariantStatsItem(name, StructuralVariantType.DUP, svParserMain.getDuplications().size()));
+            distanceVarianceStats.put(name + StructuralVariantType.DEL, new StructuralVariantStatsItem(name, StructuralVariantType.DEL, svParserMain.getDeletions().size()));
+            distanceVarianceStats.put(name + StructuralVariantType.INS, new StructuralVariantStatsItem(name, StructuralVariantType.INS, svParserMain.getInsertions().size()));
+            distanceVarianceStats.put(name + StructuralVariantType.UNK, new StructuralVariantStatsItem(name, StructuralVariantType.UNK, svParserMain.getUnknown().size()));
         }
     }
 
@@ -280,8 +280,6 @@ public class MultipleSvComparator {
             if (distanceVariance <= distanceVarianceThreshold)
                 item.addStructuralVariant(distanceVarianceThreshold);
         }
-
-        item.addSvCountTotal();
     }
 
     private void printHeader(SvResultParser svParserMain, List<SvResultParser> svParserOthers) throws Exception {

@@ -9,9 +9,10 @@ public class StructuralVariantStatsItem {
     private final Map<Integer, Integer> distanceVarianceCounts = new HashMap<>();
     int svCountTotal = 0;
 
-    public StructuralVariantStatsItem(String name, StructuralVariantType svType) {
+    public StructuralVariantStatsItem(String name, StructuralVariantType svType, int svCountTotal) {
         this.name = name;
         this.svType = svType;
+        this.svCountTotal = svCountTotal;
     }
 
     public void addStructuralVariant(int distanceVariance) {
@@ -43,9 +44,5 @@ public class StructuralVariantStatsItem {
 
     public void setSvCountTotal(int svCountTotal) {
         this.svCountTotal = svCountTotal;
-    }
-
-    public void addSvCountTotal() {
-        svCountTotal++;
     }
 }
