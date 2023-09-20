@@ -80,7 +80,7 @@ public class BionanoPipelineResultParser extends SvResultParserBase {
             addStructuralVariant(sv, deletions, StructuralVariantType.DEL);
         else if (type.contains("insertion"))
             addStructuralVariant(sv, insertions, StructuralVariantType.INS);
-        else if (type.contains("inversion")) {
+        else if (type.contains("inversion") || type.contains("duplication_inverted")) {
             inversionBreakpoints.put(sv.getId(), sv);
             inversionBreakpointLinks.put(sv.getId(), entry.getLinkID().toString());
             inversionBreakpointTypes.put(sv.getId(), type);
