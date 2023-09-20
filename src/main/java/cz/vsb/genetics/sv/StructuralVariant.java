@@ -36,6 +36,7 @@ public class StructuralVariant {
     private StructuralVariantType variantType;
     private StructuralVariantOrientation srcOrientation;
     private StructuralVariantOrientation dstOrientation;
+    private Long distanceVariance;
 
     public StructuralVariant(Chromosome srcChromosome, Long srcLoc, Chromosome dstChromosome, Long dstLoc,
                              Long size) {
@@ -168,5 +169,11 @@ public class StructuralVariant {
         this.info = info;
     }
 
+    public Long getDistanceVariance() {
+        return distanceVariance;
+    }
 
+    public void setDistanceVariance(Long distanceVariance) {
+        this.distanceVariance = distanceVariance;
+    }
 }

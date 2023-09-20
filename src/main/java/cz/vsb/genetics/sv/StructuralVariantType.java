@@ -35,7 +35,7 @@ public enum StructuralVariantType {
     public static Set<StructuralVariantType> getSvTypes(String svTypes) {
         Set<StructuralVariantType> types = new HashSet<>();
 
-        for (String type : svTypes.split(",")) {
+        for (String type : svTypes.split(";")) {
             type = type.trim().toUpperCase();
             try {
                 StructuralVariantType svType = StructuralVariantType.valueOf(type);

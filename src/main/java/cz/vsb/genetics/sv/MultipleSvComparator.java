@@ -18,6 +18,8 @@
 
 package cz.vsb.genetics.sv;
 
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.FileWriter;
@@ -26,12 +28,15 @@ import java.util.*;
 public class MultipleSvComparator {
     private FileWriter fileWriter;
     private boolean onlyCommonGenes = false;
-    private Long distanceVariance = null;
+    private Long distanceVarianceThreshold = null;
     private Double minimalProportion = null;
     private Set<StructuralVariantType> svTypes;
     private SvResultParser svParserMain;
     private List<SvResultParser> svParserOthers;
     private boolean mainPrinted;
+    private int[] distanceVarianceBasesCounts;
+    private boolean calculateDistanceVarianceStats = false;
+    private List<StructuralVariantStatsItem> distanceVarianceStats = new ArrayList<>();
 
     public void compareStructuralVariants(SvResultParser svParserMain, List<SvResultParser> svParserOthers, String outputFile) throws Exception {
         fileWriter = new FileWriter(outputFile);
@@ -52,6 +57,36 @@ public class MultipleSvComparator {
         fileWriter.close();
     }
 
+    public void saveDistanceVarianceStatistics(String outputFile) throws Exception {
+        if (distanceVarianceStats.size() == 0)
+            return;
+
+        int columns = 2 + distanceVarianceBasesCounts.length * 2 + 1;
+        String[] headers = new String[columns];
+        headers[0] = "name";
+        headers[1] = "sv_type";
+        headers[columns - 1] = "sv_count_total";
+        for (int i = 0, j = 2; i < distanceVarianceBasesCounts.length; i++, j += 2) {
+            headers[j] = "dist_var_" + distanceVarianceBasesCounts[i];
+            headers[j + 1] = "dist_var_pct_" + distanceVarianceBasesCounts[i];
+        }
+
+        try (FileWriter writer = new FileWriter(outputFile); CSVPrinter printer = new CSVPrinter(writer, CSVFormat.DEFAULT.withDelimiter(';').withHeader(headers))) {
+            for (StructuralVariantStatsItem item : distanceVarianceStats) {
+                String[] record = new String[columns];
+                record[0] = item.getName();
+                record[1] = item.getSvType().toString();
+                for (int i = 0, j = 2; i < distanceVarianceBasesCounts.length; i++, j += 2) {
+                    record[j] = String.valueOf(item.getSvCounts(distanceVarianceBasesCounts[i]));
+                    record[j + 1] = item.getSvCountTotal() == 0 ? "0" :String.valueOf((double)(item.getSvCounts(distanceVarianceBasesCounts[i])) / (double)item.getSvCountTotal() * 100.0);
+                }
+                record[columns - 1] = String.valueOf(item.getSvCountTotal());
+
+                printer.printRecord(record);
+            }
+        }
+    }
+
     public boolean isOnlyCommonGenes() {
         return onlyCommonGenes;
     }
@@ -60,12 +95,12 @@ public class MultipleSvComparator {
         this.onlyCommonGenes = onlyCommonGenes;
     }
 
-    public Long getDistanceVariance() {
-        return distanceVariance;
+    public Long getDistanceVarianceThreshold() {
+        return distanceVarianceThreshold;
     }
 
-    public void setDistanceVariance(Long distanceVariance) {
-        this.distanceVariance = distanceVariance;
+    public void setDistanceVarianceThreshold(Long distanceVarianceThreshold) {
+        this.distanceVarianceThreshold = distanceVarianceThreshold;
     }
 
     public Set<StructuralVariantType> getSvTypes() {
@@ -129,6 +164,13 @@ public class MultipleSvComparator {
             return;
 
         int[] similarVariantCounts = new int[otherParsersVariants.size()];
+        List<List<StructuralVariant>> otherParserSimilarVariants = null;
+
+        if (isCalculateDistanceVarianceStats()) {
+            otherParserSimilarVariants = new ArrayList<>();
+            for (int i = 0; i < otherParsersVariants.size(); i++)
+                otherParserSimilarVariants.add(new ArrayList<>());
+        }
 
         for (StructuralVariant structuralVariant : mainVariants) {
             if (!processedVariants.contains(structuralVariant))
@@ -148,6 +190,9 @@ public class MultipleSvComparator {
 
                 printSimilarVariants(structuralVariant, similarVariants, svType);
                 similarVariantCounts[i]++;
+
+                if (isCalculateDistanceVarianceStats())
+                    otherParserSimilarVariants.get(i).add(similarVariants.get(0));
             }
 
             mainPrinted = false;
@@ -156,6 +201,47 @@ public class MultipleSvComparator {
                 fileWriter.write("\n");
         }
 
+        printSimpleVariantsStatistics(mainVariants, otherParsersVariants, svType, similarVariantCounts);
+
+        if (isCalculateDistanceVarianceStats())
+            distanceVarianceStats.addAll(collectDistanceVarianceStatistics(otherParserSimilarVariants, svType));
+    }
+
+    private List<StructuralVariant> findNearestStructuralVariants(StructuralVariant structuralVariant,
+                                                                  Set<StructuralVariant> structuralVariants) {
+        Map<Long, StructuralVariant> similarStructuralVariants = new TreeMap<>();
+
+        for (StructuralVariant otherVariant : structuralVariants) {
+            if (!(structuralVariant.getSrcChromosome() == otherVariant.getSrcChromosome() &&
+                    structuralVariant.getDstChromosome() == otherVariant.getDstChromosome()))
+                continue;
+
+            Long srcDist = Math.abs(structuralVariant.getSrcLoc() - otherVariant.getSrcLoc());
+            Long dstDist = Math.abs(structuralVariant.getDstLoc() - otherVariant.getDstLoc());
+            Long distanceVariance = srcDist + dstDist;
+
+            otherVariant.setDistanceVariance(distanceVariance);
+
+            if (onlyCommonGenes) {
+                List<String> commonGenes = getCommonGenes(structuralVariant, otherVariant);
+                if (commonGenes.size() < 1)
+                    continue;
+            }
+
+            if (distanceVarianceThreshold != null && distanceVariance > distanceVarianceThreshold)
+                continue;
+
+            Double proportion = getSizeProportion(structuralVariant, otherVariant);
+            if (minimalProportion != null && proportion != null && proportion < minimalProportion)
+                continue;
+
+            similarStructuralVariants.put(distanceVariance, otherVariant);
+        }
+
+        return new ArrayList<>(similarStructuralVariants.values());
+    }
+
+    private void printSimpleVariantsStatistics(Set<StructuralVariant> mainVariants, List<Set<StructuralVariant>> otherParsersVariants, StructuralVariantType svType, int[] similarVariantCounts) {
         for (int i = 0; i < otherParsersVariants.size(); i++) {
             double percentage = mainVariants.size() == 0 ? 0.0 :
                     (double) similarVariantCounts[i] / (double) mainVariants.size() * 100.0;
@@ -169,39 +255,27 @@ public class MultipleSvComparator {
                     mainVariants.size(),
                     percentage);
         }
-
     }
 
-    private List<StructuralVariant> findNearestStructuralVariants(StructuralVariant structuralVariant,
-            Set<StructuralVariant> structuralVariants) {
-        Map<Long, StructuralVariant> similarStructuralVariants = new TreeMap<>();
+    private List<StructuralVariantStatsItem> collectDistanceVarianceStatistics(List<List<StructuralVariant>> otherParsersVariants, StructuralVariantType svType) {
+        List<StructuralVariantStatsItem> stats = new ArrayList<>();
+        for (int i = 0; i < otherParsersVariants.size(); i++) {
+            StructuralVariantStatsItem item = new StructuralVariantStatsItem();
+            item.setName(svParserOthers.get(i).getName());
+            item.setSvType(svType);
+            item.setSvCountTotal(otherParsersVariants.get(i).size());
 
-        for (StructuralVariant otherVariant : structuralVariants) {
-            if (!(structuralVariant.getSrcChromosome() == otherVariant.getSrcChromosome() &&
-                    structuralVariant.getDstChromosome() == otherVariant.getDstChromosome()))
-                continue;
-
-            Long srcDist = Math.abs(structuralVariant.getSrcLoc() - otherVariant.getSrcLoc());
-            Long dstDist = Math.abs(structuralVariant.getDstLoc() - otherVariant.getDstLoc());
-            Long distSum = srcDist + dstDist;
-
-            if (onlyCommonGenes) {
-                List<String> commonGenes = getCommonGenes(structuralVariant, otherVariant);
-                if (commonGenes.size() < 1)
-                    continue;
+            for (int distanceVariance : distanceVarianceBasesCounts) {
+                for (StructuralVariant structuralVariant : otherParsersVariants.get(i)) {
+                    if (structuralVariant.getDistanceVariance() <= distanceVariance)
+                        item.addStructuralVariant(distanceVariance);
+                }
             }
 
-            if (distanceVariance != null && distSum > distanceVariance)
-                continue;
-
-            Double proportion = getSizeProportion(structuralVariant, otherVariant);
-            if (minimalProportion != null && proportion != null && proportion < minimalProportion)
-                continue;
-
-            similarStructuralVariants.put(distSum, otherVariant);
+            stats.add(item);
         }
 
-        return new ArrayList<>(similarStructuralVariants.values());
+        return stats;
     }
 
     private void printHeader(SvResultParser svParserMain, List<SvResultParser> svParserOthers) throws Exception {
@@ -328,5 +402,17 @@ public class MultipleSvComparator {
 
     private String getVariantId(StructuralVariant structuralVariant) {
         return structuralVariant.getId() == null ? "" : structuralVariant.getId();
+    }
+
+    public void setDistanceVarianceBasesCounts(int[] distanceVarianceBasesCounts) {
+        this.distanceVarianceBasesCounts = distanceVarianceBasesCounts;
+    }
+
+    public void setCalculateDistanceVarianceStats(boolean calculateDistanceVarianceStats) {
+        this.calculateDistanceVarianceStats = calculateDistanceVarianceStats;
+    }
+
+    public boolean isCalculateDistanceVarianceStats() {
+        return calculateDistanceVarianceStats && distanceVarianceBasesCounts != null && distanceVarianceBasesCounts.length != 0;
     }
 }
