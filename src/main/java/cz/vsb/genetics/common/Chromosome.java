@@ -76,79 +76,79 @@ public enum Chromosome {
         label = label.toLowerCase();
         label = label.replaceAll("chr", "");
 
-        if (label.contains("mt") || label.contains("m") || label.contains("25"))
+        if (label.equals("mt") || label.equals("m") || label.equals("25"))
             return chrM;
 
-        if (label.contains("y") || label.contains("24"))
+        if (label.equals("y") || label.equals("24"))
             return chrY;
 
-        if (label.contains("x") || label.contains("23"))
+        if (label.equals("x") || label.equals("23"))
             return chrX;
 
-        if (label.contains("22"))
+        if (label.equals("22"))
             return chr22;
 
-        if (label.contains("21"))
+        if (label.equals("21"))
             return chr21;
 
-        if (label.contains("20"))
+        if (label.equals("20"))
             return chr20;
 
-        if (label.contains("19"))
+        if (label.equals("19"))
             return chr19;
 
-        if (label.contains("18"))
+        if (label.equals("18"))
             return chr18;
 
-        if (label.contains("17"))
+        if (label.equals("17"))
             return chr17;
 
-        if (label.contains("16"))
+        if (label.equals("16"))
             return chr16;
 
-        if (label.contains("15"))
+        if (label.equals("15"))
             return chr15;
 
-        if (label.contains("14"))
+        if (label.equals("14"))
             return chr14;
 
-        if (label.contains("13"))
+        if (label.equals("13"))
             return chr13;
 
-        if (label.contains("12"))
+        if (label.equals("12"))
             return chr12;
 
-        if (label.contains("11"))
+        if (label.equals("11"))
             return chr11;
 
-        if (label.contains("10"))
+        if (label.equals("10"))
             return chr10;
 
-        if (label.contains("9"))
+        if (label.equals("9"))
             return chr9;
 
-        if (label.contains("8"))
+        if (label.equals("8"))
             return chr8;
 
-        if (label.contains("7"))
+        if (label.equals("7"))
             return chr7;
 
-        if (label.contains("6"))
+        if (label.equals("6"))
             return chr6;
 
-        if (label.contains("5"))
+        if (label.equals("5"))
             return chr5;
 
-        if (label.contains("4"))
+        if (label.equals("4"))
             return chr4;
 
-        if (label.contains("3"))
+        if (label.equals("3"))
             return chr3;
 
-        if (label.contains("2"))
+        if (label.equals("2"))
             return chr2;
 
-        if (label.contains("1"))
+        if (label.equals("1"))
             return chr1;
 
         return null;
