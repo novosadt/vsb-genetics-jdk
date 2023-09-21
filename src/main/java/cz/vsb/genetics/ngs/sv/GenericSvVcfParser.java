@@ -87,7 +87,7 @@ public class GenericSvVcfParser extends SvResultParserBase {
             if (!m.find()) {
                 m = chromLocPatternWithoutChr.matcher(chromLoc);
                 if (!m.find()) {
-                    System.err.printf("Skipping BND variant (%s) - unsupported destination chromosome location format: %s\n", id, chromLoc);
+                    System.err.printf("Skipping BND variant: %s - unsupported destination chromosome location format: %s\n", id, chromLoc);
                     return;
                 }
             }
@@ -114,6 +114,11 @@ public class GenericSvVcfParser extends SvResultParserBase {
 
         Chromosome srcChrom = Chromosome.of(srcChromId);
         Chromosome dstChrom = Chromosome.of(dstChromId);
+
+        if (srcChrom == null || dstChrom == null) {
+            System.err.printf("Skipping variant: %s - unsupported chromosome format. Source chromosome: %s, Destination chromosome: %s\n", id, srcChromId, dstChromId);
+            return;
+        }
 
         StructuralVariant sv = new StructuralVariant(srcChrom, srcLoc, dstChrom, dstLoc, svLength);
         sv.setId(id);
