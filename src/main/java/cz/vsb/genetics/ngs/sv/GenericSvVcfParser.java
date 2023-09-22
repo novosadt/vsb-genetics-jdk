@@ -10,6 +10,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -18,19 +19,20 @@ public class GenericSvVcfParser extends SvResultParserBase {
     private String[] header;
     private final Pattern chromLocPatternWithChr = Pattern.compile("(chr\\d+|MT|M|T|mt|m|t|X|Y|x|y):(\\d+)");
     private final Pattern chromLocPatternWithoutChr = Pattern.compile("(\\d+|MT|M|T|mt|m|t|X|Y|x|y):(\\d+)");
-    private final boolean preferBaseSvType;
+    private boolean preferBaseSvType;
+    private boolean onlyFilterPass;
+    private int filteredCount = 0;
+    private int totalCount = 0;
+    private int skippedCount = 0;
 
     public GenericSvVcfParser(String name) {
-        this(name, false);
-    }
-
-    public GenericSvVcfParser(String name, boolean preferBaseSvType) {
-        this.preferBaseSvType = preferBaseSvType;
         this.name = name;
     }
 
     @Override
     public void parseResultFile(String file, String delim) throws Exception {
+        filteredCount = totalCount = skippedCount = 0;
+
         BufferedReader reader = new BufferedReader(new FileReader(file));
 
         String line;
@@ -73,14 +75,25 @@ public class GenericSvVcfParser extends SvResultParserBase {
     }
 
     private void addStructuralVariant(Map<String, String> values) {
+        totalCount++;
+
         String srcChromId = values.get("CHROM");
         Long srcLoc = new Long(values.get("POS"));
         String id = values.get("ID");
+        String filter = values.get("FILTER");
         String dstChromId = srcChromId;
         Map<String, String> info = getInfo(values.get("INFO"));
         Long dstLoc = info.containsKey("END") ? new Long(info.get("END")) : 0;
         Long svLength = StringUtils.isBlank(info.get("SVLEN")) ? 0 : Math.abs(new Long(info.get("SVLEN")));
         String svType = info.get("SVTYPE").toLowerCase();
+
+        boolean filtered = false;
+        boolean skipped = false;
+
+        if (onlyFilterPass && StringUtils.isNotBlank(filter) && !filter.trim().equalsIgnoreCase("pass")) {
+            System.err.printf("Filtering variant: %s - filter: %s\n", id, filter);
+            filtered = true;
+        }
 
         if (svType.equals("bnd")) {
             String chromLoc = values.get("ALT").toLowerCase();
@@ -89,7 +102,7 @@ public class GenericSvVcfParser extends SvResultParserBase {
                 m = chromLocPatternWithoutChr.matcher(chromLoc);
                 if (!m.find()) {
                     System.err.printf("Skipping BND variant: %s - unsupported destination chromosome location format: %s\n", id, chromLoc);
-                    return;
+                    skipped = true;
                 }
             }
 
@@ -101,8 +114,10 @@ public class GenericSvVcfParser extends SvResultParserBase {
             // in VCF with BND structural variant type. If a variant is of type Inversion or Duplication
             // on the same chromosome, take only one of them - skip entry with start breakpoint location
             // greater than end breakpoint location
-            if ((svType.equals("inv") || svType.equals("dup")) && srcLoc > dstLoc)
+            if ((svType.equals("inv") || svType.equals("dup")) && srcLoc > dstLoc) {
+                totalCount--;
                 return;
+            }
         }
 
         if (svType.equals("ins"))
@@ -118,7 +133,7 @@ public class GenericSvVcfParser extends SvResultParserBase {
 
         if (srcChrom == null || dstChrom == null) {
             System.err.printf("Skipping variant: %s - unsupported chromosome format. Source chromosome: %s, Destination chromosome: %s\n", id, srcChromId, dstChromId);
-            return;
+            skipped = true;
         }
 
         StructuralVariant sv = new StructuralVariant(srcChrom, srcLoc, dstChrom, dstLoc, svLength);
@@ -126,15 +141,29 @@ public class GenericSvVcfParser extends SvResultParserBase {
         sv.setInfo(info);
         sv.setVariantAlleleFraction(getAllelicFraction(info));
 
+        Set<StructuralVariant> variants;
+        StructuralVariantType type;
+        
         switch (svType) {
-            case "bnd" : addStructuralVariant(sv, translocations, StructuralVariantType.BND); break;
-            case "cnv" : addStructuralVariant(sv, copyNumberVariations, StructuralVariantType.CNV); break;
-            case "del" : addStructuralVariant(sv, deletions, StructuralVariantType.DEL); break;
-            case "ins" : addStructuralVariant(sv, insertions, StructuralVariantType.INS); break;
-            case "dup" : addStructuralVariant(sv, duplications, StructuralVariantType.DUP); break;
-            case "inv" : addStructuralVariant(sv, inversions, StructuralVariantType.INV); break;
-            default: addStructuralVariant(sv, unknown, StructuralVariantType.UNK);
+            case "bnd" : variants = translocations; type = StructuralVariantType.BND; break;
+            case "cnv" : variants = copyNumberVariations; type = StructuralVariantType.CNV; break;
+            case "del" : variants = deletions; type = StructuralVariantType.DEL; break;
+            case "ins" : variants = insertions; type = StructuralVariantType.INS; break;
+            case "dup" : variants = duplications; type = StructuralVariantType.DUP; break;
+            case "inv" : variants = inversions; type = StructuralVariantType.INV; break;
+            default: variants = unknown; type = StructuralVariantType.UNK;
         }
+
+        if (!filtered && !skipped) {
+            if (!addStructuralVariant(sv, variants, type))
+                totalCount--;
+        }
+
+        if (filtered)
+            filteredCount++;
+
+        if (!filtered && skipped)
+            skippedCount++;
     }
 
     private Map<String, String> getInfo(String info) {
@@ -176,5 +205,20 @@ public class GenericSvVcfParser extends SvResultParserBase {
         }
     }
 
+    @Override
+    protected void printStructuralVariantStats(String parserName) {
+        super.printStructuralVariantStats(parserName);
 
+        System.out.printf("Filtered SV count:\t\t%d (%.2f%%)\n", filteredCount, (double) filteredCount / (double) totalCount * 100.0);
+        System.out.printf("Skipped SV count:\t\t%d (%.2f%%)\n", skippedCount, (double) skippedCount / (double) totalCount * 100.0);
+        System.out.printf("Total SV count:\t\t\t%d\n", totalCount);
+    }
+
+    public void setPreferBaseSvType(boolean preferBaseSvType) {
+        this.preferBaseSvType = preferBaseSvType;
+    }
+
+    public void setOnlyFilterPass(boolean onlyFilterPass) {
+        this.onlyFilterPass = onlyFilterPass;
+    }
 }

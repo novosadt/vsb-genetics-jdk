@@ -116,7 +116,7 @@ public abstract class SvResultParserBase implements SvResultParser {
         System.out.println("Unknown SV type (UNK):\t" + getUnknown().size());
     }
 
-    protected void addStructuralVariant(StructuralVariant variant, Set<StructuralVariant> variants, StructuralVariantType svType) {
+    protected boolean addStructuralVariant(StructuralVariant variant, Set<StructuralVariant> variants, StructuralVariantType svType) {
         variant.setVariantType(svType);
 
         // In case of translocation sort chromosomes
@@ -134,8 +134,12 @@ public abstract class SvResultParserBase implements SvResultParser {
             }
         }
 
-        if (!removeDuplicateVariants || !variants.contains(variant))
-            variants.add(variant);
+        if (removeDuplicateVariants && variants.contains(variant))
+            return false;
+
+        variants.add(variant);
+
+        return true;
     }
 
     @Override
