@@ -194,10 +194,11 @@ public class MultipleSvComparator {
                 List<StructuralVariant> similarVariants = findNearestStructuralVariants(structuralVariant, others);
                 similarVariantsTotal += similarVariants.size();
 
+                printSimilarVariants(structuralVariant, similarVariants, svType);
+
                 if (similarVariants.size() == 0)
                     continue;
 
-                printSimilarVariants(structuralVariant, similarVariants, svType);
                 similarVariantCounts[i]++;
 
                 if (isCalculateDistanceVarianceStats()) {
@@ -207,9 +208,7 @@ public class MultipleSvComparator {
             }
 
             mainPrinted = false;
-
-            if (similarVariantsTotal != 0)
-                fileWriter.write("\n");
+            fileWriter.write("\n");
         }
 
         printSimpleVariantsStatistics(mainVariants, otherParsersVariants, svType, similarVariantCounts);
@@ -319,13 +318,6 @@ public class MultipleSvComparator {
 
     private void printSimilarVariants(StructuralVariant variant,
                                       List<StructuralVariant> similarVariants, StructuralVariantType svType) throws Exception {
-        StructuralVariant similarStructuralVariant = similarVariants.get(0);
-
-        Long srcDist = Math.abs(variant.getSrcLoc() - similarStructuralVariant.getSrcLoc());
-        Long dstDist = Math.abs(variant.getDstLoc() - similarStructuralVariant.getDstLoc());
-
-        String commonGenes = StringUtils.join(getCommonGenes(variant, similarStructuralVariant), ",");
-
         String line = "";
 
         if (!mainPrinted) {
@@ -343,19 +335,30 @@ public class MultipleSvComparator {
             mainPrinted = true;
         }
 
-        line += "\t" +
-                similarStructuralVariant.getSrcLoc() + "\t" +
-                similarStructuralVariant.getDstLoc() + "\t" +
-                similarStructuralVariant.getSize() + "\t" +
-                getAllelicFraction(similarStructuralVariant) + "\t" +
-                srcDist + "\t" +
-                dstDist + "\t" +
-                (srcDist + dstDist) + "\t" +
-                similarStructuralVariant.getGene() + "\t" +
-                commonGenes + "\t" +
-                getSizeDifference(variant, similarStructuralVariant) + "\t" +
-                getSizeProportionAsString(variant, similarStructuralVariant) + "\t" +
-                getVariantId(similarStructuralVariant);
+        if (similarVariants.size() > 0) {
+            StructuralVariant similarStructuralVariant = similarVariants.get(0);
+
+            Long srcDist = Math.abs(variant.getSrcLoc() - similarStructuralVariant.getSrcLoc());
+            Long dstDist = Math.abs(variant.getDstLoc() - similarStructuralVariant.getDstLoc());
+
+            String commonGenes = StringUtils.join(getCommonGenes(variant, similarStructuralVariant), ",");
+
+            line += "\t" +
+                    similarStructuralVariant.getSrcLoc() + "\t" +
+                    similarStructuralVariant.getDstLoc() + "\t" +
+                    similarStructuralVariant.getSize() + "\t" +
+                    getAllelicFraction(similarStructuralVariant) + "\t" +
+                    srcDist + "\t" +
+                    dstDist + "\t" +
+                    (srcDist + dstDist) + "\t" +
+                    similarStructuralVariant.getGene() + "\t" +
+                    commonGenes + "\t" +
+                    getSizeDifference(variant, similarStructuralVariant) + "\t" +
+                    getSizeProportionAsString(variant, similarStructuralVariant) + "\t" +
+                    getVariantId(similarStructuralVariant);
+        }
+        else
+            line += "\t\t\t\t\t\t\t\t\t\t\t\t";
 
         fileWriter.write(line);
     }
