@@ -20,6 +20,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class SamplotBionanoVariantGenerator {
+    private String outputImageFormat = "png";
+
     public void generate(SvResultParser bionanoParser, String samplotVariantFile, String samplotCmdBase,
                          String samplotWorkdir, int forks) throws Exception {
 
@@ -45,7 +47,7 @@ public class SamplotBionanoVariantGenerator {
                     samplotCmdBase,
                     variant.getId(),
                     variantFileCsv,
-                    variantFileCsv.replace(".csv", ".png"),
+                    variantFileCsv.replace(".csv", "." + outputImageFormat),
                     getChromosomeForCommand(variant.getSrcChromosome()),
                     variant.getSrcLoc(),
                     variant.getSrcLoc(),
@@ -59,7 +61,7 @@ public class SamplotBionanoVariantGenerator {
                 samplotCmdBase,
                 variant.getId(),
                 variantFileCsv,
-                variantFileCsv.replace(".csv", ".png"),
+                variantFileCsv.replace(".csv", "." + outputImageFormat),
                 getChromosomeForCommand(variant.getSrcChromosome()),
                 variant.getSrcLoc(),
                 variant.getDstLoc(),
@@ -123,5 +125,9 @@ public class SamplotBionanoVariantGenerator {
             return "Y";
 
         return Integer.toString(chromosome.number);
+    }
+
+    public void setOutputImageFormat(String outputImageFormat) {
+        this.outputImageFormat = outputImageFormat;
     }
 }
