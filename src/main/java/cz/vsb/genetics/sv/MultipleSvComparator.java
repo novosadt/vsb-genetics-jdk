@@ -187,12 +187,10 @@ public class MultipleSvComparator {
             else
                 continue;
 
-            int similarVariantsTotal = 0;
-            for (int i = 0; i < otherParsersVariants.size(); i++) {
+             for (int i = 0; i < otherParsersVariants.size(); i++) {
                 Set<StructuralVariant> others = otherParsersVariants.get(i);
 
                 List<StructuralVariant> similarVariants = findNearestStructuralVariants(structuralVariant, others);
-                similarVariantsTotal += similarVariants.size();
 
                 printSimilarVariants(structuralVariant, similarVariants, svType);
 
@@ -244,11 +242,20 @@ public class MultipleSvComparator {
         return new ArrayList<>(similarStructuralVariants.values());
     }
 
-    private Long getDistanceVariance(StructuralVariant structuralVariant, StructuralVariant otherVariant) {
-        Long srcDist = Math.abs(structuralVariant.getSrcLoc() - otherVariant.getSrcLoc());
-        Long dstDist = Math.abs(structuralVariant.getDstLoc() - otherVariant.getDstLoc());
-        Long distanceVariance = srcDist + dstDist;
+    private long getDistanceVariance(StructuralVariant structuralVariant, StructuralVariant otherVariant) {
+        long srcDist = Math.abs(structuralVariant.getSrcLoc() - otherVariant.getSrcLoc());
+        long dstDist = Math.abs(structuralVariant.getDstLoc() - otherVariant.getDstLoc());
+        long distanceVariance = srcDist + dstDist;
+
         return distanceVariance;
+    }
+
+    private double getIntersectionVariance(StructuralVariant structuralVariant, StructuralVariant otherVariant) {
+        long from = structuralVariant.getSrcLoc() < otherVariant.getSrcLoc() ? structuralVariant.getSrcLoc() : otherVariant.getSrcLoc();
+        long to = structuralVariant.getDstLoc() > otherVariant.getDstLoc() ? structuralVariant.getDstLoc() : otherVariant.getDstLoc();
+        double intersectionVariance = (double)(to - from) / (double)(structuralVariant.getSize() + otherVariant.getSize());
+
+        return intersectionVariance;
     }
 
     private void printSimpleVariantsStatistics(Set<StructuralVariant> mainVariants, List<Set<StructuralVariant>> otherParsersVariants, StructuralVariantType svType, int[] similarVariantCounts) {
@@ -306,6 +313,7 @@ public class MultipleSvComparator {
                 svLabelOther + "_src_pos_dist\t" +
                 svLabelOther + "_dst_pos_dist\t" +
                 svLabelOther + "_dist_var\t" +
+                svLabelOther + "_intersect_var\t" +
                 svLabelOther + "_gene\t" +
                 svLabelOther + "_common_genes\t" +
                 svLabelOther + "_size_difference\t" +
@@ -350,7 +358,8 @@ public class MultipleSvComparator {
                     getAllelicFraction(similarStructuralVariant) + "\t" +
                     srcDist + "\t" +
                     dstDist + "\t" +
-                    (srcDist + dstDist) + "\t" +
+                    getDistanceVariance(variant, similarStructuralVariant) + "\t" +
+                    getIntersectionVariance(variant, similarStructuralVariant) + "\t" +
                     similarStructuralVariant.getGene() + "\t" +
                     commonGenes + "\t" +
                     getSizeDifference(variant, similarStructuralVariant) + "\t" +
@@ -358,7 +367,7 @@ public class MultipleSvComparator {
                     getVariantId(similarStructuralVariant);
         }
         else
-            line += "\t\t\t\t\t\t\t\t\t\t\t\t";
+            line += "\t\t\t\t\t\t\t\t\t\t\t\t\t";
 
         fileWriter.write(line);
     }

@@ -48,7 +48,7 @@ public class StructuralVariant {
         this.srcLoc = srcLoc;
         this.dstChromosome = dstChromosome;
         this.dstLoc = dstLoc;
-        this.size = size;
+        this.size = Math.abs(size);
         this.gene = gene;
     }
 
