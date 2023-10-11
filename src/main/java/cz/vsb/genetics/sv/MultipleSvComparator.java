@@ -255,7 +255,9 @@ public class MultipleSvComparator {
         long to = structuralVariant.getDstLoc() > otherVariant.getDstLoc() ? structuralVariant.getDstLoc() : otherVariant.getDstLoc();
         double intersectionVariance = (double)(to - from) / (double)(structuralVariant.getSize() + otherVariant.getSize());
 
-        return intersectionVariance;
+        //Value of 0.5 means absolute match of variants. So just "normalize" it to 0.0 if there is absolute match.
+        //Value of 0.5 for absolute match may be misleading
+        return intersectionVariance - 0.5;
     }
 
     private void printSimpleVariantsStatistics(Set<StructuralVariant> mainVariants, List<Set<StructuralVariant>> otherParsersVariants, StructuralVariantType svType, int[] similarVariantCounts) {
