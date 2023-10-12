@@ -29,14 +29,16 @@ public class MultipleSvComparator {
     private FileWriter fileWriter;
     private boolean onlyCommonGenes = false;
     private Long distanceVarianceThreshold = null;
+    private Double intersectionVarianceThreshold = null;
     private Double minimalProportion = null;
     private Set<StructuralVariantType> svTypes;
     private SvResultParser svParserMain;
     private List<SvResultParser> svParserOthers;
     private boolean mainPrinted;
     private int[] distanceVarianceBasesCounts;
-    private boolean calculateDistanceVarianceStats = false;
-    private Map<String, StructuralVariantStatsItem> distanceVarianceStats = new LinkedHashMap<>();
+    private double[] intersectionVarianceThresholds;
+    private boolean calculateStructuralVariantStats = false;
+    private Map<String, StructuralVariantStatsItem> structuralVariantStats = new LinkedHashMap<>();
 
     public void compareStructuralVariants(SvResultParser svParserMain, List<SvResultParser> svParserOthers, String outputFile) throws Exception {
         fileWriter = new FileWriter(outputFile);
@@ -47,8 +49,8 @@ public class MultipleSvComparator {
 
         mainPrinted = false;
 
-        if (calculateDistanceVarianceStats)
-            initDistanceVarianceStats();
+        if (calculateStructuralVariantStats)
+            initStructuralVariantStats();
 
         processStructuralVariants(StructuralVariantType.BND);
         processStructuralVariants(StructuralVariantType.INV);
@@ -60,75 +62,86 @@ public class MultipleSvComparator {
         fileWriter.close();
     }
 
-    private void initDistanceVarianceStats() {
+    private void initStructuralVariantStats() {
         for (SvResultParser svResultParser : svParserOthers) {
             String name = svResultParser.getName();
             
-            distanceVarianceStats.put(name + StructuralVariantType.BND, new StructuralVariantStatsItem(name, StructuralVariantType.BND, svParserMain.getTranslocations().size()));
-            distanceVarianceStats.put(name + StructuralVariantType.INV, new StructuralVariantStatsItem(name, StructuralVariantType.INV, svParserMain.getInversions().size()));
-            distanceVarianceStats.put(name + StructuralVariantType.DUP, new StructuralVariantStatsItem(name, StructuralVariantType.DUP, svParserMain.getDuplications().size()));
-            distanceVarianceStats.put(name + StructuralVariantType.DEL, new StructuralVariantStatsItem(name, StructuralVariantType.DEL, svParserMain.getDeletions().size()));
-            distanceVarianceStats.put(name + StructuralVariantType.INS, new StructuralVariantStatsItem(name, StructuralVariantType.INS, svParserMain.getInsertions().size()));
-            distanceVarianceStats.put(name + StructuralVariantType.UNK, new StructuralVariantStatsItem(name, StructuralVariantType.UNK, svParserMain.getUnknown().size()));
+            structuralVariantStats.put(name + StructuralVariantType.BND, new StructuralVariantStatsItem(name, StructuralVariantType.BND, svParserMain.getTranslocations().size()));
+            structuralVariantStats.put(name + StructuralVariantType.INV, new StructuralVariantStatsItem(name, StructuralVariantType.INV, svParserMain.getInversions().size()));
+            structuralVariantStats.put(name + StructuralVariantType.DUP, new StructuralVariantStatsItem(name, StructuralVariantType.DUP, svParserMain.getDuplications().size()));
+            structuralVariantStats.put(name + StructuralVariantType.DEL, new StructuralVariantStatsItem(name, StructuralVariantType.DEL, svParserMain.getDeletions().size()));
+            structuralVariantStats.put(name + StructuralVariantType.INS, new StructuralVariantStatsItem(name, StructuralVariantType.INS, svParserMain.getInsertions().size()));
+            structuralVariantStats.put(name + StructuralVariantType.UNK, new StructuralVariantStatsItem(name, StructuralVariantType.UNK, svParserMain.getUnknown().size()));
         }
     }
 
-    public void saveDistanceVarianceStatistics(String outputFile) throws Exception {
-        if (distanceVarianceStats.size() == 0)
+    public void saveStructuralVariantStats(String outputFile) throws Exception {
+        if (structuralVariantStats.size() == 0)
             return;
 
-        int columns = 2 + distanceVarianceBasesCounts.length * 2 + 1;
-        String[] headers = new String[columns];
-        headers[0] = "name";
-        headers[1] = "sv_type";
-        headers[columns - 1] = "sv_count_total";
-        for (int i = 0, j = 2; i < distanceVarianceBasesCounts.length; i++, j += 2) {
-            headers[j] = "dist_var_" + distanceVarianceBasesCounts[i];
-            headers[j + 1] = "dist_var_pct_" + distanceVarianceBasesCounts[i];
+        List<String> headers = new ArrayList<>();
+        headers.add("name");
+        headers.add("sv_type");
+        headers.add("sv_count_total");
+
+        if (distanceVarianceBasesCounts != null) {
+            for (int basesCount : distanceVarianceBasesCounts) {
+                headers.add("dist_var_" + basesCount);
+                headers.add("dist_var_pct_" + basesCount);
+            }
         }
 
-        try (FileWriter writer = new FileWriter(outputFile); CSVPrinter printer = new CSVPrinter(writer, CSVFormat.DEFAULT.withDelimiter(';').withHeader(headers))) {
-            for (StructuralVariantStatsItem item : distanceVarianceStats.values()) {
-                String[] record = new String[columns];
-                record[0] = item.getName();
-                record[1] = item.getSvType().toString();
-                for (int i = 0, j = 2; i < distanceVarianceBasesCounts.length; i++, j += 2) {
-                    record[j] = String.valueOf(item.getSvCounts(distanceVarianceBasesCounts[i]));
-                    record[j + 1] = item.getSvCountTotal() == 0 ? "0" :String.valueOf((double)(item.getSvCounts(distanceVarianceBasesCounts[i])) / (double)item.getSvCountTotal() * 100.0);
+        if (intersectionVarianceThresholds != null) {
+            for (double threshold:  intersectionVarianceThresholds) {
+                headers.add("intersect_var_" + threshold);
+                headers.add("intersect_var_pct_" + threshold);
+            }
+        }
+
+        try (FileWriter writer = new FileWriter(outputFile);
+             CSVPrinter printer = new CSVPrinter(writer, CSVFormat.DEFAULT.builder().setDelimiter(';').setHeader(headers.toArray(new String[0])).build())) {
+
+            for (StructuralVariantStatsItem item : structuralVariantStats.values()) {
+                List<String> record = new ArrayList<>();
+                record.add(item.getName());
+                record.add(item.getSvType().toString());
+                record.add(String.valueOf(item.getSvCountTotal()));
+
+                if (distanceVarianceBasesCounts != null) {
+                    for (int basesCount : distanceVarianceBasesCounts) {
+                        int svCount = item.getSvCountsDistanceVariance(basesCount);
+                        record.add(String.valueOf(svCount));
+                        record.add(String.format("%.2f", item.getSvCountTotal() == 0 ? 0.0 : (double) (svCount) / (double) item.getSvCountTotal() * 100.0));
+                    }
                 }
-                record[columns - 1] = String.valueOf(item.getSvCountTotal());
+
+                if (intersectionVarianceThresholds != null) {
+                    for (double threshold : intersectionVarianceThresholds) {
+                        int svCount = item.getSvCountsIntersectionVariance(threshold);
+                        record.add(String.valueOf(svCount));
+                        record.add(String.format("%.2f", item.getSvCountTotal() == 0 ? 0.0 : (double) (svCount) / (double) item.getSvCountTotal() * 100.0));
+                    }
+                }
 
                 printer.printRecord(record);
             }
         }
     }
 
-    public boolean isOnlyCommonGenes() {
-        return onlyCommonGenes;
-    }
-
     public void setOnlyCommonGenes(boolean onlyCommonGenes) {
         this.onlyCommonGenes = onlyCommonGenes;
-    }
-
-    public Long getDistanceVarianceThreshold() {
-        return distanceVarianceThreshold;
     }
 
     public void setDistanceVarianceThreshold(Long distanceVarianceThreshold) {
         this.distanceVarianceThreshold = distanceVarianceThreshold;
     }
 
-    public Set<StructuralVariantType> getSvTypes() {
-        return svTypes;
+    public void setIntersectionVarianceThreshold(Double intersectionVarianceThreshold) {
+        this.intersectionVarianceThreshold = intersectionVarianceThreshold;
     }
 
-    public void setVariantType(Set<StructuralVariantType> svTypes) {
+    public void setVariantTypes(Set<StructuralVariantType> svTypes) {
         this.svTypes = svTypes;
-    }
-
-    public Double getMinimalProportion() {
-        return minimalProportion;
     }
 
     public void setMinimalProportion(Double minimalProportion) {
@@ -199,9 +212,8 @@ public class MultipleSvComparator {
 
                 similarVariantCounts[i]++;
 
-                if (isCalculateDistanceVarianceStats()) {
-                    addDistanceVarianceStatistics(svParserOthers.get(i).getName(), structuralVariant.getVariantType(),
-                            getDistanceVariance(structuralVariant, similarVariants.get(0)));
+                if (calculateStructuralVariantStats) {
+                    addStructuralVariantStats(structuralVariant, i, similarVariants);
                 }
             }
 
@@ -212,9 +224,21 @@ public class MultipleSvComparator {
         printSimpleVariantsStatistics(mainVariants, otherParsersVariants, svType, similarVariantCounts);
     }
 
+    private void addStructuralVariantStats(StructuralVariant structuralVariant, int otherParserIndex, List<StructuralVariant> similarVariants) throws Exception {
+        if (distanceVarianceBasesCounts != null) {
+            addDistanceVarianceStatistics(svParserOthers.get(otherParserIndex).getName(), structuralVariant.getVariantType(),
+                    getDistanceVariance(structuralVariant, similarVariants.get(0)));
+        }
+
+        if (intersectionVarianceThresholds != null) {
+            addIntersectionVarianceStats(svParserOthers.get(otherParserIndex).getName(), structuralVariant.getVariantType(),
+                    getIntersectionVariance(structuralVariant, similarVariants.get(0)));
+        }
+    }
+
     private List<StructuralVariant> findNearestStructuralVariants(StructuralVariant structuralVariant,
                                                                   Set<StructuralVariant> structuralVariants) {
-        Map<Long, StructuralVariant> similarStructuralVariants = new TreeMap<>();
+        Map<Double, StructuralVariant> similarStructuralVariants = new TreeMap<>();
 
         for (StructuralVariant otherVariant : structuralVariants) {
             if (!(structuralVariant.getSrcChromosome() == otherVariant.getSrcChromosome() &&
@@ -222,6 +246,7 @@ public class MultipleSvComparator {
                 continue;
 
             Long distanceVariance = getDistanceVariance(structuralVariant, otherVariant);
+            Double intersectionVariance = getIntersectionVariance(structuralVariant, otherVariant);
 
             if (onlyCommonGenes) {
                 List<String> commonGenes = getCommonGenes(structuralVariant, otherVariant);
@@ -229,14 +254,15 @@ public class MultipleSvComparator {
                     continue;
             }
 
-            if (distanceVarianceThreshold != null && distanceVariance > distanceVarianceThreshold)
+            if ((distanceVarianceThreshold != null && distanceVariance > distanceVarianceThreshold) &&
+                (intersectionVarianceThreshold != null && intersectionVariance > intersectionVarianceThreshold))
                 continue;
 
             Double proportion = getSizeProportion(structuralVariant, otherVariant);
             if (minimalProportion != null && proportion != null && proportion < minimalProportion)
                 continue;
 
-            similarStructuralVariants.put(distanceVariance, otherVariant);
+            similarStructuralVariants.put(intersectionVariance, otherVariant);
         }
 
         return new ArrayList<>(similarStructuralVariants.values());
@@ -278,7 +304,7 @@ public class MultipleSvComparator {
 
     private void addDistanceVarianceStatistics(String name, StructuralVariantType svType, Long distanceVariance) throws Exception {
         String itemId = name + svType;
-        StructuralVariantStatsItem item = distanceVarianceStats.get(itemId);
+        StructuralVariantStatsItem item = structuralVariantStats.get(itemId);
 
         if (item == null) {
             throw new IllegalAccessException("Structural variant statistics item not initialized for id: " + itemId);
@@ -286,7 +312,24 @@ public class MultipleSvComparator {
 
         for (int distanceVarianceThreshold : distanceVarianceBasesCounts) {
             if (distanceVariance <= distanceVarianceThreshold)
-                item.addStructuralVariant(distanceVarianceThreshold);
+                item.addStructuralVariantDistanceVariance(distanceVarianceThreshold);
+        }
+    }
+
+    private void addIntersectionVarianceStats(String name, StructuralVariantType svType, Double intersectionVariance) throws Exception {
+        String itemId = name + svType;
+        StructuralVariantStatsItem item = structuralVariantStats.get(itemId);
+
+        if (item == null) {
+            throw new IllegalAccessException("Structural variant statistics item not initialized for id: " + itemId);
+        }
+
+        if (intersectionVarianceThresholds == null || intersectionVarianceThresholds.length == 0)
+            return;
+
+        for (double intersectionVarianceThreshold : intersectionVarianceThresholds) {
+            if (intersectionVariance <= intersectionVarianceThreshold)
+                item.addStructuralVariantIntersectionVariance(intersectionVarianceThreshold);
         }
     }
 
@@ -426,11 +469,11 @@ public class MultipleSvComparator {
         this.distanceVarianceBasesCounts = distanceVarianceBasesCounts;
     }
 
-    public void setCalculateDistanceVarianceStats(boolean calculateDistanceVarianceStats) {
-        this.calculateDistanceVarianceStats = calculateDistanceVarianceStats;
+    public void setIntersectionVarianceThresholds(double[] intersectionVarianceThresholds) {
+        this.intersectionVarianceThresholds = intersectionVarianceThresholds;
     }
 
-    public boolean isCalculateDistanceVarianceStats() {
-        return calculateDistanceVarianceStats && distanceVarianceBasesCounts != null && distanceVarianceBasesCounts.length != 0;
+    public void setCalculateStructuralVariantStats(boolean calculateStructuralVariantStats) {
+        this.calculateStructuralVariantStats = calculateStructuralVariantStats;
     }
 }

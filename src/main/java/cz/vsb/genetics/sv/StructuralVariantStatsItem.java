@@ -7,7 +7,8 @@ public class StructuralVariantStatsItem {
     private final String name;
     private final StructuralVariantType svType;
     private final Map<Integer, Integer> distanceVarianceCounts = new HashMap<>();
-    int svCountTotal = 0;
+    private final Map<Double, Integer> intersectionVarianceCounts = new HashMap<>();
+    int svCountTotal;
 
     public StructuralVariantStatsItem(String name, StructuralVariantType svType, int svCountTotal) {
         this.name = name;
@@ -15,7 +16,7 @@ public class StructuralVariantStatsItem {
         this.svCountTotal = svCountTotal;
     }
 
-    public void addStructuralVariant(int distanceVariance) {
+    public void addStructuralVariantDistanceVariance(int distanceVariance) {
         Integer count = distanceVarianceCounts.get(distanceVariance);
 
         if (count == null)
@@ -24,8 +25,23 @@ public class StructuralVariantStatsItem {
         distanceVarianceCounts.put(distanceVariance, ++count);
     }
 
-    public int getSvCounts(int distanceVariance) {
+    public int getSvCountsDistanceVariance(int distanceVariance) {
         Integer count = distanceVarianceCounts.get(distanceVariance);
+
+        return count == null ? 0 : count;
+    }
+
+    public void addStructuralVariantIntersectionVariance(double intersectionVariance) {
+        Integer count = intersectionVarianceCounts.get(intersectionVariance);
+
+        if (count == null)
+            count = 0;
+
+        intersectionVarianceCounts.put(intersectionVariance, ++count);
+    }
+
+    public int getSvCountsIntersectionVariance(double intersectionVariance) {
+        Integer count = intersectionVarianceCounts.get(intersectionVariance);
 
         return count == null ? 0 : count;
     }
