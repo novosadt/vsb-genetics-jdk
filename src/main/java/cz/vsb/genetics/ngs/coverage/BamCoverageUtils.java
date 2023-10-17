@@ -100,7 +100,7 @@ public class BamCoverageUtils {
         double sum = 0.0;
         int[] coverages = getCoverage(chromosome, start, end, samReader).getCoverages();
 
-        for (long coverage : coverages)
+        for (int coverage : coverages)
             sum += coverage;
 
         return sum / (double)coverages.length;

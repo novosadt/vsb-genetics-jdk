@@ -72,10 +72,10 @@ public class VariantFrequencyCalculator {
 
     private double calculateVariantFrequency(SamReader samReader, StructuralVariant variant, ReadInsertSizeInfo insertSizeInfo,
                                              int readLength, int maxInsert, int minInsert, int maxDepth) {
-        int srcAlignmentsStart = variant.getSrcLoc().intValue() - maxInsert;
-        int srcAlignmentsEnd = variant.getSrcLoc().intValue() + maxInsert;
-        int dstAlignmentsStart = variant.getSrcLoc().intValue() - maxInsert;
-        int dstAlignmentsEnd = variant.getSrcLoc().intValue() + maxInsert;
+        int srcAlignmentsStart = variant.getSrcLoc() - maxInsert;
+        int srcAlignmentsEnd = variant.getSrcLoc() + maxInsert;
+        int dstAlignmentsStart = variant.getSrcLoc() - maxInsert;
+        int dstAlignmentsEnd = variant.getSrcLoc() + maxInsert;
 
         List<SAMRecord> srcReads = getReadsInInterval(samReader, variant.getSrcChromosome(), srcAlignmentsStart, srcAlignmentsEnd);
         List<SAMRecord> dstReads = getReadsInInterval(samReader, variant.getSrcChromosome(), dstAlignmentsStart, dstAlignmentsEnd);

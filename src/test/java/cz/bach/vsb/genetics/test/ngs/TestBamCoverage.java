@@ -59,7 +59,7 @@ public class TestBamCoverage {
 
         BamCoverageCalculatorST coverageInfo = new BamCoverageCalculatorST(BAM_FILE, BAM_INDEX_FILE);
         coverageInfo.open();
-        long coverage = coverageInfo.getPositionCoverage(chromosome, position);
+        int coverage = coverageInfo.getPositionCoverage(chromosome, position);
         coverageInfo.close();
 
         stopWatch.stop();

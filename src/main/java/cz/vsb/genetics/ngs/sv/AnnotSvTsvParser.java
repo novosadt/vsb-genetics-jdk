@@ -85,9 +85,9 @@ public class AnnotSvTsvParser extends SvResultParserBase {
         String id = values.get("ID");
         String srcChromId = "chr" + values.get("SV_chrom");
         String dstChromId = srcChromId;
-        Long srcLoc = new Long(values.get("SV_start"));
-        Long dstLoc = new Long(values.get("SV_end"));
-        Long svLength = StringUtils.isBlank(values.get("SV_length")) ? 0 : Math.abs(new Long(values.get("SV_length")));
+        int srcLoc = Integer.valueOf(values.get("SV_start"));
+        int dstLoc = Integer.valueOf(values.get("SV_end"));
+        int svLength = StringUtils.isBlank(values.get("SV_length")) ? 0 : Math.abs(Integer.valueOf(values.get("SV_length")));
         String svType = values.get("SV_type").toLowerCase();
         Map<String, String> info = getInfo(values.get("INFO"));
 
@@ -113,7 +113,7 @@ public class AnnotSvTsvParser extends SvResultParserBase {
             }
 
             dstChromId = m.group(1);
-            dstLoc = new Long(m.group(2));
+            dstLoc = Integer.valueOf(m.group(2));
             svType = getBndVariantType(info).toString().toLowerCase();
         }
 

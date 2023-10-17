@@ -123,8 +123,8 @@ public abstract class SvResultParserBase implements SvResultParser {
         if (variant.getVariantType() == StructuralVariantType.BND) {
             Chromosome srcChromosome = variant.getSrcChromosome();
             Chromosome dstChromosome = variant.getDstChromosome();
-            long srcLoc = variant.getSrcLoc();
-            long dstLoc = variant.getDstLoc();
+            int srcLoc = variant.getSrcLoc();
+            int dstLoc = variant.getDstLoc();
 
             if (srcChromosome.number > dstChromosome.number) {
                 variant.setSrcChromosome(dstChromosome);

@@ -58,14 +58,14 @@ public class BionanoPipelineResultParser extends SvResultParserBase {
     private void addStructuralVariant(SMapEntry entry) {
         String srcChromId = entry.getRefcontigID1().toString();
         String dstChromId = entry.getRefcontigID2().toString();
-        Long srcLoc = entry.getRefStartPos().longValue();
-        Long dstLoc = entry.getRefEndPos().longValue();
+        int srcLoc = entry.getRefStartPos().intValue();
+        int dstLoc = entry.getRefEndPos().intValue();
         String type = entry.getType().toLowerCase();
-        long size = dstLoc - srcLoc;
+        int size = dstLoc - srcLoc;
         String gene = entry.getOverlapGenes() == null ? "" : entry.getOverlapGenes();
 
         if (type.contains("translocation"))
-            size = 0L;
+            size = 0;
 
         Chromosome srcChrom = Chromosome.of(srcChromId);
         Chromosome dstChrom = Chromosome.of(dstChromId);
@@ -100,8 +100,8 @@ public class BionanoPipelineResultParser extends SvResultParserBase {
 
             StructuralVariant link = inversionBreakpoints.get(inversionBreakpointLinks.get(breakpoint.getId()));
 
-            long baseStart = breakpoint.getDstLoc() != -1 ? breakpoint.getDstLoc() : breakpoint.getSrcLoc();
-            long linkStart = link.getSrcLoc() != -1 ? link.getSrcLoc() : link.getDstLoc();
+            int baseStart = breakpoint.getDstLoc() != -1 ? breakpoint.getDstLoc() : breakpoint.getSrcLoc();
+            int linkStart = link.getSrcLoc() != -1 ? link.getSrcLoc() : link.getDstLoc();
 
             StructuralVariant breakpointA = breakpoint;
             StructuralVariant breakpointB = link;
@@ -111,9 +111,9 @@ public class BionanoPipelineResultParser extends SvResultParserBase {
                 breakpointB = breakpoint;
             }
 
-            long startPos = breakpointA.getDstLoc() != -1 ? breakpointA.getDstLoc() : breakpointA.getSrcLoc();
-            long endPos = breakpointB.getSrcLoc() != -1 ? breakpointB.getSrcLoc() : breakpointB.getDstLoc();
-            long size = endPos - startPos;
+            int startPos = breakpointA.getDstLoc() != -1 ? breakpointA.getDstLoc() : breakpointA.getSrcLoc();
+            int endPos = breakpointB.getSrcLoc() != -1 ? breakpointB.getSrcLoc() : breakpointB.getDstLoc();
+            int size = endPos - startPos;
 
             StructuralVariant inversion = new StructuralVariant(breakpoint.getSrcChromosome(), startPos, breakpoint.getDstChromosome(), endPos, size, breakpoint.getGene());
             inversion.setVariantAlleleFraction(breakpoint.getVariantAllelicFraction());

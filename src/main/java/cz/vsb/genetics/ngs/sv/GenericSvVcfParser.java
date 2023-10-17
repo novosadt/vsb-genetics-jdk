@@ -78,13 +78,13 @@ public class GenericSvVcfParser extends SvResultParserBase {
         totalCount++;
 
         String srcChromId = values.get("CHROM");
-        Long srcLoc = new Long(values.get("POS"));
+        int srcLoc = Integer.valueOf(values.get("POS"));
         String id = values.get("ID");
         String filter = values.get("FILTER");
         String dstChromId = srcChromId;
         Map<String, String> info = getInfo(values.get("INFO"));
-        Long dstLoc = info.containsKey("END") ? new Long(info.get("END")) : 0;
-        Long svLength = StringUtils.isBlank(info.get("SVLEN")) ? 0 : Math.abs(new Long(info.get("SVLEN")));
+        int dstLoc = info.containsKey("END") ? Integer.valueOf(info.get("END")) : 0;
+        int svLength = StringUtils.isBlank(info.get("SVLEN")) ? 0 : Math.abs(Integer.valueOf(info.get("SVLEN")));
         String svType = info.get("SVTYPE").toLowerCase();
 
         boolean filtered = false;
@@ -107,7 +107,7 @@ public class GenericSvVcfParser extends SvResultParserBase {
             }
 
             dstChromId = m.group(1);
-            dstLoc = new Long(m.group(2));
+            dstLoc = Integer.valueOf(m.group(2));
             svType = getBndVariantType(info).toString().toLowerCase();
 
             // There are paired entries for Inversions and Duplications

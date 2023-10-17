@@ -54,7 +54,7 @@ public class TestBionanoCoverage {
 
         BionanoCoverageCalculator coverageInfo = new BionanoCoverageCalculator(CMAP_REF, CMAP_QRY, XMAP);
         coverageInfo.open();
-        long coverage = coverageInfo.getPositionCoverage(chromosome, position);
+        int coverage = coverageInfo.getPositionCoverage(chromosome, position);
         coverageInfo.close();
 
         stopWatch.stop();

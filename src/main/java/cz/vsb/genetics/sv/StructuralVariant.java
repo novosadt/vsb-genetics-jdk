@@ -27,9 +27,9 @@ public class StructuralVariant {
     private String id;
     private Chromosome srcChromosome;
     private Chromosome dstChromosome;
-    private Long srcLoc;
-    private Long dstLoc;
-    private final Long size;
+    private int srcLoc;
+    private int dstLoc;
+    private final int size;
     private final String gene;
     private Double variantAlleleFraction;
     private Map<String, String> info;
@@ -37,13 +37,13 @@ public class StructuralVariant {
     private StructuralVariantOrientation srcOrientation;
     private StructuralVariantOrientation dstOrientation;
 
-    public StructuralVariant(Chromosome srcChromosome, Long srcLoc, Chromosome dstChromosome, Long dstLoc,
-                             Long size) {
+    public StructuralVariant(Chromosome srcChromosome, int srcLoc, Chromosome dstChromosome, int dstLoc,
+                             int size) {
         this(srcChromosome, srcLoc, dstChromosome, dstLoc, size, null);
     }
 
-    public StructuralVariant(Chromosome srcChromosome, Long srcLoc, Chromosome dstChromosome, Long dstLoc,
-                             Long size, String gene) {
+    public StructuralVariant(Chromosome srcChromosome, int srcLoc, Chromosome dstChromosome, int dstLoc,
+                             int size, String gene) {
         this.srcChromosome = srcChromosome;
         this.srcLoc = srcLoc;
         this.dstChromosome = dstChromosome;
@@ -59,23 +59,21 @@ public class StructuralVariant {
 
         StructuralVariant that = (StructuralVariant) o;
 
+        if (srcLoc != that.srcLoc) return false;
+        if (dstLoc != that.dstLoc) return false;
+        if (size != that.size) return false;
         if (srcChromosome != that.srcChromosome) return false;
-        if (!srcLoc.equals(that.srcLoc)) return false;
         if (dstChromosome != that.dstChromosome) return false;
-        if (!dstLoc.equals(that.dstLoc)) return false;
-        if (!size.equals(that.size)) return false;
-        if (variantType != that.variantType) return false;
-
-        return true;
+        return variantType == that.variantType;
     }
 
     @Override
     public int hashCode() {
         int result = srcChromosome.hashCode();
-        result = 31 * result + srcLoc.hashCode();
         result = 31 * result + dstChromosome.hashCode();
-        result = 31 * result + dstLoc.hashCode();
-        result = 31 * result + size.hashCode();
+        result = 31 * result + srcLoc;
+        result = 31 * result + dstLoc;
+        result = 31 * result + size;
         result = 31 * result + variantType.hashCode();
         return result;
     }
@@ -84,7 +82,7 @@ public class StructuralVariant {
         return srcChromosome;
     }
 
-    public Long getSrcLoc() {
+    public int getSrcLoc() {
         return srcLoc;
     }
 
@@ -92,11 +90,11 @@ public class StructuralVariant {
         return dstChromosome;
     }
 
-    public Long getDstLoc() {
+    public int getDstLoc() {
         return dstLoc;
     }
 
-    public Long getSize() {
+    public int getSize() {
         return size;
     }
 
@@ -144,11 +142,11 @@ public class StructuralVariant {
         this.dstChromosome = dstChromosome;
     }
 
-    public void setSrcLoc(Long srcLoc) {
+    public void setSrcLoc(int srcLoc) {
         this.srcLoc = srcLoc;
     }
 
-    public void setDstLoc(Long dstLoc) {
+    public void setDstLoc(int dstLoc) {
         this.dstLoc = dstLoc;
     }
 

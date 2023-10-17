@@ -18,17 +18,22 @@
 
 package cz.vsb.genetics.sv;
 
+import cz.vsb.genetics.common.ChromosomeRegion;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.FileWriter;
 import java.util.*;
 
 public class MultipleSvComparator {
+    private static final Logger log = LoggerFactory.getLogger(MultipleSvComparator.class);
+
     private FileWriter fileWriter;
     private boolean onlyCommonGenes = false;
-    private Long distanceVarianceThreshold = null;
+    private Integer distanceVarianceThreshold = null;
     private Double intersectionVarianceThreshold = null;
     private Double minimalProportion = null;
     private Set<StructuralVariantType> svTypes;
@@ -39,6 +44,7 @@ public class MultipleSvComparator {
     private double[] intersectionVarianceThresholds;
     private boolean calculateStructuralVariantStats = false;
     private Map<String, StructuralVariantStatsItem> structuralVariantStats = new LinkedHashMap<>();
+    private List<ChromosomeRegion> excludedRegions;
 
     public void compareStructuralVariants(SvResultParser svParserMain, List<SvResultParser> svParserOthers, String outputFile) throws Exception {
         fileWriter = new FileWriter(outputFile);
@@ -132,7 +138,7 @@ public class MultipleSvComparator {
         this.onlyCommonGenes = onlyCommonGenes;
     }
 
-    public void setDistanceVarianceThreshold(Long distanceVarianceThreshold) {
+    public void setDistanceVarianceThreshold(Integer distanceVarianceThreshold) {
         this.distanceVarianceThreshold = distanceVarianceThreshold;
     }
 
@@ -195,6 +201,9 @@ public class MultipleSvComparator {
         int[] similarVariantCounts = new int[otherParsersVariants.size()];
 
         for (StructuralVariant structuralVariant : mainVariants) {
+            if (isFiltered(structuralVariant))
+                continue;
+
             if (!processedVariants.contains(structuralVariant))
                 processedVariants.add(structuralVariant);
             else
@@ -224,6 +233,18 @@ public class MultipleSvComparator {
         printSimpleVariantsStatistics(mainVariants, otherParsersVariants, svType, similarVariantCounts);
     }
 
+    private boolean isFiltered(StructuralVariant variant) {
+        if (excludedRegions != null && excludedRegions.size() > 0) {
+            for (ChromosomeRegion excluded : excludedRegions) {
+                if (excluded.isInRegion(variant.getSrcChromosome(), variant.getSrcLoc())) {
+
+                }
+            }
+        }
+
+        return false;
+    }
+
     private void addStructuralVariantStats(StructuralVariant structuralVariant, int otherParserIndex, List<StructuralVariant> similarVariants) throws Exception {
         if (distanceVarianceBasesCounts != null) {
             addDistanceVarianceStatistics(svParserOthers.get(otherParserIndex).getName(), structuralVariant.getVariantType(),
@@ -245,8 +266,8 @@ public class MultipleSvComparator {
                     structuralVariant.getDstChromosome() == otherVariant.getDstChromosome()))
                 continue;
 
-            Long distanceVariance = getDistanceVariance(structuralVariant, otherVariant);
-            Double intersectionVariance = getIntersectionVariance(structuralVariant, otherVariant);
+            int distanceVariance = getDistanceVariance(structuralVariant, otherVariant);
+            double intersectionVariance = getIntersectionVariance(structuralVariant, otherVariant);
 
             if (onlyCommonGenes) {
                 List<String> commonGenes = getCommonGenes(structuralVariant, otherVariant);
@@ -268,17 +289,17 @@ public class MultipleSvComparator {
         return new ArrayList<>(similarStructuralVariants.values());
     }
 
-    private long getDistanceVariance(StructuralVariant structuralVariant, StructuralVariant otherVariant) {
-        long srcDist = Math.abs(structuralVariant.getSrcLoc() - otherVariant.getSrcLoc());
-        long dstDist = Math.abs(structuralVariant.getDstLoc() - otherVariant.getDstLoc());
-        long distanceVariance = srcDist + dstDist;
+    private int getDistanceVariance(StructuralVariant structuralVariant, StructuralVariant otherVariant) {
+        int srcDist = Math.abs(structuralVariant.getSrcLoc() - otherVariant.getSrcLoc());
+        int dstDist = Math.abs(structuralVariant.getDstLoc() - otherVariant.getDstLoc());
+        int distanceVariance = srcDist + dstDist;
 
         return distanceVariance;
     }
 
     private double getIntersectionVariance(StructuralVariant structuralVariant, StructuralVariant otherVariant) {
-        long from = structuralVariant.getSrcLoc() < otherVariant.getSrcLoc() ? structuralVariant.getSrcLoc() : otherVariant.getSrcLoc();
-        long to = structuralVariant.getDstLoc() > otherVariant.getDstLoc() ? structuralVariant.getDstLoc() : otherVariant.getDstLoc();
+        int from = Math.min(structuralVariant.getSrcLoc(), otherVariant.getSrcLoc());
+        int to = Math.max(structuralVariant.getDstLoc(), otherVariant.getDstLoc());
         double intersectionVariance = (double)(to - from) / (double)(structuralVariant.getSize() + otherVariant.getSize());
 
         //Value of 0.5 means absolute match of variants. So just "normalize" it to 0.0 if there is absolute match.
@@ -302,7 +323,7 @@ public class MultipleSvComparator {
         }
     }
 
-    private void addDistanceVarianceStatistics(String name, StructuralVariantType svType, Long distanceVariance) throws Exception {
+    private void addDistanceVarianceStatistics(String name, StructuralVariantType svType, int distanceVariance) throws Exception {
         String itemId = name + svType;
         StructuralVariantStatsItem item = structuralVariantStats.get(itemId);
 
@@ -391,8 +412,8 @@ public class MultipleSvComparator {
         if (similarVariants.size() > 0) {
             StructuralVariant similarStructuralVariant = similarVariants.get(0);
 
-            Long srcDist = Math.abs(variant.getSrcLoc() - similarStructuralVariant.getSrcLoc());
-            Long dstDist = Math.abs(variant.getDstLoc() - similarStructuralVariant.getDstLoc());
+            int srcDist = Math.abs(variant.getSrcLoc() - similarStructuralVariant.getSrcLoc());
+            int dstDist = Math.abs(variant.getDstLoc() - similarStructuralVariant.getDstLoc());
 
             String commonGenes = StringUtils.join(getCommonGenes(variant, similarStructuralVariant), ",");
 
@@ -445,7 +466,7 @@ public class MultipleSvComparator {
         if (main.getSize() == 0 || other.getSize() == 0)
             return "";
 
-        return Long.toString(other.getSize() - main.getSize());
+        return Integer.toString(other.getSize() - main.getSize());
     }
 
     private String getSizeProportionAsString(StructuralVariant main, StructuralVariant other) {
@@ -475,5 +496,9 @@ public class MultipleSvComparator {
 
     public void setCalculateStructuralVariantStats(boolean calculateStructuralVariantStats) {
         this.calculateStructuralVariantStats = calculateStructuralVariantStats;
+    }
+
+    public void setExcludedRegions(List<ChromosomeRegion> excludedRegions) {
+        this.excludedRegions = excludedRegions;
     }
 }
