@@ -362,6 +362,7 @@ public class MultipleSvComparator {
                 "sv_type\t" +
                 "src_chr\t" +
                 "dst_chr\t" +
+                svLabelMain + "_filter\t" +
                 svLabelMain + "_src_pos\t" +
                 svLabelMain + "_dst_pos\t" +
                 svLabelMain + "_sv_size\t" +
@@ -400,12 +401,14 @@ public class MultipleSvComparator {
                     svType.toString() + "\t" +
                     variant.getSrcChromosome().toString() + "\t" +
                     variant.getDstChromosome().toString() + "\t" +
+                    StringUtils.join(variant.getFilters(), ";") + "\t" +
                     variant.getSrcLoc() + "\t" +
                     variant.getDstLoc() + "\t" +
                     variant.getSize() + "\t" +
                     getAllelicFraction(variant) + "\t" +
                     variant.getGene() + "\t" +
                     getVariantId(variant);
+
 
             mainPrinted = true;
         }
