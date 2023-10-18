@@ -21,6 +21,7 @@ package cz.vsb.genetics.sv;
 import cz.vsb.genetics.common.ChromosomeRegion;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.jexl2.parser.ASTTrueNode;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -201,8 +202,7 @@ public class MultipleSvComparator {
         int[] similarVariantCounts = new int[otherParsersVariants.size()];
 
         for (StructuralVariant structuralVariant : mainVariants) {
-            if (isFiltered(structuralVariant))
-                continue;
+            applyVariantFilters(structuralVariant);
 
             if (!processedVariants.contains(structuralVariant))
                 processedVariants.add(structuralVariant);
@@ -221,7 +221,7 @@ public class MultipleSvComparator {
 
                 similarVariantCounts[i]++;
 
-                if (calculateStructuralVariantStats) {
+                if (calculateStructuralVariantStats && !structuralVariant.isFiltered()) {
                     addStructuralVariantStats(structuralVariant, i, similarVariants);
                 }
             }
@@ -233,16 +233,17 @@ public class MultipleSvComparator {
         printSimpleVariantsStatistics(mainVariants, otherParsersVariants, svType, similarVariantCounts);
     }
 
-    private boolean isFiltered(StructuralVariant variant) {
+    private void applyVariantFilters(StructuralVariant variant) {
         if (excludedRegions != null && excludedRegions.size() > 0) {
             for (ChromosomeRegion excluded : excludedRegions) {
-                if (excluded.isInRegion(variant.getSrcChromosome(), variant.getSrcLoc())) {
-
+                if (excluded.isInRegion(variant.getSrcChromosome(), variant.getSrcLoc()) ||
+                        excluded.isInRegion(variant.getDstChromosome(), variant.getDstLoc())) {
+                    log.info(String.format("FILTER: %s - Variant (%s) id: %s", StructuralVariantFilter.EXCLUDED_REGION, variant.getVariantType(), variant.getId()));
+                    variant.addFilter(StructuralVariantFilter.EXCLUDED_REGION);
+                    break;
                 }
             }
         }
-
-        return false;
     }
 
     private void addStructuralVariantStats(StructuralVariant structuralVariant, int otherParserIndex, List<StructuralVariant> similarVariants) throws Exception {

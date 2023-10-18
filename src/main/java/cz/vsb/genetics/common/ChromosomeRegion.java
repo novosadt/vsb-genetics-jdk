@@ -72,10 +72,10 @@ public class ChromosomeRegion {
         if (!this.chromosome.equals(chromosome))
             return false;
 
-        int start = Math.max(Math.abs(getStart()), Math.abs(getEnd()));
-        int end = Math.min(Math.abs(getEnd()), Math.abs(getStart()));
+        int start = Math.min(Math.abs(getStart()), Math.abs(getEnd()));
+        int end = Math.max(Math.abs(getEnd()), Math.abs(getStart()));
 
-         return (position >= start || position <= end);
+        return (position >= start && position <= end);
     }
 
     public static ChromosomeRegion valueOf(String value) {
@@ -108,7 +108,7 @@ public class ChromosomeRegion {
     public static ChromosomeRegion valueOf(String value, String delimiter) {
         String[] values = value.split(delimiter);
 
-        if (value.length() != 3)
+        if (values.length < 3)
             return null;
 
         Chromosome chromosome = Chromosome.of(values[0]);

@@ -21,7 +21,7 @@ package cz.vsb.genetics.sv;
 
 import cz.vsb.genetics.common.Chromosome;
 
-import java.util.Map;
+import java.util.*;
 
 public class StructuralVariant {
     private String id;
@@ -36,6 +36,7 @@ public class StructuralVariant {
     private StructuralVariantType variantType;
     private StructuralVariantOrientation srcOrientation;
     private StructuralVariantOrientation dstOrientation;
+    private Set<StructuralVariantFilter> filter = new LinkedHashSet<>();
 
     public StructuralVariant(Chromosome srcChromosome, int srcLoc, Chromosome dstChromosome, int dstLoc,
                              int size) {
@@ -164,5 +165,17 @@ public class StructuralVariant {
 
     public void setInfo(Map<String, String> info) {
         this.info = info;
+    }
+
+    public void addFilter(StructuralVariantFilter value) {
+        filter.add(value);
+    }
+
+    public List<StructuralVariantFilter> getFilters() {
+        return new ArrayList<>(filter);
+    }
+
+    public boolean isFiltered() {
+        return filter.size() > 0;
     }
 }
