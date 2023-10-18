@@ -21,7 +21,6 @@ package cz.vsb.genetics.sv;
 import cz.vsb.genetics.common.ChromosomeRegion;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
-import org.apache.commons.jexl2.parser.ASTTrueNode;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
