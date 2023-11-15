@@ -72,12 +72,12 @@ public class MultipleSvComparator {
         for (SvResultParser svResultParser : svParserOthers) {
             String name = svResultParser.getName();
             
-            structuralVariantStats.put(name + StructuralVariantType.BND, new StructuralVariantStatsItem(name, StructuralVariantType.BND, svParserMain.getTranslocations().size()));
-            structuralVariantStats.put(name + StructuralVariantType.INV, new StructuralVariantStatsItem(name, StructuralVariantType.INV, svParserMain.getInversions().size()));
-            structuralVariantStats.put(name + StructuralVariantType.DUP, new StructuralVariantStatsItem(name, StructuralVariantType.DUP, svParserMain.getDuplications().size()));
-            structuralVariantStats.put(name + StructuralVariantType.DEL, new StructuralVariantStatsItem(name, StructuralVariantType.DEL, svParserMain.getDeletions().size()));
-            structuralVariantStats.put(name + StructuralVariantType.INS, new StructuralVariantStatsItem(name, StructuralVariantType.INS, svParserMain.getInsertions().size()));
-            structuralVariantStats.put(name + StructuralVariantType.UNK, new StructuralVariantStatsItem(name, StructuralVariantType.UNK, svParserMain.getUnknown().size()));
+            structuralVariantStats.put(name + StructuralVariantType.BND, new StructuralVariantStatsItem(name, StructuralVariantType.BND));
+            structuralVariantStats.put(name + StructuralVariantType.INV, new StructuralVariantStatsItem(name, StructuralVariantType.INV));
+            structuralVariantStats.put(name + StructuralVariantType.DUP, new StructuralVariantStatsItem(name, StructuralVariantType.DUP));
+            structuralVariantStats.put(name + StructuralVariantType.DEL, new StructuralVariantStatsItem(name, StructuralVariantType.DEL));
+            structuralVariantStats.put(name + StructuralVariantType.INS, new StructuralVariantStatsItem(name, StructuralVariantType.INS));
+            structuralVariantStats.put(name + StructuralVariantType.UNK, new StructuralVariantStatsItem(name, StructuralVariantType.UNK));
         }
     }
 
@@ -199,9 +199,13 @@ public class MultipleSvComparator {
             return;
 
         int[] similarVariantCounts = new int[otherParsersVariants.size()];
+        int unfilteredSvCount = 0;
 
         for (StructuralVariant structuralVariant : mainVariants) {
             applyVariantFilters(structuralVariant);
+
+            if (!structuralVariant.isFiltered())
+                unfilteredSvCount++;
 
             if (!processedVariants.contains(structuralVariant))
                 processedVariants.add(structuralVariant);
@@ -229,6 +233,9 @@ public class MultipleSvComparator {
             fileWriter.write("\n");
         }
 
+        if (calculateStructuralVariantStats)
+            setStatsSvCountTotal(unfilteredSvCount, svType);
+
         printSimpleVariantsStatistics(mainVariants, otherParsersVariants, svType, similarVariantCounts);
     }
 
@@ -242,6 +249,14 @@ public class MultipleSvComparator {
                     break;
                 }
             }
+        }
+    }
+
+    private void setStatsSvCountTotal(int svCountTotal, StructuralVariantType svType) {
+        for (SvResultParser svResultParser : svParserOthers) {
+            String name = svResultParser.getName();
+
+            structuralVariantStats.get(name + svType).setSvCountTotal(svCountTotal);
         }
     }
 
@@ -283,7 +298,13 @@ public class MultipleSvComparator {
             if (minimalProportion != null && proportion != null && proportion < minimalProportion)
                 continue;
 
-            similarStructuralVariants.put(intersectionVariance, otherVariant);
+            // In case of BND variant (Translocation), there is no information about variant size,
+            // thus intersection variance score cannot be calculated. Distance variance score is used instead
+            // for variant sorting.
+            if (structuralVariant.getVariantType() == StructuralVariantType.BND)
+                similarStructuralVariants.put(Double.valueOf(distanceVariance), otherVariant);
+            else
+                similarStructuralVariants.put(intersectionVariance, otherVariant);
         }
 
         return new ArrayList<>(similarStructuralVariants.values());

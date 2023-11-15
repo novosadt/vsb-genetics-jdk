@@ -10,7 +10,7 @@ public class StructuralVariantStatsItem {
     private final Map<Double, Integer> intersectionVarianceCounts = new HashMap<>();
     int svCountTotal;
 
-    public StructuralVariantStatsItem(String name, StructuralVariantType svType, int svCountTotal) {
+    public StructuralVariantStatsItem(String name, StructuralVariantType svType) {
         this.name = name;
         this.svType = svType;
         this.svCountTotal = svCountTotal;
