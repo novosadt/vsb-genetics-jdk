@@ -290,21 +290,32 @@ public class MultipleSvComparator {
                     continue;
             }
 
-            if ((distanceVarianceThreshold != null && distanceVariance > distanceVarianceThreshold) &&
-                (intersectionVarianceThreshold != null && intersectionVariance > intersectionVarianceThreshold))
-                continue;
+            // distance variance filter
+            boolean distanceVarianceFilter = true;
+            if (distanceVarianceThreshold != null && distanceVariance > distanceVarianceThreshold)
+                distanceVarianceFilter = false;
 
+            // intersection variance filter
+            boolean intersectionVarianceFilter = true;
+            if(intersectionVarianceThreshold != null && intersectionVariance > intersectionVarianceThreshold)
+                intersectionVarianceFilter = false;
+
+            // proportion filter
+            boolean sizeProportionFilter = true;
             Double proportion = getSizeProportion(structuralVariant, otherVariant);
             if (minimalProportion != null && proportion != null && proportion < minimalProportion)
-                continue;
+                sizeProportionFilter = false;
 
-            // In case of BND variant (Translocation), there is no information about variant size,
-            // thus intersection variance score cannot be calculated. Distance variance score is used instead
-            // for variant sorting.
-            if (structuralVariant.getVariantType() == StructuralVariantType.BND)
-                similarStructuralVariants.put(Double.valueOf(distanceVariance), otherVariant);
-            else
-                similarStructuralVariants.put(intersectionVariance, otherVariant);
+            // If one of the filters passes, variant is added for further processing.
+            if (distanceVarianceFilter || (intersectionVarianceFilter && sizeProportionFilter)) {
+                // In case of BND variant (Translocation), there is no information about variant size,
+                // thus intersection variance score cannot be calculated. Distance variance score is used instead
+                // for variant sorting.
+                if (structuralVariant.getVariantType() == StructuralVariantType.BND)
+                    similarStructuralVariants.put(Double.valueOf(distanceVariance), otherVariant);
+                else
+                    similarStructuralVariants.put(intersectionVariance, otherVariant);
+            }
         }
 
         return new ArrayList<>(similarStructuralVariants.values());
