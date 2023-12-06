@@ -9,11 +9,11 @@ public class StructuralVariantStatsItem {
     private final Map<Integer, Integer> distanceVarianceCounts = new HashMap<>();
     private final Map<Double, Integer> intersectionVarianceCounts = new HashMap<>();
     int svCountTotal;
+    int svCountPassed = 0;
 
     public StructuralVariantStatsItem(String name, StructuralVariantType svType) {
         this.name = name;
         this.svType = svType;
-        this.svCountTotal = svCountTotal;
     }
 
     public void addStructuralVariantDistanceVariance(int distanceVariance) {
@@ -60,5 +60,13 @@ public class StructuralVariantStatsItem {
 
     public void setSvCountTotal(int svCountTotal) {
         this.svCountTotal = svCountTotal;
+    }
+
+    public int getSvCountPassed() {
+        return svCountPassed;
+    }
+
+    public void addSvCountPassed() {
+        svCountPassed++;
     }
 }

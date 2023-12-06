@@ -72,13 +72,17 @@ public class MultipleSvComparator {
         for (SvResultParser svResultParser : svParserOthers) {
             String name = svResultParser.getName();
             
-            structuralVariantStats.put(name + StructuralVariantType.BND, new StructuralVariantStatsItem(name, StructuralVariantType.BND));
-            structuralVariantStats.put(name + StructuralVariantType.INV, new StructuralVariantStatsItem(name, StructuralVariantType.INV));
-            structuralVariantStats.put(name + StructuralVariantType.DUP, new StructuralVariantStatsItem(name, StructuralVariantType.DUP));
-            structuralVariantStats.put(name + StructuralVariantType.DEL, new StructuralVariantStatsItem(name, StructuralVariantType.DEL));
-            structuralVariantStats.put(name + StructuralVariantType.INS, new StructuralVariantStatsItem(name, StructuralVariantType.INS));
-            structuralVariantStats.put(name + StructuralVariantType.UNK, new StructuralVariantStatsItem(name, StructuralVariantType.UNK));
+            structuralVariantStats.put(getStatsItemId(StructuralVariantType.BND, name), new StructuralVariantStatsItem(name, StructuralVariantType.BND));
+            structuralVariantStats.put(getStatsItemId(StructuralVariantType.INV, name), new StructuralVariantStatsItem(name, StructuralVariantType.INV));
+            structuralVariantStats.put(getStatsItemId(StructuralVariantType.DUP, name), new StructuralVariantStatsItem(name, StructuralVariantType.DUP));
+            structuralVariantStats.put(getStatsItemId(StructuralVariantType.DEL, name), new StructuralVariantStatsItem(name, StructuralVariantType.DEL));
+            structuralVariantStats.put(getStatsItemId(StructuralVariantType.INS, name), new StructuralVariantStatsItem(name, StructuralVariantType.INS));
+            structuralVariantStats.put(getStatsItemId(StructuralVariantType.UNK, name), new StructuralVariantStatsItem(name, StructuralVariantType.UNK));
         }
+    }
+
+    private static String getStatsItemId(StructuralVariantType svType, String name) {
+        return name + svType;
     }
 
     public void saveStructuralVariantStats(String outputFile) throws Exception {
@@ -89,6 +93,7 @@ public class MultipleSvComparator {
         headers.add("name");
         headers.add("sv_type");
         headers.add("sv_count_total");
+        headers.add("sv_passed_total");
 
         if (distanceVarianceBasesCounts != null) {
             for (int basesCount : distanceVarianceBasesCounts) {
@@ -112,6 +117,7 @@ public class MultipleSvComparator {
                 record.add(item.getName());
                 record.add(item.getSvType().toString());
                 record.add(String.valueOf(item.getSvCountTotal()));
+                record.add(String.valueOf(item.getSvCountPassed()));
 
                 if (distanceVarianceBasesCounts != null) {
                     for (int basesCount : distanceVarianceBasesCounts) {
@@ -202,30 +208,24 @@ public class MultipleSvComparator {
         int unfilteredSvCount = 0;
 
         for (StructuralVariant structuralVariant : mainVariants) {
-            applyVariantFilters(structuralVariant);
+            if (processedVariants.contains(structuralVariant))
+                continue;
+
+            processedVariants.add(structuralVariant);
+            applyMainVariantFilters(structuralVariant);
 
             if (!structuralVariant.isFiltered())
                 unfilteredSvCount++;
 
-            if (!processedVariants.contains(structuralVariant))
-                processedVariants.add(structuralVariant);
-            else
-                continue;
-
-             for (int i = 0; i < otherParsersVariants.size(); i++) {
+            for (int i = 0; i < otherParsersVariants.size(); i++) {
                 Set<StructuralVariant> others = otherParsersVariants.get(i);
+                StructuralVariant similarVariant = findBestSimilarStructuralVariant(structuralVariant, others);
 
-                List<StructuralVariant> similarVariants = findSimilarStructuralVariants(structuralVariant, others);
+                printSimilarVariant(structuralVariant, similarVariant, svType);
 
-                printSimilarVariants(structuralVariant, similarVariants, svType);
-
-                if (similarVariants.size() == 0)
-                    continue;
-
-                similarVariantCounts[i]++;
-
-                if (calculateStructuralVariantStats && !structuralVariant.isFiltered()) {
-                    addStructuralVariantStats(structuralVariant, i, similarVariants);
+                if (similarVariant != null) {
+                    similarVariantCounts[i]++;
+                    addStructuralVariantStats(structuralVariant, i, similarVariant);
                 }
             }
 
@@ -233,13 +233,11 @@ public class MultipleSvComparator {
             fileWriter.write("\n");
         }
 
-        if (calculateStructuralVariantStats)
-            setStatsSvCountTotal(unfilteredSvCount, svType);
-
+        setStatsSvCountTotal(unfilteredSvCount, svType);
         printSimpleVariantsStatistics(mainVariants, otherParsersVariants, svType, similarVariantCounts);
     }
 
-    private void applyVariantFilters(StructuralVariant variant) {
+    private void applyMainVariantFilters(StructuralVariant variant) {
         if (excludedRegions != null && excludedRegions.size() > 0) {
             for (ChromosomeRegion excluded : excludedRegions) {
                 if (excluded.isInRegion(variant.getSrcChromosome(), variant.getSrcLoc()) ||
@@ -252,29 +250,9 @@ public class MultipleSvComparator {
         }
     }
 
-    private void setStatsSvCountTotal(int svCountTotal, StructuralVariantType svType) {
-        for (SvResultParser svResultParser : svParserOthers) {
-            String name = svResultParser.getName();
-
-            structuralVariantStats.get(name + svType).setSvCountTotal(svCountTotal);
-        }
-    }
-
-    private void addStructuralVariantStats(StructuralVariant structuralVariant, int otherParserIndex, List<StructuralVariant> similarVariants) throws Exception {
-        if (distanceVarianceBasesCounts != null) {
-            addDistanceVarianceStatistics(svParserOthers.get(otherParserIndex).getName(), structuralVariant.getVariantType(),
-                    getDistanceVariance(structuralVariant, similarVariants.get(0)));
-        }
-
-        if (intersectionVarianceThresholds != null) {
-            addIntersectionVarianceStats(svParserOthers.get(otherParserIndex).getName(), structuralVariant.getVariantType(),
-                    getIntersectionVariance(structuralVariant, similarVariants.get(0)));
-        }
-    }
-
-    private List<StructuralVariant> findSimilarStructuralVariants(StructuralVariant structuralVariant,
-                                                                  Set<StructuralVariant> structuralVariants) {
-        Map<Double, StructuralVariant> similarStructuralVariants = new TreeMap<>();
+    private StructuralVariant findBestSimilarStructuralVariant(StructuralVariant structuralVariant,
+                                                               Set<StructuralVariant> structuralVariants) {
+        TreeMap<Double, StructuralVariant> similarStructuralVariants = new TreeMap<>();
 
         for (StructuralVariant otherVariant : structuralVariants) {
             if (!(structuralVariant.getSrcChromosome() == otherVariant.getSrcChromosome() &&
@@ -293,7 +271,126 @@ public class MultipleSvComparator {
                 similarStructuralVariants.put(intersectionVariance, otherVariant);
         }
 
-        return new ArrayList<>(similarStructuralVariants.values());
+        return similarStructuralVariants.size() > 0 ? similarStructuralVariants.firstEntry().getValue() : null;
+    }
+
+    private void printHeader(SvResultParser svParserMain, List<SvResultParser> svParserOthers) throws Exception {
+        String svLabelMain = svParserMain.getName();
+
+        String header =
+                "sv_type\t" +
+                        "src_chr\t" +
+                        "dst_chr\t" +
+                        svLabelMain + "_filter\t" +
+                        svLabelMain + "_src_pos\t" +
+                        svLabelMain + "_dst_pos\t" +
+                        svLabelMain + "_sv_size\t" +
+                        svLabelMain + "_sv_fraction\t" +
+                        svLabelMain + "_gene\t" +
+                        svLabelMain + "_id";
+
+        for (SvResultParser svParserOther : svParserOthers) {
+            String svLabelOther = svParserOther.getName();
+
+            header += "\t" +
+                    svLabelOther + "_src_pos\t" +
+                    svLabelOther + "_dst_pos\t" +
+                    svLabelOther + "_sv_size\t" +
+                    svLabelOther + "_sv_fraction\t" +
+                    svLabelOther + "_src_pos_dist\t" +
+                    svLabelOther + "_dst_pos_dist\t" +
+                    svLabelOther + "_dist_var\t" +
+                    svLabelOther + "_intersect_var\t" +
+                    svLabelOther + "_gene\t" +
+                    svLabelOther + "_common_genes\t" +
+                    svLabelOther + "_size_difference\t" +
+                    svLabelOther + "_size_proportion\t" +
+                    svLabelOther + "_filter\t" +
+                    svLabelOther + "_filter_name\t" +
+                    svLabelOther + "_id";
+        }
+
+        fileWriter.write(header + "\n");
+    }
+
+    private void printSimilarVariant(StructuralVariant variant, StructuralVariant similarVariant,
+                                     StructuralVariantType svType) throws Exception {
+        String line = "";
+
+        if (!mainPrinted) {
+            line +=
+                    svType.toString() + "\t" +
+                            variant.getSrcChromosome().toString() + "\t" +
+                            variant.getDstChromosome().toString() + "\t" +
+                            StringUtils.join(variant.getFilters(), ";") + "\t" +
+                            variant.getSrcLoc() + "\t" +
+                            variant.getDstLoc() + "\t" +
+                            variant.getSize() + "\t" +
+                            getAllelicFraction(variant) + "\t" +
+                            variant.getGene() + "\t" +
+                            getVariantId(variant);
+
+
+            mainPrinted = true;
+        }
+
+        if (similarVariant != null) {
+            applySimilarVariantFilters(variant, similarVariant);
+
+            int srcDist = Math.abs(variant.getSrcLoc() - similarVariant.getSrcLoc());
+            int dstDist = Math.abs(variant.getDstLoc() - similarVariant.getDstLoc());
+
+            String commonGenes = StringUtils.join(getCommonGenes(variant, similarVariant), ",");
+
+            line += "\t" +
+                    similarVariant.getSrcLoc() + "\t" +
+                    similarVariant.getDstLoc() + "\t" +
+                    similarVariant.getSize() + "\t" +
+                    getAllelicFraction(similarVariant) + "\t" +
+                    srcDist + "\t" +
+                    dstDist + "\t" +
+                    getDistanceVariance(variant, similarVariant) + "\t" +
+                    getIntersectionVariance(variant, similarVariant) + "\t" +
+                    similarVariant.getGene() + "\t" +
+                    commonGenes + "\t" +
+                    getSizeDifference(variant, similarVariant) + "\t" +
+                    getSizeProportionAsString(variant, similarVariant) + "\t" +
+                    (similarVariant.isPassed() ? "PASS" : "") + "\t" +
+                    StringUtils.join(similarVariant.getFilters(), ",") + "\t" +
+                    getVariantId(similarVariant);
+        }
+        else
+            line += "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t";
+
+        fileWriter.write(line);
+    }
+
+    private void addStructuralVariantStats(StructuralVariant structuralVariant, int otherParserIndex, StructuralVariant similarVariant) throws Exception {
+        if (!calculateStructuralVariantStats || structuralVariant.isFiltered())
+            return;
+
+        String parserName = svParserOthers.get(otherParserIndex).getName();
+
+        addPassedStatistics(parserName, structuralVariant, similarVariant);
+
+        if (distanceVarianceBasesCounts != null) {
+            addDistanceVarianceStatistics(parserName, structuralVariant.getVariantType(), getDistanceVariance(structuralVariant, similarVariant));
+        }
+
+        if (intersectionVarianceThresholds != null) {
+            addIntersectionVarianceStats(parserName, structuralVariant.getVariantType(), getIntersectionVariance(structuralVariant, similarVariant));
+        }
+    }
+
+    private void setStatsSvCountTotal(int count, StructuralVariantType svType) {
+        if (!calculateStructuralVariantStats)
+            return;
+
+        for (SvResultParser svResultParser : svParserOthers) {
+            String name = svResultParser.getName();
+
+            structuralVariantStats.get(getStatsItemId(svType, name)).setSvCountTotal(count);
+        }
     }
 
     private void applySimilarVariantFilters(StructuralVariant structuralVariant, StructuralVariant otherVariant) {
@@ -369,7 +466,7 @@ public class MultipleSvComparator {
     }
 
     private void addDistanceVarianceStatistics(String name, StructuralVariantType svType, int distanceVariance) throws Exception {
-        String itemId = name + svType;
+        String itemId = getStatsItemId(svType, name);
         StructuralVariantStatsItem item = structuralVariantStats.get(itemId);
 
         if (item == null) {
@@ -383,7 +480,7 @@ public class MultipleSvComparator {
     }
 
     private void addIntersectionVarianceStats(String name, StructuralVariantType svType, Double intersectionVariance) throws Exception {
-        String itemId = name + svType;
+        String itemId = getStatsItemId(svType, name);
         StructuralVariantStatsItem item = structuralVariantStats.get(itemId);
 
         if (item == null) {
@@ -399,97 +496,21 @@ public class MultipleSvComparator {
         }
     }
 
-    private void printHeader(SvResultParser svParserMain, List<SvResultParser> svParserOthers) throws Exception {
-        String svLabelMain = svParserMain.getName();
+    private void addPassedStatistics(String name, StructuralVariant StructuralVariant, StructuralVariant similarVariant) throws Exception {
+        if (!calculateStructuralVariantStats)
+            return;
 
-        String header =
-                "sv_type\t" +
-                "src_chr\t" +
-                "dst_chr\t" +
-                svLabelMain + "_filter\t" +
-                svLabelMain + "_src_pos\t" +
-                svLabelMain + "_dst_pos\t" +
-                svLabelMain + "_sv_size\t" +
-                svLabelMain + "_sv_fraction\t" +
-                svLabelMain + "_gene\t" +
-                svLabelMain + "_id";
+        String itemId = getStatsItemId(similarVariant.getVariantType(), name);
+        StructuralVariantStatsItem item = structuralVariantStats.get(itemId);
 
-        for (SvResultParser svParserOther : svParserOthers) {
-            String svLabelOther = svParserOther.getName();
-
-            header += "\t" +
-                svLabelOther + "_src_pos\t" +
-                svLabelOther + "_dst_pos\t" +
-                svLabelOther + "_sv_size\t" +
-                svLabelOther + "_sv_fraction\t" +
-                svLabelOther + "_src_pos_dist\t" +
-                svLabelOther + "_dst_pos_dist\t" +
-                svLabelOther + "_dist_var\t" +
-                svLabelOther + "_intersect_var\t" +
-                svLabelOther + "_gene\t" +
-                svLabelOther + "_common_genes\t" +
-                svLabelOther + "_size_difference\t" +
-                svLabelOther + "_size_proportion\t" +
-                svLabelOther + "_filter\t" +
-                svLabelOther + "_filter_name\t" +
-                svLabelOther + "_id";
+        if (item == null) {
+            throw new IllegalAccessException("Structural variant statistics item not initialized for id: " + itemId);
         }
 
-        fileWriter.write(header + "\n");
-    }
+        applySimilarVariantFilters(StructuralVariant, similarVariant);
 
-    private void printSimilarVariants(StructuralVariant variant,
-                                      List<StructuralVariant> similarVariants, StructuralVariantType svType) throws Exception {
-        String line = "";
-
-        if (!mainPrinted) {
-            line +=
-                    svType.toString() + "\t" +
-                    variant.getSrcChromosome().toString() + "\t" +
-                    variant.getDstChromosome().toString() + "\t" +
-                    StringUtils.join(variant.getFilters(), ";") + "\t" +
-                    variant.getSrcLoc() + "\t" +
-                    variant.getDstLoc() + "\t" +
-                    variant.getSize() + "\t" +
-                    getAllelicFraction(variant) + "\t" +
-                    variant.getGene() + "\t" +
-                    getVariantId(variant);
-
-
-            mainPrinted = true;
-        }
-
-        if (similarVariants.size() > 0) {
-            StructuralVariant similarVariant = similarVariants.get(0);
-
-            applySimilarVariantFilters(variant, similarVariant);
-
-            int srcDist = Math.abs(variant.getSrcLoc() - similarVariant.getSrcLoc());
-            int dstDist = Math.abs(variant.getDstLoc() - similarVariant.getDstLoc());
-
-            String commonGenes = StringUtils.join(getCommonGenes(variant, similarVariant), ",");
-
-            line += "\t" +
-                    similarVariant.getSrcLoc() + "\t" +
-                    similarVariant.getDstLoc() + "\t" +
-                    similarVariant.getSize() + "\t" +
-                    getAllelicFraction(similarVariant) + "\t" +
-                    srcDist + "\t" +
-                    dstDist + "\t" +
-                    getDistanceVariance(variant, similarVariant) + "\t" +
-                    getIntersectionVariance(variant, similarVariant) + "\t" +
-                    similarVariant.getGene() + "\t" +
-                    commonGenes + "\t" +
-                    getSizeDifference(variant, similarVariant) + "\t" +
-                    getSizeProportionAsString(variant, similarVariant) + "\t" +
-                    (similarVariant.isPassed() ? "PASS" : "") + "\t" +
-                    StringUtils.join(similarVariant.getFilters(), ",") + "\t" +
-                    getVariantId(similarVariant);
-        }
-        else
-            line += "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t";
-
-        fileWriter.write(line);
+        if (similarVariant.isPassed())
+            item.addSvCountPassed();
     }
 
     private List<String> getCommonGenes(StructuralVariant sv1, StructuralVariant sv2) {
