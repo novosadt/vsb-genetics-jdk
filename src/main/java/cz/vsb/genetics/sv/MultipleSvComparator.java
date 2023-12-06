@@ -43,7 +43,7 @@ public class MultipleSvComparator {
     private int[] distanceVarianceBasesCounts;
     private double[] intersectionVarianceThresholds;
     private boolean calculateStructuralVariantStats = false;
-    private Map<String, StructuralVariantStatsItem> structuralVariantStats = new LinkedHashMap<>();
+    private final Map<String, StructuralVariantStatsItem> structuralVariantStats = new LinkedHashMap<>();
     private List<ChromosomeRegion> excludedRegions;
 
     public void compareStructuralVariants(SvResultParser svParserMain, List<SvResultParser> svParserOthers, String outputFile) throws Exception {
@@ -215,7 +215,7 @@ public class MultipleSvComparator {
              for (int i = 0; i < otherParsersVariants.size(); i++) {
                 Set<StructuralVariant> others = otherParsersVariants.get(i);
 
-                List<StructuralVariant> similarVariants = findNearestStructuralVariants(structuralVariant, others);
+                List<StructuralVariant> similarVariants = findSimilarStructuralVariants(structuralVariant, others);
 
                 printSimilarVariants(structuralVariant, similarVariants, svType);
 
@@ -272,7 +272,7 @@ public class MultipleSvComparator {
         }
     }
 
-    private List<StructuralVariant> findNearestStructuralVariants(StructuralVariant structuralVariant,
+    private List<StructuralVariant> findSimilarStructuralVariants(StructuralVariant structuralVariant,
                                                                   Set<StructuralVariant> structuralVariants) {
         Map<Double, StructuralVariant> similarStructuralVariants = new TreeMap<>();
 
@@ -284,41 +284,54 @@ public class MultipleSvComparator {
             int distanceVariance = getDistanceVariance(structuralVariant, otherVariant);
             double intersectionVariance = getIntersectionVariance(structuralVariant, otherVariant);
 
-            if (onlyCommonGenes) {
-                List<String> commonGenes = getCommonGenes(structuralVariant, otherVariant);
-                if (commonGenes.size() < 1)
-                    continue;
-            }
-
-            // distance variance filter
-            boolean distanceVarianceFilter = true;
-            if (distanceVarianceThreshold != null && distanceVariance > distanceVarianceThreshold)
-                distanceVarianceFilter = false;
-
-            // intersection variance filter
-            boolean intersectionVarianceFilter = true;
-            if(intersectionVarianceThreshold != null && intersectionVariance > intersectionVarianceThreshold)
-                intersectionVarianceFilter = false;
-
-            // proportion filter
-            boolean sizeProportionFilter = true;
-            Double proportion = getSizeProportion(structuralVariant, otherVariant);
-            if (minimalProportion != null && proportion != null && proportion < minimalProportion)
-                sizeProportionFilter = false;
-
-            // If one of the filters passes, variant is added for further processing.
-            if (distanceVarianceFilter || (intersectionVarianceFilter && sizeProportionFilter)) {
-                // In case of BND variant (Translocation), there is no information about variant size,
-                // thus intersection variance score cannot be calculated. Distance variance score is used instead
-                // for variant sorting.
-                if (structuralVariant.getVariantType() == StructuralVariantType.BND)
-                    similarStructuralVariants.put(Double.valueOf(distanceVariance), otherVariant);
-                else
-                    similarStructuralVariants.put(intersectionVariance, otherVariant);
-            }
+            // In case of BND variant (Translocation), there is no information about variant size,
+            // thus intersection variance score cannot be calculated. Distance variance score is used instead
+            // for variant sorting.
+            if (structuralVariant.getVariantType() == StructuralVariantType.BND)
+                similarStructuralVariants.put(Double.valueOf(distanceVariance), otherVariant);
+            else
+                similarStructuralVariants.put(intersectionVariance, otherVariant);
         }
 
         return new ArrayList<>(similarStructuralVariants.values());
+    }
+
+    private void applySimilarVariantFilters(StructuralVariant structuralVariant, StructuralVariant otherVariant) {
+        otherVariant.resetFilter();
+
+        int distanceVariance = getDistanceVariance(structuralVariant, otherVariant);
+        double intersectionVariance = getIntersectionVariance(structuralVariant, otherVariant);
+
+        boolean commonGenesFilter = false;
+        if (onlyCommonGenes) {
+            List<String> commonGenes = getCommonGenes(structuralVariant, otherVariant);
+            if (commonGenes.size() < 1)
+                commonGenesFilter = true;
+        }
+
+        // distance variance filter
+        boolean distanceVarianceFilter = distanceVarianceThreshold != null && distanceVariance > distanceVarianceThreshold;
+
+        // intersection variance filter
+        boolean intersectionVarianceFilter = intersectionVarianceThreshold != null && !Double.isInfinite(intersectionVariance) && intersectionVariance > intersectionVarianceThreshold;
+
+        // proportion filter
+        Double proportion = getSizeProportion(structuralVariant, otherVariant);
+        boolean sizeProportionFilter = minimalProportion != null && proportion != null && proportion < minimalProportion;
+
+        if (commonGenesFilter)
+            otherVariant.addFilter(StructuralVariantFilter.COMMON_GENES);
+
+        if (distanceVarianceFilter)
+            otherVariant.addFilter(StructuralVariantFilter.DISTANCE_VARIANCE);
+
+        if (intersectionVarianceFilter)
+            otherVariant.addFilter(StructuralVariantFilter.INTERSECTION_VARIANCE);
+
+        if (sizeProportionFilter)
+            otherVariant.addFilter(StructuralVariantFilter.SIZE_PROPORTION);
+
+        otherVariant.setPassed(!sizeProportionFilter && (!distanceVarianceFilter || !intersectionVarianceFilter));
     }
 
     private int getDistanceVariance(StructuralVariant structuralVariant, StructuralVariant otherVariant) {
@@ -332,7 +345,7 @@ public class MultipleSvComparator {
     private double getIntersectionVariance(StructuralVariant structuralVariant, StructuralVariant otherVariant) {
         int from = Math.min(structuralVariant.getSrcLoc(), otherVariant.getSrcLoc());
         int to = Math.max(structuralVariant.getDstLoc(), otherVariant.getDstLoc());
-        double intersectionVariance = (double)(to - from) / (double)(structuralVariant.getSize() + otherVariant.getSize());
+        double intersectionVariance = (double)(to - from + 1) / (double)(structuralVariant.getSize() + otherVariant.getSize());
 
         //Value of 0.5 means absolute match of variants. So just "normalize" it to 0.0 if there is absolute match.
         //Value of 0.5 for absolute match may be misleading
@@ -417,6 +430,8 @@ public class MultipleSvComparator {
                 svLabelOther + "_common_genes\t" +
                 svLabelOther + "_size_difference\t" +
                 svLabelOther + "_size_proportion\t" +
+                svLabelOther + "_filter\t" +
+                svLabelOther + "_filter_name\t" +
                 svLabelOther + "_id";
         }
 
@@ -445,30 +460,34 @@ public class MultipleSvComparator {
         }
 
         if (similarVariants.size() > 0) {
-            StructuralVariant similarStructuralVariant = similarVariants.get(0);
+            StructuralVariant similarVariant = similarVariants.get(0);
 
-            int srcDist = Math.abs(variant.getSrcLoc() - similarStructuralVariant.getSrcLoc());
-            int dstDist = Math.abs(variant.getDstLoc() - similarStructuralVariant.getDstLoc());
+            applySimilarVariantFilters(variant, similarVariant);
 
-            String commonGenes = StringUtils.join(getCommonGenes(variant, similarStructuralVariant), ",");
+            int srcDist = Math.abs(variant.getSrcLoc() - similarVariant.getSrcLoc());
+            int dstDist = Math.abs(variant.getDstLoc() - similarVariant.getDstLoc());
+
+            String commonGenes = StringUtils.join(getCommonGenes(variant, similarVariant), ",");
 
             line += "\t" +
-                    similarStructuralVariant.getSrcLoc() + "\t" +
-                    similarStructuralVariant.getDstLoc() + "\t" +
-                    similarStructuralVariant.getSize() + "\t" +
-                    getAllelicFraction(similarStructuralVariant) + "\t" +
+                    similarVariant.getSrcLoc() + "\t" +
+                    similarVariant.getDstLoc() + "\t" +
+                    similarVariant.getSize() + "\t" +
+                    getAllelicFraction(similarVariant) + "\t" +
                     srcDist + "\t" +
                     dstDist + "\t" +
-                    getDistanceVariance(variant, similarStructuralVariant) + "\t" +
-                    getIntersectionVariance(variant, similarStructuralVariant) + "\t" +
-                    similarStructuralVariant.getGene() + "\t" +
+                    getDistanceVariance(variant, similarVariant) + "\t" +
+                    getIntersectionVariance(variant, similarVariant) + "\t" +
+                    similarVariant.getGene() + "\t" +
                     commonGenes + "\t" +
-                    getSizeDifference(variant, similarStructuralVariant) + "\t" +
-                    getSizeProportionAsString(variant, similarStructuralVariant) + "\t" +
-                    getVariantId(similarStructuralVariant);
+                    getSizeDifference(variant, similarVariant) + "\t" +
+                    getSizeProportionAsString(variant, similarVariant) + "\t" +
+                    (similarVariant.isPassed() ? "PASS" : "") + "\t" +
+                    StringUtils.join(similarVariant.getFilters(), ",") + "\t" +
+                    getVariantId(similarVariant);
         }
         else
-            line += "\t\t\t\t\t\t\t\t\t\t\t\t\t";
+            line += "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t";
 
         fileWriter.write(line);
     }

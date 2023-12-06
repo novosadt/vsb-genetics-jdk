@@ -36,7 +36,8 @@ public class StructuralVariant {
     private StructuralVariantType variantType;
     private StructuralVariantOrientation srcOrientation;
     private StructuralVariantOrientation dstOrientation;
-    private Set<StructuralVariantFilter> filter = new LinkedHashSet<>();
+    private final Set<StructuralVariantFilter> filter = new LinkedHashSet<>();
+    private boolean passed = true;
 
     public StructuralVariant(Chromosome srcChromosome, int srcLoc, Chromosome dstChromosome, int dstLoc,
                              int size) {
@@ -171,11 +172,23 @@ public class StructuralVariant {
         filter.add(value);
     }
 
+    public void resetFilter() {
+        filter.clear();
+    }
+
     public List<StructuralVariantFilter> getFilters() {
         return new ArrayList<>(filter);
     }
 
     public boolean isFiltered() {
         return filter.size() > 0;
+    }
+
+    public boolean isPassed() {
+        return passed;
+    }
+
+    public void setPassed(boolean passed) {
+        this.passed = passed;
     }
 }
