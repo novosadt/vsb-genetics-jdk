@@ -93,7 +93,8 @@ public class MultipleSvComparator {
         headers.add("name");
         headers.add("sv_type");
         headers.add("sv_count_total");
-        headers.add("sv_passed_total");
+        headers.add("sv_count_passed");
+        headers.add("sv_count_passed_pct");
 
         if (distanceVarianceBasesCounts != null) {
             for (int basesCount : distanceVarianceBasesCounts) {
@@ -118,6 +119,7 @@ public class MultipleSvComparator {
                 record.add(item.getSvType().toString());
                 record.add(String.valueOf(item.getSvCountTotal()));
                 record.add(String.valueOf(item.getSvCountPassed()));
+                record.add(String.format("%.2f", item.getSvCountTotal() == 0 ? 0.0 : (double) (item.getSvCountPassed()) / (double) item.getSvCountTotal() * 100.0));
 
                 if (distanceVarianceBasesCounts != null) {
                     for (int basesCount : distanceVarianceBasesCounts) {
@@ -355,7 +357,7 @@ public class MultipleSvComparator {
                     commonGenes + "\t" +
                     getSizeDifference(variant, similarVariant) + "\t" +
                     getSizeProportionAsString(variant, similarVariant) + "\t" +
-                    (similarVariant.isPassed() ? "PASS" : "") + "\t" +
+                    (similarVariant.passed() ? "PASS" : "") + "\t" +
                     StringUtils.join(similarVariant.getFilters(), ",") + "\t" +
                     getVariantId(similarVariant);
         }
@@ -372,6 +374,9 @@ public class MultipleSvComparator {
         String parserName = svParserOthers.get(otherParserIndex).getName();
 
         addPassedStatistics(parserName, structuralVariant, similarVariant);
+
+        if (!similarVariant.passed())
+            return;
 
         if (distanceVarianceBasesCounts != null) {
             addDistanceVarianceStatistics(parserName, structuralVariant.getVariantType(), getDistanceVariance(structuralVariant, similarVariant));
@@ -410,7 +415,7 @@ public class MultipleSvComparator {
         boolean distanceVarianceFilter = distanceVarianceThreshold != null && distanceVariance > distanceVarianceThreshold;
 
         // intersection variance filter
-        boolean intersectionVarianceFilter = intersectionVarianceThreshold != null && !Double.isInfinite(intersectionVariance) && intersectionVariance > intersectionVarianceThreshold;
+        boolean intersectionVarianceFilter = intersectionVarianceThreshold != null && (Double.isInfinite(intersectionVariance) || intersectionVariance > intersectionVarianceThreshold);
 
         // proportion filter
         Double proportion = getSizeProportion(structuralVariant, otherVariant);
@@ -509,7 +514,7 @@ public class MultipleSvComparator {
 
         applySimilarVariantFilters(StructuralVariant, similarVariant);
 
-        if (similarVariant.isPassed())
+        if (similarVariant.passed())
             item.addSvCountPassed();
     }
 

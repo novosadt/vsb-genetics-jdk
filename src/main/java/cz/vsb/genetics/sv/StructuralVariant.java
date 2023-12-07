@@ -184,7 +184,7 @@ public class StructuralVariant {
         return filter.size() > 0;
     }
 
-    public boolean isPassed() {
+    public boolean passed() {
         return passed;
     }
 
