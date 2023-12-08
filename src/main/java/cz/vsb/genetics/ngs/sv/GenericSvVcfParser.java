@@ -31,6 +31,8 @@ public class GenericSvVcfParser extends SvResultParserBase {
 
     @Override
     public void parseResultFile(String file, String delim) throws Exception {
+        reset();
+
         filteredCount = totalCount = skippedCount = 0;
 
         BufferedReader reader = new BufferedReader(new FileReader(file));
