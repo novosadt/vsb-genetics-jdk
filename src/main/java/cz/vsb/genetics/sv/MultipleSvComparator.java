@@ -485,7 +485,7 @@ public class MultipleSvComparator {
     }
 
     private void addIntersectionVarianceStats(String name, StructuralVariantType svType, Double intersectionVariance) throws Exception {
-        if (svType == StructuralVariantType.BND)
+        if (StructuralVariantType.BND == svType)
             return;
 
         String itemId = getStatsItemId(svType, name);
