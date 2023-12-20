@@ -89,12 +89,10 @@ public class GenericSvVcfParser extends SvResultParserBase {
         int svLength = StringUtils.isBlank(info.get("SVLEN")) ? 0 : Math.abs(Integer.valueOf(info.get("SVLEN")));
         String svType = info.get("SVTYPE").toLowerCase();
 
-        boolean filtered = false;
-        boolean skipped = false;
-
         if (onlyFilterPass && StringUtils.isNotBlank(filter) && !filter.trim().equalsIgnoreCase("pass")) {
             System.err.printf("Filtering variant: %s - filter: %s\n", id, filter);
-            filtered = true;
+            filteredCount++;
+            return;
         }
 
         if (svType.equals("bnd")) {
@@ -104,7 +102,8 @@ public class GenericSvVcfParser extends SvResultParserBase {
                 m = chromLocPatternWithoutChr.matcher(chromLoc);
                 if (!m.find()) {
                     System.err.printf("Skipping BND variant: %s - unsupported destination chromosome location format: %s\n", id, chromLoc);
-                    skipped = true;
+                    skippedCount++;
+                    return;
                 }
             }
 
@@ -134,8 +133,9 @@ public class GenericSvVcfParser extends SvResultParserBase {
         Chromosome dstChrom = Chromosome.of(dstChromId);
 
         if (srcChrom == null || dstChrom == null) {
-            System.err.printf("Skipping variant: %s - unsupported chromosome format. Source chromosome: %s, Destination chromosome: %s\n", id, srcChromId, dstChromId);
-            skipped = true;
+            System.err.printf("Skipping variant id: %s - unsupported chromosome format. Source chromosome: %s, Destination chromosome: %s\n", id, srcChromId, dstChromId);
+            skippedCount++;
+            return;
         }
 
         StructuralVariant sv = new StructuralVariant(srcChrom, srcLoc, dstChrom, dstLoc, svLength);
@@ -156,16 +156,8 @@ public class GenericSvVcfParser extends SvResultParserBase {
             default: variants = unknown; type = StructuralVariantType.UNK;
         }
 
-        if (!filtered && !skipped) {
-            if (!addStructuralVariant(sv, variants, type))
-                totalCount--;
-        }
-
-        if (filtered)
-            filteredCount++;
-
-        if (!filtered && skipped)
-            skippedCount++;
+        if (!addStructuralVariant(sv, variants, type))
+            totalCount--;
     }
 
     private Map<String, String> getInfo(String info) {
