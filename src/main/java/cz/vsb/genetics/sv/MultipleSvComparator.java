@@ -86,7 +86,7 @@ public class MultipleSvComparator {
     }
 
     public void saveStructuralVariantStats(String outputFile) throws Exception {
-        if (structuralVariantStats.size() == 0)
+        if (structuralVariantStats.isEmpty())
             return;
 
         List<String> headers = new ArrayList<>();
@@ -240,7 +240,7 @@ public class MultipleSvComparator {
     }
 
     private void applyMainVariantFilters(StructuralVariant variant) {
-        if (excludedRegions != null && excludedRegions.size() > 0) {
+        if (excludedRegions != null && !excludedRegions.isEmpty()) {
             for (ChromosomeRegion excluded : excludedRegions) {
                 if (excluded.isInRegion(variant.getSrcChromosome(), variant.getSrcLoc()) ||
                         excluded.isInRegion(variant.getDstChromosome(), variant.getDstLoc())) {
@@ -273,7 +273,7 @@ public class MultipleSvComparator {
                 similarStructuralVariants.put(intersectionVariance, otherVariant);
         }
 
-        return similarStructuralVariants.size() > 0 ? similarStructuralVariants.firstEntry().getValue() : null;
+        return !similarStructuralVariants.isEmpty() ? similarStructuralVariants.firstEntry().getValue() : null;
     }
 
     private void printHeader(SvResultParser svParserMain, List<SvResultParser> svParserOthers) throws Exception {
@@ -407,7 +407,7 @@ public class MultipleSvComparator {
         boolean commonGenesFilter = false;
         if (onlyCommonGenes) {
             List<String> commonGenes = getCommonGenes(structuralVariant, otherVariant);
-            if (commonGenes.size() < 1)
+            if (commonGenes.isEmpty())
                 commonGenesFilter = true;
         }
 
@@ -456,7 +456,7 @@ public class MultipleSvComparator {
 
     private void printSimpleVariantsStatistics(Set<StructuralVariant> mainVariants, List<Set<StructuralVariant>> otherParsersVariants, StructuralVariantType svType, int[] similarVariantCounts) {
         for (int i = 0; i < otherParsersVariants.size(); i++) {
-            double percentage = mainVariants.size() == 0 ? 0.0 :
+            double percentage = mainVariants.isEmpty() ? 0.0 :
                     (double) similarVariantCounts[i] / (double) mainVariants.size() * 100.0;
 
             System.out.printf("Common SV (%s with %s / %s) - %s:\t%d/%d (%.02f%%)%n",
@@ -562,7 +562,10 @@ public class MultipleSvComparator {
         if (main.getSize() == 0 || other.getSize() == 0)
             return null;
 
-        return (double)other.getSize() / (double)main.getSize();
+        double numerator = Math.min(main.getSize(), other.getSize());
+        double denominator = Math.max(main.getSize(), other.getSize());
+
+        return numerator / denominator;
     }
 
     private String getVariantId(StructuralVariant structuralVariant) {
