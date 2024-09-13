@@ -28,6 +28,7 @@ public class BamCoverageCalculatorST implements CoverageCalculator {
     private SamReader samReader;
     private final String bamFile;
     private final String indexFile;
+    private int mappingQuality = 0;
 
     public BamCoverageCalculatorST(String bamFile, String indexFile) {
         this.bamFile = bamFile;
@@ -46,16 +47,21 @@ public class BamCoverageCalculatorST implements CoverageCalculator {
 
     @Override
     public int getPositionCoverage(Chromosome chromosome, int position) {
-        return BamCoverageUtils.getCoverage(chromosome, position, samReader);
+        return BamCoverageUtils.getCoverage(chromosome, position, samReader, mappingQuality);
     }
 
     @Override
     public CoverageInfo getIntervalCoverage(Chromosome chromosome, int start, int end) {
-        return BamCoverageUtils.getCoverage(chromosome, start, end, samReader);
+        return BamCoverageUtils.getCoverage(chromosome, start, end, samReader, mappingQuality);
     }
 
     @Override
     public double getMeanCoverage(Chromosome chromosome, int start, int end) {
-        return BamCoverageUtils.getMeanCoverage(chromosome, start, end, samReader);
+        return BamCoverageUtils.getMeanCoverage(chromosome, start, end, samReader, mappingQuality);
+    }
+
+    @Override
+    public void setMappingQuality(int mappingQuality) {
+        this.mappingQuality = mappingQuality;
     }
 }

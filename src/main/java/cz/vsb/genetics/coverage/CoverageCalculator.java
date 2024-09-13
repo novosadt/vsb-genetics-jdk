@@ -30,4 +30,6 @@ public interface CoverageCalculator extends AutoCloseable {
     CoverageInfo getIntervalCoverage(Chromosome chromosome, int start, int end) throws Exception;
 
     double getMeanCoverage(Chromosome chromosome, int start, int end) throws Exception;
+
+    void setMappingQuality(int mappingQuality);
 }

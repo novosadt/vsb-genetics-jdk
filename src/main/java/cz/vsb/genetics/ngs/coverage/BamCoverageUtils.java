@@ -28,22 +28,31 @@ import htsjdk.samtools.SamReader;
 public class BamCoverageUtils {
 
 
-    public static int getCoverage(Chromosome chromosome, int position, SamReader samReader) {
+    public static int getCoverage(Chromosome chromosome, int position, SamReader samReader, int mappingQuality) {
         SAMRecordIterator it = samReader.queryOverlapping(chromosome.toString(), position, position);
 
-        int count = it.hasNext() ? (int)it.stream().count() : 0;
+        int count = 0;
+
+        while(it.hasNext()) {
+            SAMRecord samRecord = it.next();
+
+            if (samRecord.getMappingQuality() < mappingQuality)
+                continue;
+
+            count++;
+        }
 
         it.close();
 
         return count;
     }
 
-    public static CoverageInfo getCoverage(Chromosome chromosome, int start, int end, SamReader samReader) {
+    public static CoverageInfo getCoverage(Chromosome chromosome, int start, int end, SamReader samReader, int mappingQuality) {
         if (end < start)
             return new CoverageInfo(new int[0], 0, 0, start, end);
 
         if (end - start == 0) {
-            int coverage = getCoverage(chromosome, start, samReader);
+            int coverage = getCoverage(chromosome, start, samReader, mappingQuality);
             return new CoverageInfo(new int[]{coverage}, coverage, coverage, start, end);
         }
 
@@ -54,6 +63,9 @@ public class BamCoverageUtils {
         try (SAMRecordIterator it = samReader.queryOverlapping(chromosome.toString(), start, end)) {
             while(it.hasNext()) {
                 SAMRecord samRecord = it.next();
+
+                if (samRecord.getMappingQuality() < mappingQuality)
+                    continue;
 
                 for (AlignmentBlock alignmentBlock : samRecord.getAlignmentBlocks()) {
                     int startPosition = alignmentBlock.getReferenceStart();
@@ -96,9 +108,9 @@ public class BamCoverageUtils {
         return new CoverageInfo(coverages, minCoverage, maxCoverage, start, end);
     }
 
-    public static double getMeanCoverage(Chromosome chromosome, int start, int end, SamReader samReader) {
+    public static double getMeanCoverage(Chromosome chromosome, int start, int end, SamReader samReader, int mappingQuality) {
         double sum = 0.0;
-        int[] coverages = getCoverage(chromosome, start, end, samReader).getCoverages();
+        int[] coverages = getCoverage(chromosome, start, end, samReader, mappingQuality).getCoverages();
 
         for (int coverage : coverages)
             sum += coverage;

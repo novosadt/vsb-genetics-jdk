@@ -24,10 +24,7 @@ import cz.vsb.genetics.coverage.CoverageCalculator;
 import cz.vsb.genetics.coverage.CoverageInfo;
 import cz.vsb.genetics.om.struct.bionano.*;
 
-import javax.xml.stream.events.StartDocument;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class BionanoCoverageCalculator implements CoverageCalculator {
@@ -114,5 +111,10 @@ public class BionanoCoverageCalculator implements CoverageCalculator {
         }
 
         return entries.size();
+    }
+
+    @Override
+    public void setMappingQuality(int mappingQuality) {
+        throw new UnsupportedOperationException("Setting mapping quality for Optical Mapping technologies is not supported yet.");
     }
 }

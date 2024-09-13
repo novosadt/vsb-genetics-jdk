@@ -33,6 +33,7 @@ public class BamCoverageCalculatorMT implements CoverageCalculator {
     private final int threads;
     private final String bamFile;
     private final String indexFile;
+    private int mappingQuality = 0;
 
     public BamCoverageCalculatorMT(String bamFile, String indexFile, int threads) {
         this.threads = threads;
@@ -56,7 +57,7 @@ public class BamCoverageCalculatorMT implements CoverageCalculator {
 
     @Override
     public int getPositionCoverage(Chromosome chromosome, int position) {
-        return BamCoverageUtils.getCoverage(chromosome, position, samReaders[0]);
+        return BamCoverageUtils.getCoverage(chromosome, position, samReaders[0], mappingQuality);
     }
 
     @Override
@@ -73,7 +74,7 @@ public class BamCoverageCalculatorMT implements CoverageCalculator {
             int a = start + i * delta;
             int b = i == threads - 1 ? end : a + delta - 1;
 
-            IntervalCoverageCalculator calculator = new IntervalCoverageCalculator(chromosome, a, b, samReaders[i]);
+            IntervalCoverageCalculator calculator = new IntervalCoverageCalculator(chromosome, a, b, samReaders[i], mappingQuality);
             calculators.add(calculator);
             calculator.start();
         }
@@ -105,9 +106,14 @@ public class BamCoverageCalculatorMT implements CoverageCalculator {
         int[] coverages = getIntervalCoverage(chromosome, start, end).getCoverages();
 
         for (int coverage : coverages)
-            sum += (double)coverage;
+            sum += coverage;
 
         return sum / (double)coverages.length;
+    }
+
+    @Override
+    public void setMappingQuality(int mappingQuality) {
+        this.mappingQuality = mappingQuality;
     }
 
     private static class IntervalCoverageCalculator extends Thread {
@@ -116,17 +122,19 @@ public class BamCoverageCalculatorMT implements CoverageCalculator {
         private final Chromosome chromosome;
         private final int start;
         private final int end;
+        private final int mappingQuality;
 
-        public IntervalCoverageCalculator(Chromosome chromosome, int start, int end, SamReader samReader) {
+        public IntervalCoverageCalculator(Chromosome chromosome, int start, int end, SamReader samReader, int mappingQuality) {
             this.samReader = samReader;
             this.chromosome = chromosome;
             this.start = start;
             this.end = end;
+            this.mappingQuality = mappingQuality;
         }
 
         @Override
         public void run() {
-            coverageInfo = BamCoverageUtils.getCoverage(chromosome, start, end, samReader);
+            coverageInfo = BamCoverageUtils.getCoverage(chromosome, start, end, samReader, mappingQuality);
         }
 
         public CoverageInfo getCoverageInfo() {
