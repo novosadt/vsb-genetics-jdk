@@ -86,8 +86,17 @@ public class GenericSvVcfParser extends SvResultParserBase {
         String dstChromId = srcChromId;
         Map<String, String> info = getInfo(values.get("INFO"));
         int dstLoc = info.containsKey("END") ? Integer.valueOf(info.get("END")) : 0;
-        int svLength = StringUtils.isBlank(info.get("SVLEN")) ? 0 : Math.abs(Integer.valueOf(info.get("SVLEN")));
         String svType = info.get("SVTYPE").toLowerCase();
+        int svLength = 0;
+
+        if (StringUtils.isBlank(info.get("SVLEN"))) {
+            try {
+                svLength = Math.abs(Integer.valueOf(info.get("SVLEN")));
+            } catch (NumberFormatException e) {
+                // do nothing a let svLength equals to zero
+            }
+        }
+
 
         if (onlyFilterPass && StringUtils.isNotBlank(filter) && !filter.trim().equalsIgnoreCase("pass")) {
             System.err.printf("Filtering variant: %s - filter: %s\n", id, filter);

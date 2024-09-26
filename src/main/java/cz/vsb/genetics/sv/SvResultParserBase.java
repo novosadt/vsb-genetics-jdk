@@ -21,10 +21,7 @@ package cz.vsb.genetics.sv;
 
 import cz.vsb.genetics.common.Chromosome;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public abstract class SvResultParserBase implements SvResultParser {
     protected final Set<StructuralVariant> translocations = new HashSet<>();
@@ -38,6 +35,7 @@ public abstract class SvResultParserBase implements SvResultParser {
     private boolean removeDuplicateVariants = false;
 
     protected String name;
+    protected String[] infoTags = new String[0];
 
     protected void reset() {
         translocations.clear();
@@ -145,5 +143,15 @@ public abstract class SvResultParserBase implements SvResultParser {
     @Override
     public String getName() {
         return name;
+    }
+
+    @Override
+    public void setInfoTags(String[] infoTags) {
+        this.infoTags = infoTags == null ? new String[0] : infoTags;
+    }
+
+    @Override
+    public String[] getInfoTags() {
+        return infoTags;
     }
 }

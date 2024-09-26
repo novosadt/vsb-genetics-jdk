@@ -46,4 +46,8 @@ public interface SvResultParser {
     List<StructuralVariant> getVariants();
 
     String getName();
+
+    void setInfoTags(String[] infoTags);
+
+    String[] getInfoTags();
 }

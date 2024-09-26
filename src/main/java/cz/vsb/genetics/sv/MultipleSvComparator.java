@@ -223,7 +223,7 @@ public class MultipleSvComparator {
                 Set<StructuralVariant> others = otherParsersVariants.get(i);
                 StructuralVariant similarVariant = findBestSimilarStructuralVariant(structuralVariant, others);
 
-                printSimilarVariant(structuralVariant, similarVariant, svType);
+                printSimilarVariant(structuralVariant, similarVariant, svType, svParserOthers.get(i).getInfoTags());
 
                 if (similarVariant != null) {
                     similarVariantCounts[i]++;
@@ -279,8 +279,8 @@ public class MultipleSvComparator {
     private void printHeader(SvResultParser svParserMain, List<SvResultParser> svParserOthers) throws Exception {
         String svLabelMain = svParserMain.getName();
 
-        String header =
-                "sv_type\t" +
+        StringBuilder header =
+                new StringBuilder("sv_type\t" +
                         "src_chr\t" +
                         "dst_chr\t" +
                         svLabelMain + "_filter\t" +
@@ -289,34 +289,35 @@ public class MultipleSvComparator {
                         svLabelMain + "_sv_size\t" +
                         svLabelMain + "_sv_fraction\t" +
                         svLabelMain + "_gene\t" +
-                        svLabelMain + "_id";
+                        svLabelMain + "_id");
 
         for (SvResultParser svParserOther : svParserOthers) {
             String svLabelOther = svParserOther.getName();
 
-            header += "\t" +
-                    svLabelOther + "_src_pos\t" +
-                    svLabelOther + "_dst_pos\t" +
-                    svLabelOther + "_sv_size\t" +
-                    svLabelOther + "_sv_fraction\t" +
-                    svLabelOther + "_src_pos_dist\t" +
-                    svLabelOther + "_dst_pos_dist\t" +
-                    svLabelOther + "_dist_var\t" +
-                    svLabelOther + "_intersect_var\t" +
-                    svLabelOther + "_gene\t" +
-                    svLabelOther + "_common_genes\t" +
-                    svLabelOther + "_size_difference\t" +
-                    svLabelOther + "_size_proportion\t" +
-                    svLabelOther + "_filter\t" +
-                    svLabelOther + "_filter_name\t" +
-                    svLabelOther + "_id";
+            header.append("\t")
+                    .append(svLabelOther).append("_src_pos\t")
+                    .append(svLabelOther).append("_dst_pos\t")
+                    .append(svLabelOther).append("_sv_size\t")
+                    .append(svLabelOther).append("_sv_fraction\t")
+                    .append(svLabelOther).append("_src_pos_dist\t")
+                    .append(svLabelOther).append("_dst_pos_dist\t")
+                    .append(svLabelOther).append("_dist_var\t")
+                    .append(svLabelOther).append("_intersect_var\t")
+                    .append(svLabelOther).append("_gene\t")
+                    .append(svLabelOther).append("_common_genes\t")
+                    .append(svLabelOther).append("_size_difference\t")
+                    .append(svLabelOther).append("_size_proportion\t")
+                    .append(svLabelOther).append("_filter\t")
+                    .append(svLabelOther).append("_filter_name\t")
+                    .append(svLabelOther).append("_id\t")
+                    .append(svLabelOther).append("_info");
         }
 
         fileWriter.write(header + "\n");
     }
 
     private void printSimilarVariant(StructuralVariant variant, StructuralVariant similarVariant,
-                                     StructuralVariantType svType) throws Exception {
+                                     StructuralVariantType svType, String[] infoTags) throws Exception {
         String line = "";
 
         if (!mainPrinted) {
@@ -359,10 +360,11 @@ public class MultipleSvComparator {
                     getSizeProportionAsString(variant, similarVariant) + "\t" +
                     (similarVariant.passed() ? "PASS" : "") + "\t" +
                     StringUtils.join(similarVariant.getFilters(), ",") + "\t" +
-                    getVariantId(similarVariant);
+                    getVariantId(similarVariant) + "\t" +
+                    getVariantInfo(similarVariant, infoTags);
         }
         else
-            line += "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t";
+            line += "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t";
 
         fileWriter.write(line);
     }
@@ -570,6 +572,19 @@ public class MultipleSvComparator {
 
     private String getVariantId(StructuralVariant structuralVariant) {
         return structuralVariant.getId() == null ? "" : structuralVariant.getId();
+    }
+
+    private String getVariantInfo(StructuralVariant structuralVariant, String[] infoTags) {
+        List<String> infos = new ArrayList<>();
+
+        for (String infoTag : infoTags) {
+            String info = structuralVariant.getInfo().get(infoTag);
+
+            if (StringUtils.isNotBlank(info))
+                infos.add(info);
+        }
+
+        return StringUtils.join(infos, ";");
     }
 
     public void setDistanceVarianceBasesCounts(int[] distanceVarianceBasesCounts) {
