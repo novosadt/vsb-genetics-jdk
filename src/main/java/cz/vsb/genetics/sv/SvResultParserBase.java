@@ -20,6 +20,7 @@
 package cz.vsb.genetics.sv;
 
 import cz.vsb.genetics.common.Chromosome;
+import cz.vsb.genetics.util.GeneAnnotator;
 
 import java.util.*;
 
@@ -36,6 +37,7 @@ public abstract class SvResultParserBase implements SvResultParser {
 
     protected String name;
     protected String[] infoTags = new String[0];
+    protected GeneAnnotator geneAnnotator;
 
     protected void reset() {
         translocations.clear();
@@ -153,5 +155,10 @@ public abstract class SvResultParserBase implements SvResultParser {
     @Override
     public String[] getInfoTags() {
         return infoTags;
+    }
+
+    @Override
+    public void setGeneAnnotator(GeneAnnotator geneAnnotator) {
+        this.geneAnnotator = geneAnnotator;
     }
 }

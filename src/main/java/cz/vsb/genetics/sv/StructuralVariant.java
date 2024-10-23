@@ -29,8 +29,8 @@ public class StructuralVariant {
     private Chromosome dstChromosome;
     private int srcLoc;
     private int dstLoc;
-    private final int size;
-    private final String gene;
+    private int size;
+    private String gene;
     private Double variantAlleleFraction;
     private Map<String, String> info;
     private StructuralVariantType variantType;
@@ -39,8 +39,7 @@ public class StructuralVariant {
     private final Set<StructuralVariantFilter> filter = new LinkedHashSet<>();
     private boolean passed = true;
 
-    public StructuralVariant(Chromosome srcChromosome, int srcLoc, Chromosome dstChromosome, int dstLoc,
-                             int size) {
+    public StructuralVariant(Chromosome srcChromosome, int srcLoc, Chromosome dstChromosome, int dstLoc, int size) {
         this(srcChromosome, srcLoc, dstChromosome, dstLoc, size, null);
     }
 
@@ -54,54 +53,60 @@ public class StructuralVariant {
         this.gene = gene;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        StructuralVariant that = (StructuralVariant) o;
-
-        if (srcLoc != that.srcLoc) return false;
-        if (dstLoc != that.dstLoc) return false;
-        if (size != that.size) return false;
-        if (srcChromosome != that.srcChromosome) return false;
-        if (dstChromosome != that.dstChromosome) return false;
-        return variantType == that.variantType;
+    public String getId() {
+        return id;
     }
 
-    @Override
-    public int hashCode() {
-        int result = srcChromosome.hashCode();
-        result = 31 * result + dstChromosome.hashCode();
-        result = 31 * result + srcLoc;
-        result = 31 * result + dstLoc;
-        result = 31 * result + size;
-        result = 31 * result + variantType.hashCode();
-        return result;
+    public void setId(String id) {
+        this.id = id;
     }
 
     public Chromosome getSrcChromosome() {
         return srcChromosome;
     }
 
+    public void setSrcChromosome(Chromosome srcChromosome) {
+        this.srcChromosome = srcChromosome;
+    }
+
     public int getSrcLoc() {
         return srcLoc;
+    }
+
+    public void setSrcLoc(int srcLoc) {
+        this.srcLoc = srcLoc;
     }
 
     public Chromosome getDstChromosome() {
         return dstChromosome;
     }
 
+    public void setDstChromosome(Chromosome dstChromosome) {
+        this.dstChromosome = dstChromosome;
+    }
+
     public int getDstLoc() {
         return dstLoc;
+    }
+
+    public void setDstLoc(int dstLoc) {
+        this.dstLoc = dstLoc;
     }
 
     public int getSize() {
         return size;
     }
 
+    public void setSize(int size) {
+        this.size = size;
+    }
+
     public String getGene() {
         return gene == null ? "" : gene;
+    }
+
+    public void setGene(String gene) {
+        this.gene = gene;
     }
 
     public StructuralVariantType getVariantType() {
@@ -136,30 +141,6 @@ public class StructuralVariant {
         this.dstOrientation = dstOrientation;
     }
 
-    public void setSrcChromosome(Chromosome srcChromosome) {
-        this.srcChromosome = srcChromosome;
-    }
-
-    public void setDstChromosome(Chromosome dstChromosome) {
-        this.dstChromosome = dstChromosome;
-    }
-
-    public void setSrcLoc(int srcLoc) {
-        this.srcLoc = srcLoc;
-    }
-
-    public void setDstLoc(int dstLoc) {
-        this.dstLoc = dstLoc;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
     public Map<String, String> getInfo() {
         return info;
     }
@@ -181,7 +162,7 @@ public class StructuralVariant {
     }
 
     public boolean isFiltered() {
-        return filter.size() > 0;
+        return !filter.isEmpty();
     }
 
     public boolean passed() {
@@ -190,5 +171,31 @@ public class StructuralVariant {
 
     public void setPassed(boolean passed) {
         this.passed = passed;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        StructuralVariant that = (StructuralVariant) o;
+
+        if (srcLoc != that.srcLoc) return false;
+        if (dstLoc != that.dstLoc) return false;
+        if (size != that.size) return false;
+        if (srcChromosome != that.srcChromosome) return false;
+        if (dstChromosome != that.dstChromosome) return false;
+        return variantType == that.variantType;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = srcChromosome.hashCode();
+        result = 31 * result + dstChromosome.hashCode();
+        result = 31 * result + srcLoc;
+        result = 31 * result + dstLoc;
+        result = 31 * result + size;
+        result = 31 * result + variantType.hashCode();
+        return result;
     }
 }

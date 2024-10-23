@@ -19,6 +19,8 @@
 
 package cz.vsb.genetics.sv;
 
+import cz.vsb.genetics.util.GeneAnnotator;
+
 import java.util.List;
 import java.util.Set;
 
@@ -50,4 +52,6 @@ public interface SvResultParser {
     void setInfoTags(String[] infoTags);
 
     String[] getInfoTags();
+
+    void setGeneAnnotator(GeneAnnotator geneAnnotator);
 }

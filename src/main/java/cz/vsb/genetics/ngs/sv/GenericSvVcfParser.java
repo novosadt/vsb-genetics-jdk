@@ -4,6 +4,7 @@ import cz.vsb.genetics.common.Chromosome;
 import cz.vsb.genetics.sv.StructuralVariant;
 import cz.vsb.genetics.sv.StructuralVariantType;
 import cz.vsb.genetics.sv.SvResultParserBase;
+import cz.vsb.genetics.util.GeneAnnotator;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.BufferedReader;
@@ -164,6 +165,9 @@ public class GenericSvVcfParser extends SvResultParserBase {
             case "inv" : variants = inversions; type = StructuralVariantType.INV; break;
             default: variants = unknown; type = StructuralVariantType.UNK;
         }
+
+        if (geneAnnotator != null)
+            sv.setGene(GeneAnnotator.toSymbols(geneAnnotator.findIntersectingGenes(sv)));
 
         if (!addStructuralVariant(sv, variants, type))
             totalCount--;
