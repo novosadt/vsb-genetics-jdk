@@ -435,7 +435,8 @@ public class MultipleSvComparator {
         if (sizeProportionFilter)
             otherVariant.addFilter(StructuralVariantFilter.SIZE_PROPORTION);
 
-        otherVariant.setPassed(!sizeProportionFilter && (!distanceVarianceFilter || !intersectionVarianceFilter));
+        otherVariant.setPassed(!commonGenesFilter
+                && (!sizeProportionFilter && (!distanceVarianceFilter || !intersectionVarianceFilter)));
     }
 
     private int getDistanceVariance(StructuralVariant structuralVariant, StructuralVariant otherVariant) {
