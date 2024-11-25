@@ -18,7 +18,10 @@
 
 package cz.vsb.genetics.sv;
 
+import cz.vsb.genetics.common.Chromosome;
 import cz.vsb.genetics.common.ChromosomeRegion;
+import cz.vsb.genetics.common.Gene;
+import cz.vsb.genetics.util.GeneAnnotator;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.lang3.StringUtils;
@@ -45,6 +48,7 @@ public class MultipleSvComparator {
     private boolean calculateStructuralVariantStats = false;
     private final Map<String, StructuralVariantStatsItem> structuralVariantStats = new LinkedHashMap<>();
     private List<ChromosomeRegion> excludedRegions;
+    private GeneAnnotator geneAnnotator;
 
     public void compareStructuralVariants(SvResultParser svParserMain, List<SvResultParser> svParserOthers, String outputFile) throws Exception {
         fileWriter = new FileWriter(outputFile);
@@ -305,6 +309,7 @@ public class MultipleSvComparator {
                     .append(svLabelOther).append("_intersect_var\t")
                     .append(svLabelOther).append("_gene\t")
                     .append(svLabelOther).append("_common_genes\t")
+                    .append(svLabelOther).append("_common_genes_annotation\t")
                     .append(svLabelOther).append("_size_difference\t")
                     .append(svLabelOther).append("_size_proportion\t")
                     .append(svLabelOther).append("_filter\t")
@@ -343,7 +348,8 @@ public class MultipleSvComparator {
             int srcDist = Math.abs(variant.getSrcLoc() - similarVariant.getSrcLoc());
             int dstDist = Math.abs(variant.getDstLoc() - similarVariant.getDstLoc());
 
-            String commonGenes = StringUtils.join(getCommonGenes(variant, similarVariant), ",");
+            List<String> commonGenes = getCommonGenes(variant, similarVariant);
+            String commonGenesAnnotation = getCommonGenesAnnotation(commonGenes, similarVariant.getSrcChromosome());
 
             line += "\t" +
                     similarVariant.getSrcLoc() + "\t" +
@@ -355,7 +361,8 @@ public class MultipleSvComparator {
                     getDistanceVariance(variant, similarVariant) + "\t" +
                     getIntersectionVariance(variant, similarVariant) + "\t" +
                     similarVariant.getGene() + "\t" +
-                    commonGenes + "\t" +
+                    StringUtils.join(commonGenes, ",") + "\t" +
+                    commonGenesAnnotation + "\t" +
                     getSizeDifference(variant, similarVariant) + "\t" +
                     getSizeProportionAsString(variant, similarVariant) + "\t" +
                     (similarVariant.passed() ? "PASS" : "") + "\t" +
@@ -364,7 +371,7 @@ public class MultipleSvComparator {
                     getVariantInfo(similarVariant, infoTags);
         }
         else
-            line += "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t";
+            line += "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t";
 
         fileWriter.write(line);
     }
@@ -541,6 +548,22 @@ public class MultipleSvComparator {
         return commonGenes;
     }
 
+    private String getCommonGenesAnnotation(List<String> commonGenes, Chromosome chromosome) {
+        if (geneAnnotator == null)
+            return "";
+
+        List<String> annotations = new ArrayList<>();
+
+        for (String symbol : commonGenes) {
+            Gene gene = geneAnnotator.getGene(symbol, chromosome);
+
+            if (gene != null)
+                annotations.add(symbol + ":" + geneAnnotator.getGene(symbol, chromosome).getInfo());
+        }
+
+        return StringUtils.join(annotations, "|");
+    }
+
     private String getAllelicFraction(StructuralVariant structuralVariant) {
         if (structuralVariant.getVariantAllelicFraction() == null)
             return "";
@@ -602,5 +625,9 @@ public class MultipleSvComparator {
 
     public void setExcludedRegions(List<ChromosomeRegion> excludedRegions) {
         this.excludedRegions = excludedRegions;
+    }
+
+    public void setGeneAnnotator(GeneAnnotator geneAnnotator) {
+        this.geneAnnotator = geneAnnotator;
     }
 }

@@ -18,20 +18,11 @@
 package cz.vsb.genetics.common;
 
 public class Gene {
-    String id;
     Chromosome chromosome;
     int start;
     int end;
     String symbol;
-    String name;
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
+    String info;
 
     public Chromosome getChromosome() {
         return chromosome;
@@ -65,11 +56,11 @@ public class Gene {
         this.symbol = symbol;
     }
 
-    public String getName() {
-        return name;
+    public String getInfo() {
+        return info;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setInfo(String info) {
+        this.info = info;
     }
 }

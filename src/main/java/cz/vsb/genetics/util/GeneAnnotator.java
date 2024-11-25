@@ -24,59 +24,62 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class GeneAnnotator {
-    private final List<Gene> chr1 = new ArrayList<>();
-    private final List<Gene> chr2 = new ArrayList<>();
-    private final List<Gene> chr3 = new ArrayList<>();
-    private final List<Gene> chr4 = new ArrayList<>();
-    private final List<Gene> chr5 = new ArrayList<>();
-    private final List<Gene> chr6 = new ArrayList<>();
-    private final List<Gene> chr7 = new ArrayList<>();
-    private final List<Gene> chr8 = new ArrayList<>();
-    private final List<Gene> chr9 = new ArrayList<>();
-    private final List<Gene> chr10 = new ArrayList<>();
-    private final List<Gene> chr11 = new ArrayList<>();
-    private final List<Gene> chr12 = new ArrayList<>();
-    private final List<Gene> chr13 = new ArrayList<>();
-    private final List<Gene> chr14 = new ArrayList<>();
-    private final List<Gene> chr15 = new ArrayList<>();
-    private final List<Gene> chr16 = new ArrayList<>();
-    private final List<Gene> chr17 = new ArrayList<>();
-    private final List<Gene> chr18 = new ArrayList<>();
-    private final List<Gene> chr19 = new ArrayList<>();
-    private final List<Gene> chr20 = new ArrayList<>();
-    private final List<Gene> chr21 = new ArrayList<>();
-    private final List<Gene> chr22 = new ArrayList<>();
-    private final List<Gene> chrX = new ArrayList<>();
-    private final List<Gene> chrY = new ArrayList<>();
-    private final List<Gene> chrM = new ArrayList<>();
+    private final Map<String, Gene> chr1 = new HashMap<>();
+    private final Map<String, Gene> chr2 = new HashMap<>();
+    private final Map<String, Gene> chr3 = new HashMap<>();
+    private final Map<String, Gene> chr4 = new HashMap<>();
+    private final Map<String, Gene> chr5 = new HashMap<>();
+    private final Map<String, Gene> chr6 = new HashMap<>();
+    private final Map<String, Gene> chr7 = new HashMap<>();
+    private final Map<String, Gene> chr8 = new HashMap<>();
+    private final Map<String, Gene> chr9 = new HashMap<>();
+    private final Map<String, Gene> chr10 = new HashMap<>();
+    private final Map<String, Gene> chr11 = new HashMap<>();
+    private final Map<String, Gene> chr12 = new HashMap<>();
+    private final Map<String, Gene> chr13 = new HashMap<>();
+    private final Map<String, Gene> chr14 = new HashMap<>();
+    private final Map<String, Gene> chr15 = new HashMap<>();
+    private final Map<String, Gene> chr16 = new HashMap<>();
+    private final Map<String, Gene> chr17 = new HashMap<>();
+    private final Map<String, Gene> chr18 = new HashMap<>();
+    private final Map<String, Gene> chr19 = new HashMap<>();
+    private final Map<String, Gene> chr20 = new HashMap<>();
+    private final Map<String, Gene> chr21 = new HashMap<>();
+    private final Map<String, Gene> chr22 = new HashMap<>();
+    private final Map<String, Gene> chrX = new HashMap<>();
+    private final Map<String, Gene> chrY = new HashMap<>();
+    private final Map<String, Gene> chrM = new HashMap<>();
 
-    public void parseGeneFile(String filePath, String separator, boolean hasHeaderRow) throws Exception {
+    public void parseGeneFile(String filePath, String separator) throws Exception {
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
-
-            if (hasHeaderRow)
-                reader.readLine(); // skip header line
+            String[] header = reader.readLine().split(separator);
 
             String line;
             while((line = reader.readLine()) != null) {
                 String[] values = line.split(separator);
 
                 Gene gene = new Gene();
-                gene.setSymbol(values[0]);
+                gene.setSymbol(values[0].toUpperCase());
                 gene.setChromosome(Chromosome.of(values[1]));
                 gene.setStart(Integer.valueOf(values[2]));
                 gene.setEnd(Integer.valueOf(values[3]));
 
-                if (values.length > 4)
-                    gene.setName(values[4]);
+                if (values.length > 4) {
+                    List<String> infos = new ArrayList<>();
+                    for (int i = 4; i < values.length; i++) {
+                        String label = header[i].replaceAll("\t", "  ");
+                        String value = values[i].replaceAll(";", ",").replaceAll(":", ".")
+                                .replaceAll("\"", "'").replaceAll("\t", "  ");
 
-                if (values.length > 5)
-                    gene.setId(values[5]);
+                        infos.add(label + "=" + value);
+                    }
+
+                    gene.setInfo(StringUtils.join(infos, ";").replaceAll("\\|", "-"));
+                }
 
                 addGene(gene);
             }
@@ -84,7 +87,7 @@ public class GeneAnnotator {
     }
 
     private void addGene(Gene gene) {
-        getChromosomeGenes(gene.getChromosome()).add(gene);
+        getChromosomeGenes(gene.getChromosome()).put(gene.getSymbol(), gene);
     }
 
     public List<Gene> findIntersectingGenes(StructuralVariant variant) {
@@ -92,15 +95,15 @@ public class GeneAnnotator {
 
         // inter-chromosomal translocation
         if (variant.getSrcChromosome() != variant.getDstChromosome()) {
-            List<Gene> sourceGenes = getChromosomeGenes(variant.getSrcChromosome());
-            List<Gene> destinationGenes = getChromosomeGenes(variant.getDstChromosome());
+            Map<String, Gene> sourceGenes = getChromosomeGenes(variant.getSrcChromosome());
+            Map<String, Gene> destinationGenes = getChromosomeGenes(variant.getDstChromosome());
 
-            for (Gene gene : sourceGenes)
+            for (Gene gene : sourceGenes.values())
                 if (gene.getStart() <= variant.getSrcLoc() && gene.getEnd() >= variant.getSrcLoc())
                     intersectingGenes.add(gene);
 
 
-            for (Gene gene : destinationGenes)
+            for (Gene gene : destinationGenes.values())
                 if (gene.getStart() <= variant.getDstLoc() && gene.getEnd() >= variant.getDstLoc())
                     intersectingGenes.add(gene);
         }
@@ -109,9 +112,9 @@ public class GeneAnnotator {
             int start = Math.min(variant.getSrcLoc(), variant.getDstLoc());
             int end = Math.max(variant.getSrcLoc(), variant.getDstLoc());
 
-            List<Gene> genes = getChromosomeGenes(variant.getSrcChromosome());
+            Map<String, Gene> genes = getChromosomeGenes(variant.getSrcChromosome());
 
-            for (Gene gene : genes) {
+            for (Gene gene : genes.values()) {
                 if (!(start > gene.getEnd() || end < gene.getStart()))
                     intersectingGenes.add(gene);
             }
@@ -120,7 +123,7 @@ public class GeneAnnotator {
         return intersectingGenes;
     }
 
-    private List<Gene> getChromosomeGenes(Chromosome chromosome) {
+    private Map<String, Gene> getChromosomeGenes(Chromosome chromosome) {
         switch (chromosome) {
             case chr1: return this.chr1;
             case chr2: return this.chr2;
@@ -149,12 +152,16 @@ public class GeneAnnotator {
             case chrM: return this.chrM;
         }
 
-        return Collections.emptyList();
+        return Collections.emptyMap();
     }
 
     public static String toSymbols(List<Gene> genes) {
         return StringUtils.join(genes.stream()
                         .map(Gene::getSymbol)
                         .collect(Collectors.toList()), ";");
+    }
+
+    public Gene getGene(String symbol, Chromosome chromosome) {
+        return  getChromosomeGenes(chromosome).get(symbol.toUpperCase());
     }
 }
