@@ -27,8 +27,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -96,7 +95,8 @@ public class AnnotSvTsvParser extends SvResultParserBase {
         if (annotSvType == null)
             annotSvType = values.get("Annotation_mode") == null ? null : values.get("Annotation_mode").toLowerCase();
 
-        String gene = values.get("Gene_name");
+        String gene = StringUtils.isBlank(values.get("Gene_name")) ? "" : values.get("Gene_name");
+        Set<String> genes = new HashSet<>(Arrays.asList(gene.toUpperCase().split("[/;]")));
 
         if (!"full".equals(annotSvType))
             return;
@@ -123,7 +123,7 @@ public class AnnotSvTsvParser extends SvResultParserBase {
         Chromosome srcChrom = Chromosome.of(srcChromId);
         Chromosome dstChrom = Chromosome.of(dstChromId);
 
-        StructuralVariant sv = new StructuralVariant(srcChrom, srcLoc, dstChrom, dstLoc, svLength, gene);
+        StructuralVariant sv = new StructuralVariant(srcChrom, srcLoc, dstChrom, dstLoc, svLength, genes);
         sv.setId(id);
         sv.setInfo(info);
         sv.setVariantAlleleFraction(getAllelicFraction(info));

@@ -167,7 +167,7 @@ public class GenericSvVcfParser extends SvResultParserBase {
         }
 
         if (geneAnnotator != null)
-            sv.setGene(GeneAnnotator.toSymbols(geneAnnotator.findIntersectingGenes(sv)));
+            sv.setGenes(GeneAnnotator.toSymbols(geneAnnotator.findIntersectingGenes(sv)));
 
         if (!addStructuralVariant(sv, variants, type))
             totalCount--;

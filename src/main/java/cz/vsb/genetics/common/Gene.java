@@ -53,7 +53,7 @@ public class Gene {
     }
 
     public void setSymbol(String symbol) {
-        this.symbol = symbol;
+        this.symbol = symbol == null ? null : symbol.toUpperCase();
     }
 
     public String getInfo() {

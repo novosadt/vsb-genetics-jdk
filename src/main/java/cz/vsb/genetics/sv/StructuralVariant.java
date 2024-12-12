@@ -30,7 +30,7 @@ public class StructuralVariant {
     private int srcLoc;
     private int dstLoc;
     private int size;
-    private String gene;
+    private Set<String> genes;
     private Double variantAlleleFraction;
     private Map<String, String> info;
     private StructuralVariantType variantType;
@@ -44,13 +44,13 @@ public class StructuralVariant {
     }
 
     public StructuralVariant(Chromosome srcChromosome, int srcLoc, Chromosome dstChromosome, int dstLoc,
-                             int size, String gene) {
+                             int size, Set<String> genes) {
         this.srcChromosome = srcChromosome;
         this.srcLoc = srcLoc;
         this.dstChromosome = dstChromosome;
         this.dstLoc = dstLoc;
         this.size = Math.abs(size);
-        this.gene = gene;
+        this.genes = genes;
     }
 
     public String getId() {
@@ -101,12 +101,12 @@ public class StructuralVariant {
         this.size = size;
     }
 
-    public String getGene() {
-        return gene == null ? "" : gene;
+    public Set<String> getGenes() {
+        return genes == null ? Collections.emptySet() : genes;
     }
 
-    public void setGene(String gene) {
-        this.gene = gene;
+    public void setGenes(Set<String> genes) {
+        this.genes = genes;
     }
 
     public StructuralVariantType getVariantType() {

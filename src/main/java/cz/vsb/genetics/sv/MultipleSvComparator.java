@@ -293,6 +293,7 @@ public class MultipleSvComparator {
                         svLabelMain + "_sv_size\t" +
                         svLabelMain + "_sv_fraction\t" +
                         svLabelMain + "_gene\t" +
+                        svLabelMain + "_gene_annotation\t" +
                         svLabelMain + "_id");
 
         for (SvResultParser svParserOther : svParserOthers) {
@@ -308,6 +309,7 @@ public class MultipleSvComparator {
                     .append(svLabelOther).append("_dist_var\t")
                     .append(svLabelOther).append("_intersect_var\t")
                     .append(svLabelOther).append("_gene\t")
+                    .append(svLabelOther).append("_gene_annotation\t")
                     .append(svLabelOther).append("_common_genes\t")
                     .append(svLabelOther).append("_common_genes_annotation\t")
                     .append(svLabelOther).append("_size_difference\t")
@@ -335,7 +337,8 @@ public class MultipleSvComparator {
                             variant.getDstLoc() + "\t" +
                             variant.getSize() + "\t" +
                             getAllelicFraction(variant) + "\t" +
-                            variant.getGene() + "\t" +
+                            StringUtils.join(variant.getGenes(), ';') + "\t" +
+                            getGenesAnnotation(variant.getGenes(), variant.getSrcChromosome()) + "\t" +
                             getVariantId(variant);
 
 
@@ -348,8 +351,7 @@ public class MultipleSvComparator {
             int srcDist = Math.abs(variant.getSrcLoc() - similarVariant.getSrcLoc());
             int dstDist = Math.abs(variant.getDstLoc() - similarVariant.getDstLoc());
 
-            List<String> commonGenes = getCommonGenes(variant, similarVariant);
-            String commonGenesAnnotation = getCommonGenesAnnotation(commonGenes, similarVariant.getSrcChromosome());
+            Set<String> commonGenes = getCommonGenes(variant, similarVariant);
 
             line += "\t" +
                     similarVariant.getSrcLoc() + "\t" +
@@ -360,9 +362,10 @@ public class MultipleSvComparator {
                     dstDist + "\t" +
                     getDistanceVariance(variant, similarVariant) + "\t" +
                     getIntersectionVariance(variant, similarVariant) + "\t" +
-                    similarVariant.getGene() + "\t" +
-                    StringUtils.join(commonGenes, ",") + "\t" +
-                    commonGenesAnnotation + "\t" +
+                    StringUtils.join(';', similarVariant.getGenes()) + "\t" +
+                    getGenesAnnotation(similarVariant.getGenes(), similarVariant.getSrcChromosome()) + "\t" +
+                    StringUtils.join(commonGenes, ';') + "\t" +
+                    getGenesAnnotation(commonGenes, similarVariant.getSrcChromosome()) + "\t" +
                     getSizeDifference(variant, similarVariant) + "\t" +
                     getSizeProportionAsString(variant, similarVariant) + "\t" +
                     (similarVariant.passed() ? "PASS" : "") + "\t" +
@@ -371,7 +374,7 @@ public class MultipleSvComparator {
                     getVariantInfo(similarVariant, infoTags);
         }
         else
-            line += "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t";
+            line += "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t";
 
         fileWriter.write(line);
     }
@@ -415,7 +418,7 @@ public class MultipleSvComparator {
 
         boolean commonGenesFilter = false;
         if (onlyCommonGenes) {
-            List<String> commonGenes = getCommonGenes(structuralVariant, otherVariant);
+            Set<String> commonGenes = getCommonGenes(structuralVariant, otherVariant);
             if (commonGenes.isEmpty())
                 commonGenesFilter = true;
         }
@@ -531,30 +534,27 @@ public class MultipleSvComparator {
             item.addSvCountPassed();
     }
 
-    private List<String> getCommonGenes(StructuralVariant sv1, StructuralVariant sv2) {
-        if (StringUtils.isBlank(sv1.getGene()) || StringUtils.isBlank(sv2.getGene()))
-            return Collections.emptyList();
+    private Set<String> getCommonGenes(StructuralVariant sv1, StructuralVariant sv2) {
+        if (sv1.getGenes().isEmpty() || sv2.getGenes().isEmpty())
+            return Collections.emptySet();
 
-        String[] sv1Genes = sv1.getGene().toUpperCase().split("[/;]");
-        List<String> sv2Genes = Arrays.asList(sv2.getGene().toUpperCase().split("[/;]"));
+        Set<String> commonGenes = new HashSet<>();
 
-        List<String> commonGenes = new ArrayList<>();
-
-        for (String gene : sv1Genes) {
-            if (sv2Genes.contains(gene))
+        for (String gene : sv1.getGenes()) {
+            if (sv2.getGenes().contains(gene))
                 commonGenes.add(gene);
         }
 
         return commonGenes;
     }
 
-    private String getCommonGenesAnnotation(List<String> commonGenes, Chromosome chromosome) {
+    private String getGenesAnnotation(Set<String> genes, Chromosome chromosome) {
         if (geneAnnotator == null)
             return "";
 
         List<String> annotations = new ArrayList<>();
 
-        for (String symbol : commonGenes) {
+        for (String symbol : genes) {
             Gene gene = geneAnnotator.getGene(symbol, chromosome);
 
             if (gene != null)

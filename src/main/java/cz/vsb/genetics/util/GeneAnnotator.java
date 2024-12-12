@@ -155,10 +155,10 @@ public class GeneAnnotator {
         return Collections.emptyMap();
     }
 
-    public static String toSymbols(List<Gene> genes) {
-        return StringUtils.join(genes.stream()
+    public static Set<String> toSymbols(List<Gene> genes) {
+        return genes.stream()
                         .map(Gene::getSymbol)
-                        .collect(Collectors.toList()), ";");
+                        .collect(Collectors.toSet());
     }
 
     public Gene getGene(String symbol, Chromosome chromosome) {

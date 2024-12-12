@@ -27,8 +27,7 @@ import cz.vsb.genetics.sv.StructuralVariant;
 import cz.vsb.genetics.sv.StructuralVariantType;
 import cz.vsb.genetics.sv.SvResultParserBase;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class BionanoPipelineResultParser extends SvResultParserBase {
     private Map<String, StructuralVariant> inversionBreakpoints = new HashMap<>();
@@ -63,6 +62,7 @@ public class BionanoPipelineResultParser extends SvResultParserBase {
         String type = entry.getType().toLowerCase();
         int size = dstLoc - srcLoc;
         String gene = entry.getOverlapGenes() == null ? "" : entry.getOverlapGenes();
+        Set<String> genes = new HashSet<>(Arrays.asList(gene.toUpperCase().split("[/;]")));
 
         if (type.contains("translocation"))
             size = 0;
@@ -70,7 +70,7 @@ public class BionanoPipelineResultParser extends SvResultParserBase {
         Chromosome srcChrom = Chromosome.of(srcChromId);
         Chromosome dstChrom = Chromosome.of(dstChromId);
 
-        StructuralVariant sv = new StructuralVariant(srcChrom, srcLoc, dstChrom, dstLoc, size, gene);
+        StructuralVariant sv = new StructuralVariant(srcChrom, srcLoc, dstChrom, dstLoc, size, genes);
         sv.setVariantAlleleFraction(entry.getVaf());
         sv.setId(entry.getSmapEntryID().toString());
 
@@ -115,7 +115,7 @@ public class BionanoPipelineResultParser extends SvResultParserBase {
             int endPos = breakpointB.getSrcLoc() != -1 ? breakpointB.getSrcLoc() : breakpointB.getDstLoc();
             int size = endPos - startPos;
 
-            StructuralVariant inversion = new StructuralVariant(breakpoint.getSrcChromosome(), startPos, breakpoint.getDstChromosome(), endPos, size, breakpoint.getGene());
+            StructuralVariant inversion = new StructuralVariant(breakpoint.getSrcChromosome(), startPos, breakpoint.getDstChromosome(), endPos, size, breakpoint.getGenes());
             inversion.setVariantAlleleFraction(breakpoint.getVariantAllelicFraction());
             inversion.setId(breakpoint.getId());
 
