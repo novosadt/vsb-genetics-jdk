@@ -362,7 +362,7 @@ public class MultipleSvComparator {
                     dstDist + "\t" +
                     getDistanceVariance(variant, similarVariant) + "\t" +
                     getIntersectionVariance(variant, similarVariant) + "\t" +
-                    StringUtils.join(';', similarVariant.getGenes()) + "\t" +
+                    StringUtils.join(similarVariant.getGenes(), ';') + "\t" +
                     getGenesAnnotation(similarVariant.getGenes(), similarVariant.getSrcChromosome()) + "\t" +
                     StringUtils.join(commonGenes, ';') + "\t" +
                     getGenesAnnotation(commonGenes, similarVariant.getSrcChromosome()) + "\t" +
