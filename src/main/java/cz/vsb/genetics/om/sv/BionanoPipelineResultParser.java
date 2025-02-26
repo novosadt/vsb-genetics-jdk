@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Tomas Novosad
+ * Copyright (C) 2025  Tomas Novosad
  * VSB-TUO, Faculty of Electrical Engineering and Computer Science
  *
  * This program is free software: you can redistribute it and/or modify
@@ -30,9 +30,9 @@ import cz.vsb.genetics.sv.SvResultParserBase;
 import java.util.*;
 
 public class BionanoPipelineResultParser extends SvResultParserBase {
-    private Map<String, StructuralVariant> inversionBreakpoints = new HashMap<>();
-    private Map<String, String> inversionBreakpointLinks = new HashMap<>();
-    private Map<String, String> inversionBreakpointTypes = new HashMap<>();
+    private final Map<String, StructuralVariant> inversionBreakpoints = new HashMap<>();
+    private final Map<String, String> inversionBreakpointLinks = new HashMap<>();
+    private final Map<String, String> inversionBreakpointTypes = new HashMap<>();
 
     public BionanoPipelineResultParser(String name) {
         this.name = name;
@@ -40,6 +40,10 @@ public class BionanoPipelineResultParser extends SvResultParserBase {
 
     @Override
     public void parseResultFile(String file, String delim) throws Exception {
+        inversionBreakpoints.clear();
+        inversionBreakpointLinks.clear();
+        inversionBreakpointTypes.clear();
+
         SMapParser parser = new SMapParser();
         SMap smap = parser.parse(file);
 

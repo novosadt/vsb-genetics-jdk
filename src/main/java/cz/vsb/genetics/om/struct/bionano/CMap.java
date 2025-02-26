@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2025  Tomas Novosad
+ * VSB-TUO, Faculty of Electrical Engineering and Computer Science
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+
 package cz.vsb.genetics.om.struct.bionano;
 
 import java.util.*;
@@ -31,11 +50,11 @@ public class CMap {
     }
 
     public CMapEntry findNearestEntry(float position) {
-        if (entryPosition.size() == 0)
+        if (entryPosition.isEmpty())
             return null;
 
-        Map.Entry<Float, CMapEntry> low = ((TreeMap)entryPosition).floorEntry(position);
-        Map.Entry<Float, CMapEntry> high = ((TreeMap)entryPosition).ceilingEntry(position);
+        Map.Entry<Float, CMapEntry> low = ((TreeMap<Float, CMapEntry>)entryPosition).floorEntry(position);
+        Map.Entry<Float, CMapEntry> high = ((TreeMap<Float, CMapEntry>)entryPosition).ceilingEntry(position);
 
         if (low != null && high != null)
             return Math.abs(position - low.getKey()) < Math.abs(position - high.getKey())
@@ -47,7 +66,7 @@ public class CMap {
     }
 
     public List<CMapEntry> findEntriesAtInterval(int start, int end) {
-        if (entryPosition.size() == 0)
+        if (entryPosition.isEmpty())
             return null;
 
         CMapEntry startEntry = findNearestEntry(start);

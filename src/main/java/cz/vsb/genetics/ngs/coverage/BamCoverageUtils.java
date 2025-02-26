@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Tomas Novosad
+ * Copyright (C) 2025  Tomas Novosad
  * VSB-TUO, Faculty of Electrical Engineering and Computer Science
  *
  * This program is free software: you can redistribute it and/or modify
@@ -15,6 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 
 package cz.vsb.genetics.ngs.coverage;
 

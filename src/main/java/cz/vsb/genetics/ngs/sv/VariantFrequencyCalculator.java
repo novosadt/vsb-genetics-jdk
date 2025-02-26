@@ -19,6 +19,8 @@
 /*
  * Source code for variant frequency calculation is based on SVClone python
  * package for structural variant frequency calculation.
+ *
+ * Under construction...
  */
 
 package cz.vsb.genetics.ngs.sv;
@@ -242,7 +244,7 @@ public class VariantFrequencyCalculator {
         return count;
     }
 
-//    private ReadCountInfo getSpanningReadCount(StructuralVariant variant, List<SAMRecord> reads, ReadInsertSizeInfo insertSizeInfo, int minInsert, int maxInsert) {
-//
-//    }
+    private ReadCountInfo getSpanningReadCount(StructuralVariant variant, List<SAMRecord> reads, ReadInsertSizeInfo insertSizeInfo, int minInsert, int maxInsert) {
+        return null;
+    }
 }
