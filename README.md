@@ -1,1 +1,1 @@
-# vsb-genetics-jdk
+# Genetics Java Development Toolikt
