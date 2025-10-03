@@ -272,7 +272,7 @@ public class MultipleSvComparator {
             // thus intersection variance score cannot be calculated. Distance variance score is used instead
             // for variant sorting.
             if (structuralVariant.getVariantType() == StructuralVariantType.BND)
-                similarStructuralVariants.put(Double.valueOf(distanceVariance), otherVariant);
+                similarStructuralVariants.put((double) distanceVariance, otherVariant);
             else
                 similarStructuralVariants.put(intersectionVariance, otherVariant);
         }
@@ -445,8 +445,27 @@ public class MultipleSvComparator {
         if (sizeProportionFilter)
             otherVariant.addFilter(StructuralVariantFilter.SIZE_PROPORTION);
 
-        otherVariant.setPassed(!commonGenesFilter
-                && (!sizeProportionFilter && (!distanceVarianceFilter || !intersectionVarianceFilter)));
+        boolean passed = true;
+
+        if (commonGenesFilter)
+            passed = false;
+
+        if (sizeProportionFilter)
+            passed = false;
+
+        if (distanceVarianceThreshold != null && intersectionVarianceThreshold != null) {
+            if (distanceVarianceFilter && intersectionVarianceFilter)
+                passed = false;
+        }
+        else {
+            if (distanceVarianceFilter)
+                passed = false;
+
+            if (intersectionVarianceFilter)
+                passed = false;
+        }
+
+        otherVariant.setPassed(passed);
     }
 
     private int getDistanceVariance(StructuralVariant structuralVariant, StructuralVariant otherVariant) {
