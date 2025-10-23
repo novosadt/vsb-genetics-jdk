@@ -63,6 +63,22 @@ public class ChromosomeRegion {
         return String.format("%s:%d-%d", chromosome, start, end);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ChromosomeRegion that = (ChromosomeRegion) o;
+        return start == that.start && end == that.end && chromosome == that.chromosome;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = chromosome.hashCode();
+        result = 31 * result + start;
+        result = 31 * result + end;
+        return result;
+    }
+
     /**
      *
      * @param other Chromosomal region the intersection will be calculated with.
@@ -72,10 +88,10 @@ public class ChromosomeRegion {
         if (!chromosome.equals(other.getChromosome()))
             return 0.0;
 
-        int start = Math.max(getStart(), getEnd());
-        int end = Math.min(getEnd(), getStart());
-        int otherStart = Math.max(other.getStart(), other.getEnd());
-        int otherEnd = Math.min(other.getEnd(), other.getStart());
+        int start = Math.min(getStart(), getEnd());
+        int end = Math.max(getEnd(), getStart());
+        int otherStart = Math.min(other.getStart(), other.getEnd());
+        int otherEnd = Math.max(other.getEnd(), other.getStart());
 
         if (otherStart > end || start > otherEnd)
             return 0.0;
