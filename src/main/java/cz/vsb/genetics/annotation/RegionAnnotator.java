@@ -19,7 +19,6 @@
 package cz.vsb.genetics.annotation;
 
 import cz.vsb.genetics.common.ChromosomeRegion;
-import cz.vsb.genetics.ngs.struct.RegionAnnotation;
 import cz.vsb.genetics.util.Util;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
