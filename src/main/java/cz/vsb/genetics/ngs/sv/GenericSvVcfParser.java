@@ -23,7 +23,7 @@ import cz.vsb.genetics.common.Chromosome;
 import cz.vsb.genetics.sv.StructuralVariant;
 import cz.vsb.genetics.sv.StructuralVariantType;
 import cz.vsb.genetics.sv.SvResultParserBase;
-import cz.vsb.genetics.util.GeneAnnotator;
+import cz.vsb.genetics.annotation.GeneAnnotator;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.BufferedReader;
@@ -100,12 +100,12 @@ public class GenericSvVcfParser extends SvResultParserBase {
         totalCount++;
 
         String srcChromId = values.get("CHROM");
-        int srcLoc = Integer.valueOf(values.get("POS"));
+        int srcLoc = Integer.parseInt(values.get("POS"));
         String id = values.get("ID");
         String filter = values.get("FILTER");
         String dstChromId = srcChromId;
         Map<String, String> info = getInfo(values.get("INFO"));
-        int dstLoc = info.containsKey("END") ? Integer.valueOf(info.get("END")) : 0;
+        int dstLoc = info.containsKey("END") ? Integer.parseInt(info.get("END")) : 0;
         String svType = info.get("SVTYPE").toLowerCase();
         int svLength = getSvLength(info);
 
@@ -129,7 +129,7 @@ public class GenericSvVcfParser extends SvResultParserBase {
             }
 
             dstChromId = m.group(1);
-            dstLoc = Integer.valueOf(m.group(2));
+            dstLoc = Integer.parseInt(m.group(2));
             svType = getBndVariantType(info).toString().toLowerCase();
 
             // There are paired entries for Inversions and Duplications
@@ -200,7 +200,7 @@ public class GenericSvVcfParser extends SvResultParserBase {
     private int getSvLength(Map<String, String> info) {
         if (StringUtils.isNotBlank(info.get("SVLEN"))) {
             try {
-                return Math.abs(Integer.valueOf(info.get("SVLEN")));
+                return Math.abs(Integer.parseInt(info.get("SVLEN")));
             } catch (NumberFormatException e) {
                 // structural variant size cannot be obtained from INFO - NaN
             }

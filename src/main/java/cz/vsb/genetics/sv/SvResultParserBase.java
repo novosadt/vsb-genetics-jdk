@@ -20,7 +20,7 @@
 package cz.vsb.genetics.sv;
 
 import cz.vsb.genetics.common.Chromosome;
-import cz.vsb.genetics.util.GeneAnnotator;
+import cz.vsb.genetics.annotation.GeneAnnotator;
 
 import java.util.*;
 

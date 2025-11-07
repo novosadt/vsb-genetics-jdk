@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package cz.vsb.genetics.util;
+package cz.vsb.genetics.annotation;
 
 import cz.vsb.genetics.common.Chromosome;
 import cz.vsb.genetics.common.Gene;
@@ -65,8 +65,8 @@ public class GeneAnnotator {
                 Gene gene = new Gene();
                 gene.setSymbol(values[0].toUpperCase());
                 gene.setChromosome(Chromosome.of(values[1]));
-                gene.setStart(Integer.valueOf(values[2]));
-                gene.setEnd(Integer.valueOf(values[3]));
+                gene.setStart(Integer.parseInt(values[2]));
+                gene.setEnd(Integer.parseInt(values[3]));
 
                 if (values.length > 4) {
                     List<String> infos = new ArrayList<>();

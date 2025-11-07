@@ -21,7 +21,7 @@ package cz.vsb.genetics.sv;
 import cz.vsb.genetics.common.Chromosome;
 import cz.vsb.genetics.common.ChromosomeRegion;
 import cz.vsb.genetics.common.Gene;
-import cz.vsb.genetics.util.GeneAnnotator;
+import cz.vsb.genetics.annotation.GeneAnnotator;
 import cz.vsb.genetics.util.SvUtil;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
